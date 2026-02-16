@@ -1,7 +1,7 @@
 class AppConstants {
   // Currency
-  static const String currencySymbol = '\$';
-  static const String currencyCode = 'USD';
+  static const String currencySymbol = '৳';
+  static const String currencyCode = 'BDT';
 
   // Date formats
   static const String dateFormat = 'dd MMM yyyy';
@@ -34,5 +34,3 @@ class AppConstants {
   static const Duration mediumAnimation = Duration(milliseconds: 300);
   static const Duration longAnimation = Duration(milliseconds: 500);
 }
-
-
