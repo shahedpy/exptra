@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'core/db/app_database.dart';
 import 'core/theme/app_theme.dart';
-import 'modules/dashboard/dashboard_page.dart';
+import 'core/routes/app_routes.dart';
+import 'modules/expense/expense_controller.dart';
+import 'modules/category/category_controller.dart';
 
 void main() {
   final db = AppDatabase();
@@ -16,12 +18,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize controllers
+    Get.put(ExpenseController());
+    Get.put(CategoryController());
+
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Expense Tracker',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      home: const DashboardPage(),
+      getPages: AppRoutes.routes,
+      initialRoute: AppRoutes.dashboard,
     );
   }
 }
+
+
