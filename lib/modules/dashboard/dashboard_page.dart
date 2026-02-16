@@ -18,7 +18,7 @@ class DashboardPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Expense Tracker'),
+        title: const Text('Exptra'),
         elevation: 0,
         actions: [
           IconButton(
@@ -52,18 +52,11 @@ class DashboardPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.receipt_long,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
+          Icon(Icons.receipt_long, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: AppConstants.defaultPadding),
           Text(
             'No expenses yet',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 8),
           Text(
@@ -86,8 +79,7 @@ class DashboardPage extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius:
-              BorderRadius.circular(AppConstants.defaultBorderRadius),
+          borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
           boxShadow: [
             BoxShadow(
               color: Colors.green.shade300.withValues(alpha: 0.5),
@@ -101,9 +93,9 @@ class DashboardPage extends StatelessWidget {
           children: [
             Text(
               'Total Expenses',
-              style: Theme.of(Get.context!).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
-                  ),
+              style: Theme.of(
+                Get.context!,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ),
             const SizedBox(height: 8),
             Text(
@@ -139,10 +131,7 @@ class DashboardPage extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
         ),
         const SizedBox(height: 4),
         Text(
@@ -177,76 +166,74 @@ class DashboardPage extends StatelessWidget {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
-              leading: CircleAvatar(
-                backgroundColor: ColorHelper.getColorFromInt(category?.color),
-                child: Icon(
-                  Icons.category,
-                  color: Colors.white,
-                ),
-              ),
-              title: Text(category?.name ?? 'Unknown'),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (expense.note != null && expense.note!.isNotEmpty)
-                    Text(
-                      expense.note!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12),
+            child: InkWell(
+              onLongPress: () {
+                Get.dialog(
+                  AlertDialog(
+                    title: const Text('Delete Expense'),
+                    content: const Text(
+                      'Are you sure you want to delete this expense?',
                     ),
-                  Text(
-                    DateHelper.formatDate(expense.expenseDate),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    CurrencyHelper.formatAmount(expense.amount),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, size: 20),
-                    onPressed: () {
-                      Get.dialog(
-                        AlertDialog(
-                          title: const Text('Delete Expense'),
-                          content: const Text(
-                            'Are you sure you want to delete this expense?',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Get.back(),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                expenseController.deleteExpense(expense.id);
-                                Get.back();
-                              },
-                              child: const Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
+                    actions: [
+                      TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          expenseController.deleteExpense(expense.id);
+                          Get.back();
+                        },
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ],
+                );
+              },
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(
+                  AppConstants.defaultPadding,
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: ColorHelper.getColorFromInt(category?.color),
+                  child: Icon(Icons.category, color: Colors.white),
+                ),
+                title: Text(category?.name ?? 'Unknown'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (expense.note != null && expense.note!.isNotEmpty)
+                      Text(
+                        expense.note!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    Text(
+                      DateHelper.formatDate(expense.expenseDate),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      CurrencyHelper.formatAmount(expense.amount),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
