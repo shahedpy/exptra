@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../category/category_page.dart';
 import '../dashboard/dashboard_page.dart';
+import '../reports/report_page.dart';
 import '../settings/more_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
@@ -33,7 +34,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      extendBody: true,
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),

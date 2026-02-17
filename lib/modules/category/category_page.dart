@@ -74,12 +74,9 @@ class _CategoryPageState extends State<CategoryPage> {
                 },
               ),
       ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: bottomInset),
-        child: FloatingActionButton(
-          onPressed: _addCategory,
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addCategory,
+        child: const Icon(Icons.add),
       ),
     );
   }

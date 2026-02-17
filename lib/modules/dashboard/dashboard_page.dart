@@ -32,12 +32,9 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
       ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: bottomInset),
-        child: FloatingActionButton(
-          onPressed: () => Get.toNamed(AppRoutes.addExpense),
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.toNamed(AppRoutes.addExpense),
+        child: const Icon(Icons.add),
       ),
     );
   }
