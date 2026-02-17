@@ -21,6 +21,7 @@ class DashboardPage extends StatelessWidget {
     final expenseController = Get.put(ExpenseController());
     final categoryController = Get.put(CategoryController());
     final dashboardController = Get.put(DashboardController());
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
       appBar: AppBar(
@@ -56,9 +57,12 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppRoutes.addExpense),
-        child: const Icon(Icons.add),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: FloatingActionButton(
+          onPressed: () => Get.toNamed(AppRoutes.addExpense),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

@@ -31,11 +31,10 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Categories'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Manage Categories'), elevation: 0),
       body: Obx(
         () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
@@ -50,8 +49,9 @@ class _CategoryPageState extends State<CategoryPage> {
                     ),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor:
-                            ColorHelper.getColorFromInt(category.color),
+                        backgroundColor: ColorHelper.getColorFromInt(
+                          category.color,
+                        ),
                       ),
                       title: Text(category.name),
                       trailing: PopupMenuButton(
@@ -65,8 +65,7 @@ class _CategoryPageState extends State<CategoryPage> {
                               'Delete',
                               style: TextStyle(color: Colors.red),
                             ),
-                            onTap: () =>
-                                controller.deleteCategory(category.id),
+                            onTap: () => controller.deleteCategory(category.id),
                           ),
                         ],
                       ),
@@ -75,9 +74,12 @@ class _CategoryPageState extends State<CategoryPage> {
                 },
               ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addCategory,
-        child: const Icon(Icons.add),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: FloatingActionButton(
+          onPressed: _addCategory,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -127,7 +129,8 @@ class _CategoryPageState extends State<CategoryPage> {
                   spacing: 8,
                   runSpacing: 8,
                   children: ColorHelper.getCategoryColors().map((color) {
-                    final isSelected = _selectedColor.toARGB32() == color.toARGB32();
+                    final isSelected =
+                        _selectedColor.toARGB32() == color.toARGB32();
                     return GestureDetector(
                       onTap: () {
                         setState(() {
@@ -187,7 +190,3 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 }
-
-
-
-
