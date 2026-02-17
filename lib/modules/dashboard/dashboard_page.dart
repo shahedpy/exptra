@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
-import 'package:share_plus/share_plus.dart';
 import '../expense/expense_controller.dart';
 import '../category/category_controller.dart';
 import 'dashboard_controller.dart';
-import '../../core/db/app_database.dart';
-import '../../core/db/database_backup_service.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/routes/app_routes.dart';
-
-enum _DataAction { backup, restore }
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -24,26 +18,7 @@ class DashboardPage extends StatelessWidget {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Exptra'),
-        elevation: 0,
-        actions: [
-          PopupMenuButton<_DataAction>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (action) => _onDataActionSelected(action),
-            itemBuilder: (_) => const [
-              PopupMenuItem<_DataAction>(
-                value: _DataAction.backup,
-                child: Text('Backup data'),
-              ),
-              PopupMenuItem<_DataAction>(
-                value: _DataAction.restore,
-                child: Text('Restore data'),
-              ),
-            ],
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Exptra'), elevation: 0),
       body: Obx(
         () => expenseController.expenses.isEmpty
             ? _buildEmptyState()
@@ -86,88 +61,6 @@ class DashboardPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _onDataActionSelected(_DataAction action) async {
-    switch (action) {
-      case _DataAction.backup:
-        await _backupData();
-      case _DataAction.restore:
-        await _restoreData();
-    }
-  }
-
-  Future<void> _backupData() async {
-    try {
-      final backupService = DatabaseBackupService();
-      final db = Get.find<AppDatabase>();
-      final backupFile = await backupService.createBackupFile(db);
-
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(backupFile.path)]),
-      );
-
-      Get.snackbar(
-        'Backup Ready',
-        'Save the shared file to cloud or device storage.',
-      );
-    } catch (e) {
-      Get.snackbar('Backup Failed', 'Could not create backup: $e');
-    }
-  }
-
-  Future<void> _restoreData() async {
-    try {
-      final selectedFile = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['exptra'],
-      );
-
-      final backupPath = selectedFile?.files.single.path;
-      if (backupPath == null) {
-        return;
-      }
-
-      final confirmed = await Get.dialog<bool>(
-        AlertDialog(
-          title: const Text('Restore Backup'),
-          content: const Text(
-            'Current local data will be replaced with backup data. Continue?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: const Text('Restore'),
-            ),
-          ],
-        ),
-      );
-
-      if (confirmed != true) {
-        return;
-      }
-
-      final backupService = DatabaseBackupService();
-      final db = Get.find<AppDatabase>();
-      await backupService.restoreBackupFromPath(
-        backupPath: backupPath,
-        database: db,
-      );
-
-      final expenseController = Get.find<ExpenseController>();
-      final categoryController = Get.find<CategoryController>();
-
-      await categoryController.loadCategories();
-      await expenseController.loadExpenses();
-
-      Get.snackbar('Restore Complete', 'Data restored from backup file.');
-    } catch (e) {
-      Get.snackbar('Restore Failed', 'Could not restore backup: $e');
-    }
   }
 
   Widget _buildSummaryCard(DashboardController dashboardController) {

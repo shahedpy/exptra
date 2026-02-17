@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../category/category_page.dart';
 import '../dashboard/dashboard_page.dart';
+import '../settings/more_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -16,8 +17,8 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   static const List<Widget> _pages = [
     DashboardPage(),
     CategoryPage(),
-    _PlaceholderPage(),
-    _PlaceholderPage(),
+    ReportPage(),
+    MorePage(),
   ];
 
   static const List<_NavItemData> _navItems = [
@@ -108,13 +109,4 @@ class _NavItemData {
   final IconData icon;
 
   const _NavItemData({required this.label, required this.icon});
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  const _PlaceholderPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox.expand();
-  }
 }
