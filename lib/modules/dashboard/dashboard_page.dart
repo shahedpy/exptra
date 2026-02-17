@@ -41,10 +41,6 @@ class DashboardPage extends StatelessWidget {
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.category),
-            onPressed: () => Get.toNamed(AppRoutes.categories),
-          ),
         ],
       ),
       body: Obx(
