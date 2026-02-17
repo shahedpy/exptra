@@ -15,7 +15,6 @@ class DashboardPage extends StatelessWidget {
     final expenseController = Get.put(ExpenseController());
     final categoryController = Get.put(CategoryController());
     final dashboardController = Get.put(DashboardController());
-    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Exptra'), elevation: 0),

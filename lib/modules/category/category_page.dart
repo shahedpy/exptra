@@ -31,8 +31,6 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Manage Categories'), elevation: 0),
       body: Obx(
