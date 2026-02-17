@@ -104,10 +104,7 @@ class DashboardPage extends StatelessWidget {
       final backupFile = await backupService.createBackupFile(db);
 
       await SharePlus.instance.share(
-        ShareParams(
-          text: 'Exptra backup file',
-          files: [XFile(backupFile.path)],
-        ),
+        ShareParams(files: [XFile(backupFile.path)]),
       );
 
       Get.snackbar(
@@ -123,7 +120,7 @@ class DashboardPage extends StatelessWidget {
     try {
       final selectedFile = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['json', 'exptra'],
+        allowedExtensions: ['exptra'],
       );
 
       final backupPath = selectedFile?.files.single.path;

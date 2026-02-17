@@ -14,7 +14,7 @@ class DatabaseBackupService {
 
     final tempDir = await getTemporaryDirectory();
     final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final backupPath = p.join(tempDir.path, 'exptra-backup-$timestamp.json');
+    final backupPath = p.join(tempDir.path, 'exptra-backup-$timestamp.exptra');
 
     final backupPayload = {
       'version': 1,
