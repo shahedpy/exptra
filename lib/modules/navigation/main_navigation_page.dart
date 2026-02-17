@@ -24,7 +24,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     _NavItemData(label: 'Dashboard', icon: Icons.dashboard_rounded),
     _NavItemData(label: 'Categories', icon: Icons.category_rounded),
     _NavItemData(label: 'Reports', icon: Icons.bar_chart_rounded),
-    _NavItemData(label: 'More', icon: Icons.grid_view_rounded),
+    _NavItemData(label: 'Settings', icon: Icons.settings_rounded),
   ];
 
   @override
