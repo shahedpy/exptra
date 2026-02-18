@@ -36,7 +36,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        padding: const EdgeInsets.fromLTRB(10, 6, 10, 8),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainer.withOpacity(0.88),
         ),
@@ -49,14 +49,14 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
               return Expanded(
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(18),
                   onTap: () {
                     setState(() {
                       _currentIndex = index;
                     });
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 1),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -64,31 +64,32 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                           duration: const Duration(milliseconds: 180),
                           curve: Curves.easeOut,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 22,
-                            vertical: 10,
+                            horizontal: 16,
+                            vertical: 6,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? colorScheme.secondaryContainer
                                 : Colors.transparent,
-                            borderRadius: BorderRadius.circular(22),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Icon(
                             item.icon,
+                            size: 20,
                             color: isSelected
                                 ? colorScheme.onSecondaryContainer
                                 : colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         Text(
                           item.label,
-                          style: Theme.of(context).textTheme.labelMedium
+                          style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
                                 color: isSelected
                                     ? colorScheme.onSurface
                                     : colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                               ),
                         ),
                       ],
