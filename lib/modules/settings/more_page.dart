@@ -7,6 +7,7 @@ import '../../core/db/app_database.dart';
 import '../../core/db/database_backup_service.dart';
 import '../category/category_controller.dart';
 import '../expense/expense_controller.dart';
+import '../income/income_controller.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -97,9 +98,11 @@ class MorePage extends StatelessWidget {
 
       final categoryController = _resolveCategoryController();
       final expenseController = _resolveExpenseController();
+      final incomeController = _resolveIncomeController();
 
       await categoryController.loadCategories();
       await expenseController.loadExpenses();
+      await incomeController.loadIncomes();
 
       Get.snackbar('Restore Complete', 'Data restored from backup file.');
     } catch (e) {
@@ -119,5 +122,12 @@ class MorePage extends StatelessWidget {
       return Get.find<ExpenseController>();
     }
     return Get.put(ExpenseController());
+  }
+
+  IncomeController _resolveIncomeController() {
+    if (Get.isRegistered<IncomeController>()) {
+      return Get.find<IncomeController>();
+    }
+    return Get.put(IncomeController());
   }
 }

@@ -4,6 +4,7 @@ import 'core/db/app_database.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_routes.dart';
 import 'modules/expense/expense_controller.dart';
+import 'modules/income/income_controller.dart';
 import 'modules/category/category_controller.dart';
 
 void main() {
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Initialize controllers
     Get.put(ExpenseController());
+    Get.put(IncomeController());
     Get.put(CategoryController());
 
     return GetMaterialApp(

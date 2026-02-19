@@ -32,9 +32,43 @@ class DashboardPage extends StatelessWidget {
               ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppRoutes.addExpense),
+        onPressed: _showAddEntrySheet,
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  void _showAddEntrySheet() {
+    Get.bottomSheet(
+      SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(Get.context!).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.remove_circle_outline),
+                title: const Text('Add Expense'),
+                onTap: () {
+                  Get.back();
+                  Get.toNamed(AppRoutes.addExpense);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.add_circle_outline),
+                title: const Text('Add Income'),
+                onTap: () {
+                  Get.back();
+                  Get.toNamed(AppRoutes.addIncome);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 
