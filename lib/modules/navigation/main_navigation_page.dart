@@ -42,62 +42,46 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         ),
         child: SafeArea(
           top: false,
-          child: Row(
-            children: List.generate(_navItems.length, (index) {
-              final item = _navItems[index];
-              final isSelected = _currentIndex == index;
-
-              return Expanded(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(18),
-                  onTap: () {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 1),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          curve: Curves.easeOut,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? colorScheme.secondaryContainer
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Icon(
-                            item.icon,
-                            size: 20,
-                            color: isSelected
-                                ? colorScheme.onSecondaryContainer
-                                : colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.label,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: isSelected
-                                    ? colorScheme.onSurface
-                                    : colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
-                        ),
-                      ],
+          child: NavigationBarTheme(
+            data: NavigationBarThemeData(
+              indicatorColor: colorScheme.secondaryContainer,
+              labelTextStyle: MaterialStateProperty.resolveWith<TextStyle?>((
+                states,
+              ) {
+                final selected = states.contains(MaterialState.selected);
+                return Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: selected
+                      ? colorScheme.onSurface
+                      : colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                );
+              }),
+              iconTheme: MaterialStateProperty.resolveWith<IconThemeData?>((
+                states,
+              ) {
+                final selected = states.contains(MaterialState.selected);
+                return IconThemeData(
+                  color: selected
+                      ? colorScheme.onSecondaryContainer
+                      : colorScheme.onSurfaceVariant,
+                  size: 20,
+                );
+              }),
+            ),
+            child: NavigationBar(
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (index) =>
+                  setState(() => _currentIndex = index),
+              backgroundColor: Colors.transparent,
+              destinations: _navItems
+                  .map(
+                    (item) => NavigationDestination(
+                      icon: Icon(item.icon),
+                      label: item.label,
                     ),
-                  ),
-                ),
-              );
-            }),
+                  )
+                  .toList(),
+            ),
           ),
         ),
       ),
