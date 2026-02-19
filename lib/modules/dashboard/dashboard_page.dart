@@ -4,6 +4,7 @@ import '../expense/expense_controller.dart';
 import '../income/income_controller.dart';
 import '../category/category_controller.dart';
 import 'dashboard_controller.dart';
+import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/routes/app_routes.dart';
@@ -30,11 +31,13 @@ class DashboardPage extends StatelessWidget {
                   children: [
                     _buildSummaryCard(dashboardController),
                     const SizedBox(height: AppConstants.defaultPadding),
-                    _buildIncomesSection(incomeController),
-                    const SizedBox(height: AppConstants.defaultPadding),
-                    _buildExpensesSection(
+                    _buildTransactionTypeSelector(dashboardController),
+                    const SizedBox(height: 8),
+                    _buildTransactionsSection(
                       expenseController,
+                      incomeController,
                       categoryController,
+                      dashboardController,
                     ),
                   ],
                 ),
@@ -180,12 +183,68 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExpensesSection(
+  Widget _buildTransactionTypeSelector(
+    DashboardController dashboardController,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.defaultPadding,
+      ),
+      child: Obx(
+        () => SegmentedButton<DashboardTransactionTab>(
+          segments: const [
+            ButtonSegment<DashboardTransactionTab>(
+              value: DashboardTransactionTab.all,
+              label: Text('All'),
+              icon: Icon(Icons.list_rounded),
+            ),
+            ButtonSegment<DashboardTransactionTab>(
+              value: DashboardTransactionTab.income,
+              label: Text('Income'),
+              icon: Icon(Icons.add_circle_outline_rounded),
+            ),
+            ButtonSegment<DashboardTransactionTab>(
+              value: DashboardTransactionTab.expense,
+              label: Text('Expense'),
+              icon: Icon(Icons.remove_circle_outline_rounded),
+            ),
+          ],
+          selected: {dashboardController.selectedTransactionTab.value},
+          onSelectionChanged: (tabs) {
+            if (tabs.isNotEmpty) {
+              dashboardController.changeTransactionTab(tabs.first);
+            }
+          },
+          showSelectedIcon: false,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionsSection(
     ExpenseController expenseController,
+    IncomeController incomeController,
     CategoryController categoryController,
+    DashboardController dashboardController,
   ) {
     return Obx(() {
-      if (expenseController.expenses.isEmpty) {
+      final selectedTab = dashboardController.selectedTransactionTab.value;
+      final entries = _getFilteredEntries(
+        expenseController,
+        incomeController,
+        selectedTab,
+      );
+
+      if (entries.isEmpty) {
+        final message = switch (selectedTab) {
+          DashboardTransactionTab.all =>
+            'No entries yet. Use + to add expense or income.',
+          DashboardTransactionTab.income =>
+            'No incomes yet. Use + to add income.',
+          DashboardTransactionTab.expense =>
+            'No expenses yet. Use + to add expense.',
+        };
+
         return Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppConstants.defaultPadding,
@@ -194,7 +253,7 @@ class DashboardPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(AppConstants.defaultPadding),
               child: Text(
-                'No expenses yet. Use + to add expense or income.',
+                message,
                 style: TextStyle(color: Colors.grey.shade600),
               ),
             ),
@@ -202,44 +261,60 @@ class DashboardPage extends StatelessWidget {
         );
       }
 
-      return _buildExpensesList(expenseController, categoryController);
+      return _buildTransactionsList(
+        entries,
+        expenseController,
+        incomeController,
+        categoryController,
+      );
     });
   }
 
-  Widget _buildIncomesSection(IncomeController incomeController) {
-    return Obx(() {
-      if (incomeController.incomes.isEmpty) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppConstants.defaultPadding,
-          ),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              child: Text(
-                'No incomes yet. Use + to add expense or income.',
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-            ),
-          ),
-        );
-      }
+  List<_DashboardEntry> _getFilteredEntries(
+    ExpenseController expenseController,
+    IncomeController incomeController,
+    DashboardTransactionTab selectedTab,
+  ) {
+    final entries = <_DashboardEntry>[];
 
-      return _buildIncomesList(incomeController);
-    });
-  }
-
-  Widget _buildIncomesList(IncomeController incomeController) {
-    return Obx(
-      () => ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.defaultPadding,
+    if (selectedTab != DashboardTransactionTab.expense) {
+      entries.addAll(
+        incomeController.incomes.map(
+          (income) => _DashboardEntry.income(income),
         ),
-        itemCount: incomeController.incomes.length,
-        itemBuilder: (_, index) {
-          final income = incomeController.incomes[index];
+      );
+    }
+
+    if (selectedTab != DashboardTransactionTab.income) {
+      entries.addAll(
+        expenseController.expenses.map(
+          (expense) => _DashboardEntry.expense(expense),
+        ),
+      );
+    }
+
+    entries.sort((a, b) => b.date.compareTo(a.date));
+    return entries;
+  }
+
+  Widget _buildTransactionsList(
+    List<_DashboardEntry> entries,
+    ExpenseController expenseController,
+    IncomeController incomeController,
+    CategoryController categoryController,
+  ) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.defaultPadding,
+      ),
+      itemCount: entries.length,
+      itemBuilder: (_, index) {
+        final entry = entries[index];
+
+        if (entry.isIncome) {
+          final income = entry.income!;
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
@@ -318,104 +393,105 @@ class DashboardPage extends StatelessWidget {
               ),
             ),
           );
-        },
-      ),
-    );
-  }
+        }
 
-  Widget _buildExpensesList(
-    ExpenseController expenseController,
-    CategoryController categoryController,
-  ) {
-    return Obx(
-      () => ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.defaultPadding,
-        ),
-        itemCount: expenseController.expenses.length,
-        itemBuilder: (_, index) {
-          final expense = expenseController.expenses[index];
-          final category = categoryController.getCategoryById(
-            expense.categoryId,
-          );
+        final expense = entry.expense!;
+        final category = categoryController.getCategoryById(expense.categoryId);
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: InkWell(
-              onLongPress: () {
-                Get.dialog(
-                  AlertDialog(
-                    title: const Text('Delete Expense'),
-                    content: const Text(
-                      'Are you sure you want to delete this expense?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Get.back(),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          expenseController.deleteExpense(expense.id);
-                          Get.back();
-                        },
-                        child: const Text(
-                          'Delete',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: InkWell(
+            onLongPress: () {
+              Get.dialog(
+                AlertDialog(
+                  title: const Text('Delete Expense'),
+                  content: const Text(
+                    'Are you sure you want to delete this expense?',
                   ),
-                );
-              },
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(
-                  AppConstants.defaultPadding,
-                ),
-                leading: CircleAvatar(
-                  backgroundColor: ColorHelper.getColorFromInt(category?.color),
-                  child: Icon(Icons.category, color: Colors.white),
-                ),
-                title: Text(category?.name ?? 'Unknown'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (expense.note != null && expense.note!.isNotEmpty)
-                      Text(
-                        expense.note!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    Text(
-                      DateHelper.formatDate(expense.expenseDate),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
+                  actions: [
+                    TextButton(
+                      onPressed: () => Get.back(),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        expenseController.deleteExpense(expense.id);
+                        Get.back();
+                      },
+                      child: const Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
                       ),
                     ),
                   ],
                 ),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
+              );
+            },
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
+              leading: CircleAvatar(
+                backgroundColor: ColorHelper.getColorFromInt(category?.color),
+                child: const Icon(Icons.category, color: Colors.white),
+              ),
+              title: Text(category?.name ?? 'Unknown'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (expense.note != null && expense.note!.isNotEmpty)
                     Text(
-                      CurrencyHelper.formatAmount(expense.amount),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                      expense.note!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
                     ),
-                  ],
-                ),
+                  Text(
+                    DateHelper.formatDate(expense.expenseDate),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    CurrencyHelper.formatAmount(expense.amount),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
+  }
+}
+
+class _DashboardEntry {
+  final Income? income;
+  final Expense? expense;
+
+  const _DashboardEntry._({this.income, this.expense});
+
+  factory _DashboardEntry.income(Income income) {
+    return _DashboardEntry._(income: income);
+  }
+
+  factory _DashboardEntry.expense(Expense expense) {
+    return _DashboardEntry._(expense: expense);
+  }
+
+  bool get isIncome => income != null;
+
+  DateTime get date {
+    if (isIncome) {
+      return income!.incomeDate;
+    }
+
+    return expense!.expenseDate;
   }
 }
