@@ -38,7 +38,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(10, 6, 10, 8),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainer.withOpacity(0.88),
+          color: colorScheme.surfaceContainer.withValues(alpha: 0.88),
         ),
         child: SafeArea(
           top: false,
