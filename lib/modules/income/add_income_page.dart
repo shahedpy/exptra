@@ -15,6 +15,7 @@ class AddIncomePage extends StatefulWidget {
 class _AddIncomePageState extends State<AddIncomePage> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
+  final _sourceController = TextEditingController();
   final _noteController = TextEditingController();
   late final incomeController = Get.find<IncomeController>();
 
@@ -29,6 +30,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
   @override
   void dispose() {
     _amountController.dispose();
+    _sourceController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -62,6 +64,23 @@ class _AddIncomePageState extends State<AddIncomePage> {
                   ),
                 ),
                 validator: ValidationHelper.validateAmount,
+              ),
+              const SizedBox(height: AppConstants.defaultPadding * 1.5),
+              const Text(
+                'Income Source',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _sourceController,
+                decoration: InputDecoration(
+                  hintText: 'Salary, Freelance, Business, etc.',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.defaultBorderRadius,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(
@@ -133,6 +152,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
 
     incomeController.addIncome(
       amount: amount,
+      source: _sourceController.text.trim(),
       note: _noteController.text.trim(),
       date: _selectedDate,
     );

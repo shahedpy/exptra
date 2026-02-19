@@ -11,6 +11,7 @@ class IncomeRepository {
 
   Future<void> insertIncome({
     required double amount,
+    String? source,
     String? note,
     required DateTime date,
   }) async {
@@ -20,6 +21,7 @@ class IncomeRepository {
           IncomesCompanion.insert(
             id: _uuid.v4(),
             amount: amount,
+            source: Value(source),
             note: Value(note),
             incomeDate: date,
           ),

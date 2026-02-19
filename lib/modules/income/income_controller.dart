@@ -20,11 +20,17 @@ class IncomeController extends GetxController {
 
   Future<void> addIncome({
     required double amount,
+    String? source,
     String? note,
     required DateTime date,
   }) async {
     try {
-      await repository.insertIncome(amount: amount, note: note, date: date);
+      await repository.insertIncome(
+        amount: amount,
+        source: source,
+        note: note,
+        date: date,
+      );
       await loadIncomes();
     } catch (e) {
       Get.snackbar('Error', 'Failed to add income: $e');

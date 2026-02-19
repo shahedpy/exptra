@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../expense/expense_controller.dart';
+import '../income/income_controller.dart';
 import '../category/category_controller.dart';
 import 'dashboard_controller.dart';
 import '../../core/utils/helpers.dart';
@@ -12,21 +13,27 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final expenseController = Get.put(ExpenseController());
-    final categoryController = Get.put(CategoryController());
+    final expenseController = Get.find<ExpenseController>();
+    final incomeController = Get.find<IncomeController>();
+    final categoryController = Get.find<CategoryController>();
     final dashboardController = Get.put(DashboardController());
 
     return Scaffold(
       appBar: AppBar(title: const Text('Exptra'), elevation: 0),
       body: Obx(
-        () => expenseController.expenses.isEmpty
+        () =>
+            expenseController.expenses.isEmpty &&
+                incomeController.incomes.isEmpty
             ? _buildEmptyState()
             : SingleChildScrollView(
                 child: Column(
                   children: [
                     _buildSummaryCard(dashboardController),
                     const SizedBox(height: AppConstants.defaultPadding),
-                    _buildExpensesList(expenseController, categoryController),
+                    _buildExpensesSection(
+                      expenseController,
+                      categoryController,
+                    ),
                   ],
                 ),
               ),
@@ -80,12 +87,12 @@ class DashboardPage extends StatelessWidget {
           Icon(Icons.receipt_long, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: AppConstants.defaultPadding),
           Text(
-            'No expenses yet',
+            'No entries yet',
             style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 8),
           Text(
-            'Add your first expense to get started',
+            'Add your first income or expense to get started',
             style: TextStyle(color: Colors.grey.shade500),
           ),
         ],
@@ -117,14 +124,14 @@ class DashboardPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Total Expenses',
+              'Current Balance',
               style: Theme.of(
                 Get.context!,
               ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ),
             const SizedBox(height: 8),
             Text(
-              dashboardController.getFormattedTotal(),
+              dashboardController.getFormattedBalance(),
               style: const TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -136,12 +143,12 @@ class DashboardPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildStatItem(
-                  'Transactions',
-                  dashboardController.getExpenseCount().toString(),
+                  'Income',
+                  dashboardController.getFormattedIncome(),
                 ),
                 _buildStatItem(
-                  'Average',
-                  dashboardController.getAverageExpense(),
+                  'Expense',
+                  dashboardController.getFormattedExpense(),
                 ),
               ],
             ),
@@ -169,6 +176,32 @@ class DashboardPage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildExpensesSection(
+    ExpenseController expenseController,
+    CategoryController categoryController,
+  ) {
+    return Obx(() {
+      if (expenseController.expenses.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.defaultPadding,
+          ),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              child: Text(
+                'No expenses yet. Use + to add expense or income.',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+          ),
+        );
+      }
+
+      return _buildExpensesList(expenseController, categoryController);
+    });
   }
 
   Widget _buildExpensesList(

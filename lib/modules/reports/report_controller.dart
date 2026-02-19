@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../expense/expense_controller.dart';
+import '../income/income_controller.dart';
 import '../category/category_controller.dart';
 import '../../core/db/app_database.dart';
 
 enum ReportType { monthWise, categoryWise, dailyWise }
+
+enum ReportDataType { expense, income }
 
 class ReportSummaryItem {
   final String label;
@@ -22,14 +25,20 @@ class ReportSummaryItem {
 
 class ReportController extends GetxController {
   late final ExpenseController expenseController;
+  late final IncomeController incomeController;
   late final CategoryController categoryController;
 
+  final selectedDataType = ReportDataType.expense.obs;
   final selectedType = ReportType.monthWise.obs;
   final selectedMonth = DateTime(DateTime.now().year, DateTime.now().month).obs;
 
-  final monthWiseReports = <ReportSummaryItem>[].obs;
-  final categoryWiseReports = <ReportSummaryItem>[].obs;
-  final dailyWiseReports = <ReportSummaryItem>[].obs;
+  final expenseMonthWiseReports = <ReportSummaryItem>[].obs;
+  final expenseCategoryWiseReports = <ReportSummaryItem>[].obs;
+  final expenseDailyWiseReports = <ReportSummaryItem>[].obs;
+
+  final incomeMonthWiseReports = <ReportSummaryItem>[].obs;
+  final incomeSourceWiseReports = <ReportSummaryItem>[].obs;
+  final incomeDailyWiseReports = <ReportSummaryItem>[].obs;
 
   final totalAmount = 0.0.obs;
   final totalTransactions = 0.obs;
@@ -37,11 +46,13 @@ class ReportController extends GetxController {
   @override
   void onInit() {
     expenseController = Get.find<ExpenseController>();
+    incomeController = Get.find<IncomeController>();
     categoryController = Get.find<CategoryController>();
 
     everAll(
       [
         expenseController.expenses,
+        incomeController.incomes,
         categoryController.categories,
         selectedMonth,
       ],
@@ -56,6 +67,12 @@ class ReportController extends GetxController {
 
   void changeType(ReportType type) {
     selectedType.value = type;
+    _refreshSummary();
+  }
+
+  void changeDataType(ReportDataType dataType) {
+    selectedDataType.value = dataType;
+    _refreshSummary();
   }
 
   void previousMonth() {
@@ -75,38 +92,73 @@ class ReportController extends GetxController {
   }
 
   List<ReportSummaryItem> get activeReport {
+    if (selectedDataType.value == ReportDataType.expense) {
+      switch (selectedType.value) {
+        case ReportType.monthWise:
+          return expenseMonthWiseReports;
+        case ReportType.categoryWise:
+          return expenseCategoryWiseReports;
+        case ReportType.dailyWise:
+          return expenseDailyWiseReports;
+      }
+    }
+
     switch (selectedType.value) {
       case ReportType.monthWise:
-        return monthWiseReports;
+        return incomeMonthWiseReports;
       case ReportType.categoryWise:
-        return categoryWiseReports;
+        return incomeSourceWiseReports;
       case ReportType.dailyWise:
-        return dailyWiseReports;
+        return incomeDailyWiseReports;
     }
   }
 
   String get reportTitle {
+    final prefix = selectedDataType.value == ReportDataType.expense
+        ? 'Expense'
+        : 'Income';
+
     switch (selectedType.value) {
       case ReportType.monthWise:
-        return 'Month wise report';
+        return '$prefix month wise report';
       case ReportType.categoryWise:
-        return 'Category wise report';
+        return selectedDataType.value == ReportDataType.expense
+            ? '$prefix category wise report'
+            : '$prefix source wise report';
       case ReportType.dailyWise:
-        return 'Daily report';
+        return '$prefix daily report';
     }
   }
 
   void _generateReports() {
     final expenses = expenseController.expenses;
-    totalAmount.value = expenses.fold(0.0, (sum, item) => sum + item.amount);
-    totalTransactions.value = expenses.length;
+    final incomes = incomeController.incomes;
 
-    monthWiseReports.value = _buildMonthWise(expenses);
-    categoryWiseReports.value = _buildCategoryWise(expenses);
-    dailyWiseReports.value = _buildDailyWise(expenses);
+    expenseMonthWiseReports.value = _buildExpenseMonthWise(expenses);
+    expenseCategoryWiseReports.value = _buildExpenseCategoryWise(expenses);
+    expenseDailyWiseReports.value = _buildExpenseDailyWise(expenses);
+
+    incomeMonthWiseReports.value = _buildIncomeMonthWise(incomes);
+    incomeSourceWiseReports.value = _buildIncomeSourceWise(incomes);
+    incomeDailyWiseReports.value = _buildIncomeDailyWise(incomes);
+
+    _refreshSummary();
   }
 
-  List<ReportSummaryItem> _buildMonthWise(List<Expense> expenses) {
+  void _refreshSummary() {
+    if (selectedDataType.value == ReportDataType.expense) {
+      final expenses = expenseController.expenses;
+      totalAmount.value = expenses.fold(0.0, (sum, item) => sum + item.amount);
+      totalTransactions.value = expenses.length;
+      return;
+    }
+
+    final incomes = incomeController.incomes;
+    totalAmount.value = incomes.fold(0.0, (sum, item) => sum + item.amount);
+    totalTransactions.value = incomes.length;
+  }
+
+  List<ReportSummaryItem> _buildExpenseMonthWise(List<Expense> expenses) {
     final grouped = <DateTime, List<Expense>>{};
 
     for (final expense in expenses) {
@@ -136,7 +188,7 @@ class ReportController extends GetxController {
     return items;
   }
 
-  List<ReportSummaryItem> _buildCategoryWise(List<Expense> expenses) {
+  List<ReportSummaryItem> _buildExpenseCategoryWise(List<Expense> expenses) {
     final selected = selectedMonth.value;
     final monthExpenses = expenses
         .where(
@@ -172,7 +224,7 @@ class ReportController extends GetxController {
     return items;
   }
 
-  List<ReportSummaryItem> _buildDailyWise(List<Expense> expenses) {
+  List<ReportSummaryItem> _buildExpenseDailyWise(List<Expense> expenses) {
     final selected = selectedMonth.value;
     final monthExpenses = expenses
         .where(
@@ -201,6 +253,110 @@ class ReportController extends GetxController {
         label: _dayLabel(entry.key),
         amount: amount,
         transactionCount: dayExpenses.length,
+      );
+    }).toList();
+
+    items.sort((a, b) {
+      final first = _parseDayLabel(a.label, selected);
+      final second = _parseDayLabel(b.label, selected);
+      return second.compareTo(first);
+    });
+
+    return items;
+  }
+
+  List<ReportSummaryItem> _buildIncomeMonthWise(List<Income> incomes) {
+    final grouped = <DateTime, List<Income>>{};
+
+    for (final income in incomes) {
+      final monthKey = DateTime(
+        income.incomeDate.year,
+        income.incomeDate.month,
+      );
+      grouped.putIfAbsent(monthKey, () => []).add(income);
+    }
+
+    final items = grouped.entries.map((entry) {
+      final monthIncomes = entry.value;
+      final amount = monthIncomes.fold(0.0, (sum, item) => sum + item.amount);
+      return ReportSummaryItem(
+        label: _monthLabel(entry.key),
+        amount: amount,
+        transactionCount: monthIncomes.length,
+      );
+    }).toList();
+
+    items.sort((a, b) {
+      final first = _parseMonthLabel(a.label);
+      final second = _parseMonthLabel(b.label);
+      return second.compareTo(first);
+    });
+
+    return items;
+  }
+
+  List<ReportSummaryItem> _buildIncomeSourceWise(List<Income> incomes) {
+    final selected = selectedMonth.value;
+    final monthIncomes = incomes
+        .where(
+          (income) =>
+              income.incomeDate.year == selected.year &&
+              income.incomeDate.month == selected.month,
+        )
+        .toList();
+
+    final grouped = <String, List<Income>>{};
+
+    for (final income in monthIncomes) {
+      final source = (income.source ?? '').trim();
+      final key = source.isEmpty ? 'Unknown Source' : source;
+      grouped.putIfAbsent(key, () => []).add(income);
+    }
+
+    final items = grouped.entries.map((entry) {
+      final sourceIncomes = entry.value;
+      final amount = sourceIncomes.fold(0.0, (sum, item) => sum + item.amount);
+
+      return ReportSummaryItem(
+        label: entry.key,
+        amount: amount,
+        transactionCount: sourceIncomes.length,
+      );
+    }).toList();
+
+    items.sort((a, b) => b.amount.compareTo(a.amount));
+    return items;
+  }
+
+  List<ReportSummaryItem> _buildIncomeDailyWise(List<Income> incomes) {
+    final selected = selectedMonth.value;
+    final monthIncomes = incomes
+        .where(
+          (income) =>
+              income.incomeDate.year == selected.year &&
+              income.incomeDate.month == selected.month,
+        )
+        .toList();
+
+    final grouped = <DateTime, List<Income>>{};
+
+    for (final income in monthIncomes) {
+      final dayKey = DateTime(
+        income.incomeDate.year,
+        income.incomeDate.month,
+        income.incomeDate.day,
+      );
+      grouped.putIfAbsent(dayKey, () => []).add(income);
+    }
+
+    final items = grouped.entries.map((entry) {
+      final dayIncomes = entry.value;
+      final amount = dayIncomes.fold(0.0, (sum, item) => sum + item.amount);
+
+      return ReportSummaryItem(
+        label: _dayLabel(entry.key),
+        amount: amount,
+        transactionCount: dayIncomes.length,
       );
     }).toList();
 

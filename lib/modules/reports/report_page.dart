@@ -19,6 +19,7 @@ class ReportPage extends StatelessWidget {
         () => Column(
           children: [
             _buildSummaryCard(theme, controller),
+            _buildDataTypeSelector(controller),
             _buildTypeSelector(controller),
             if (controller.selectedType.value != ReportType.monthWise)
               _buildMonthSelector(controller),
@@ -53,7 +54,10 @@ class ReportPage extends StatelessWidget {
             Expanded(
               child: _summaryItem(
                 title: 'Type',
-                value: _shortTypeLabel(controller.selectedType.value),
+                value: _shortTypeLabel(
+                  controller.selectedType.value,
+                  controller.selectedDataType.value,
+                ),
                 alignEnd: true,
               ),
             ),
@@ -86,6 +90,9 @@ class ReportPage extends StatelessWidget {
   }
 
   Widget _buildTypeSelector(ReportController controller) {
+    final isExpense =
+        controller.selectedDataType.value == ReportDataType.expense;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.defaultPadding,
@@ -94,7 +101,7 @@ class ReportPage extends StatelessWidget {
         children: [
           Expanded(
             child: SegmentedButton<ReportType>(
-              segments: const [
+              segments: [
                 ButtonSegment<ReportType>(
                   value: ReportType.monthWise,
                   label: Text('Month'),
@@ -102,8 +109,12 @@ class ReportPage extends StatelessWidget {
                 ),
                 ButtonSegment<ReportType>(
                   value: ReportType.categoryWise,
-                  label: Text('Category'),
-                  icon: Icon(Icons.category_rounded),
+                  label: Text(isExpense ? 'Category' : 'Source'),
+                  icon: Icon(
+                    isExpense
+                        ? Icons.category_rounded
+                        : Icons.account_balance_wallet_rounded,
+                  ),
                 ),
                 ButtonSegment<ReportType>(
                   value: ReportType.dailyWise,
@@ -121,6 +132,38 @@ class ReportPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDataTypeSelector(ReportController controller) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppConstants.defaultPadding,
+        0,
+        AppConstants.defaultPadding,
+        8,
+      ),
+      child: SegmentedButton<ReportDataType>(
+        segments: const [
+          ButtonSegment<ReportDataType>(
+            value: ReportDataType.expense,
+            label: Text('Expense'),
+            icon: Icon(Icons.remove_circle_outline_rounded),
+          ),
+          ButtonSegment<ReportDataType>(
+            value: ReportDataType.income,
+            label: Text('Income'),
+            icon: Icon(Icons.add_circle_outline_rounded),
+          ),
+        ],
+        selected: {controller.selectedDataType.value},
+        onSelectionChanged: (types) {
+          if (types.isNotEmpty) {
+            controller.changeDataType(types.first);
+          }
+        },
+        showSelectedIcon: false,
       ),
     );
   }
@@ -222,12 +265,12 @@ class ReportPage extends StatelessWidget {
     );
   }
 
-  String _shortTypeLabel(ReportType type) {
+  String _shortTypeLabel(ReportType type, ReportDataType dataType) {
     switch (type) {
       case ReportType.monthWise:
         return 'Month';
       case ReportType.categoryWise:
-        return 'Category';
+        return dataType == ReportDataType.expense ? 'Category' : 'Source';
       case ReportType.dailyWise:
         return 'Daily';
     }

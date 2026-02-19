@@ -801,6 +801,15 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -852,6 +861,7 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
   List<GeneratedColumn> get $columns => [
     id,
     amount,
+    source,
     note,
     incomeDate,
     isDeleted,
@@ -881,6 +891,12 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
       );
     } else if (isInserting) {
       context.missing(_amountMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
     }
     if (data.containsKey('note')) {
       context.handle(
@@ -925,6 +941,10 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
         DriftSqlType.double,
         data['${effectivePrefix}amount'],
       )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      ),
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}note'],
@@ -953,6 +973,7 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
 class Income extends DataClass implements Insertable<Income> {
   final String id;
   final double amount;
+  final String? source;
   final String? note;
   final DateTime incomeDate;
   final bool isDeleted;
@@ -960,6 +981,7 @@ class Income extends DataClass implements Insertable<Income> {
   const Income({
     required this.id,
     required this.amount,
+    this.source,
     this.note,
     required this.incomeDate,
     required this.isDeleted,
@@ -970,6 +992,9 @@ class Income extends DataClass implements Insertable<Income> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['amount'] = Variable<double>(amount);
+    if (!nullToAbsent || source != null) {
+      map['source'] = Variable<String>(source);
+    }
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
@@ -983,6 +1008,9 @@ class Income extends DataClass implements Insertable<Income> {
     return IncomesCompanion(
       id: Value(id),
       amount: Value(amount),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       incomeDate: Value(incomeDate),
       isDeleted: Value(isDeleted),
@@ -998,6 +1026,7 @@ class Income extends DataClass implements Insertable<Income> {
     return Income(
       id: serializer.fromJson<String>(json['id']),
       amount: serializer.fromJson<double>(json['amount']),
+      source: serializer.fromJson<String?>(json['source']),
       note: serializer.fromJson<String?>(json['note']),
       incomeDate: serializer.fromJson<DateTime>(json['incomeDate']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
@@ -1010,6 +1039,7 @@ class Income extends DataClass implements Insertable<Income> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'amount': serializer.toJson<double>(amount),
+      'source': serializer.toJson<String?>(source),
       'note': serializer.toJson<String?>(note),
       'incomeDate': serializer.toJson<DateTime>(incomeDate),
       'isDeleted': serializer.toJson<bool>(isDeleted),
@@ -1020,6 +1050,7 @@ class Income extends DataClass implements Insertable<Income> {
   Income copyWith({
     String? id,
     double? amount,
+    Value<String?> source = const Value.absent(),
     Value<String?> note = const Value.absent(),
     DateTime? incomeDate,
     bool? isDeleted,
@@ -1027,6 +1058,7 @@ class Income extends DataClass implements Insertable<Income> {
   }) => Income(
     id: id ?? this.id,
     amount: amount ?? this.amount,
+    source: source.present ? source.value : this.source,
     note: note.present ? note.value : this.note,
     incomeDate: incomeDate ?? this.incomeDate,
     isDeleted: isDeleted ?? this.isDeleted,
@@ -1036,6 +1068,7 @@ class Income extends DataClass implements Insertable<Income> {
     return Income(
       id: data.id.present ? data.id.value : this.id,
       amount: data.amount.present ? data.amount.value : this.amount,
+      source: data.source.present ? data.source.value : this.source,
       note: data.note.present ? data.note.value : this.note,
       incomeDate: data.incomeDate.present
           ? data.incomeDate.value
@@ -1050,6 +1083,7 @@ class Income extends DataClass implements Insertable<Income> {
     return (StringBuffer('Income(')
           ..write('id: $id, ')
           ..write('amount: $amount, ')
+          ..write('source: $source, ')
           ..write('note: $note, ')
           ..write('incomeDate: $incomeDate, ')
           ..write('isDeleted: $isDeleted, ')
@@ -1060,13 +1094,14 @@ class Income extends DataClass implements Insertable<Income> {
 
   @override
   int get hashCode =>
-      Object.hash(id, amount, note, incomeDate, isDeleted, createdAt);
+      Object.hash(id, amount, source, note, incomeDate, isDeleted, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Income &&
           other.id == this.id &&
           other.amount == this.amount &&
+          other.source == this.source &&
           other.note == this.note &&
           other.incomeDate == this.incomeDate &&
           other.isDeleted == this.isDeleted &&
@@ -1076,6 +1111,7 @@ class Income extends DataClass implements Insertable<Income> {
 class IncomesCompanion extends UpdateCompanion<Income> {
   final Value<String> id;
   final Value<double> amount;
+  final Value<String?> source;
   final Value<String?> note;
   final Value<DateTime> incomeDate;
   final Value<bool> isDeleted;
@@ -1084,6 +1120,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   const IncomesCompanion({
     this.id = const Value.absent(),
     this.amount = const Value.absent(),
+    this.source = const Value.absent(),
     this.note = const Value.absent(),
     this.incomeDate = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -1093,6 +1130,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   IncomesCompanion.insert({
     required String id,
     required double amount,
+    this.source = const Value.absent(),
     this.note = const Value.absent(),
     required DateTime incomeDate,
     this.isDeleted = const Value.absent(),
@@ -1104,6 +1142,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   static Insertable<Income> custom({
     Expression<String>? id,
     Expression<double>? amount,
+    Expression<String>? source,
     Expression<String>? note,
     Expression<DateTime>? incomeDate,
     Expression<bool>? isDeleted,
@@ -1113,6 +1152,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (amount != null) 'amount': amount,
+      if (source != null) 'source': source,
       if (note != null) 'note': note,
       if (incomeDate != null) 'income_date': incomeDate,
       if (isDeleted != null) 'is_deleted': isDeleted,
@@ -1124,6 +1164,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   IncomesCompanion copyWith({
     Value<String>? id,
     Value<double>? amount,
+    Value<String?>? source,
     Value<String?>? note,
     Value<DateTime>? incomeDate,
     Value<bool>? isDeleted,
@@ -1133,6 +1174,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     return IncomesCompanion(
       id: id ?? this.id,
       amount: amount ?? this.amount,
+      source: source ?? this.source,
       note: note ?? this.note,
       incomeDate: incomeDate ?? this.incomeDate,
       isDeleted: isDeleted ?? this.isDeleted,
@@ -1149,6 +1191,9 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
     }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
@@ -1173,6 +1218,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     return (StringBuffer('IncomesCompanion(')
           ..write('id: $id, ')
           ..write('amount: $amount, ')
+          ..write('source: $source, ')
           ..write('note: $note, ')
           ..write('incomeDate: $incomeDate, ')
           ..write('isDeleted: $isDeleted, ')
@@ -1846,6 +1892,7 @@ typedef $$IncomesTableCreateCompanionBuilder =
     IncomesCompanion Function({
       required String id,
       required double amount,
+      Value<String?> source,
       Value<String?> note,
       required DateTime incomeDate,
       Value<bool> isDeleted,
@@ -1856,6 +1903,7 @@ typedef $$IncomesTableUpdateCompanionBuilder =
     IncomesCompanion Function({
       Value<String> id,
       Value<double> amount,
+      Value<String?> source,
       Value<String?> note,
       Value<DateTime> incomeDate,
       Value<bool> isDeleted,
@@ -1879,6 +1927,11 @@ class $$IncomesTableFilterComposer
 
   ColumnFilters<double> get amount => $composableBuilder(
     column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1922,6 +1975,11 @@ class $$IncomesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnOrderings(column),
@@ -1957,6 +2015,9 @@ class $$IncomesTableAnnotationComposer
 
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
@@ -2003,6 +2064,7 @@ class $$IncomesTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<double> amount = const Value.absent(),
+                Value<String?> source = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> incomeDate = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -2011,6 +2073,7 @@ class $$IncomesTableTableManager
               }) => IncomesCompanion(
                 id: id,
                 amount: amount,
+                source: source,
                 note: note,
                 incomeDate: incomeDate,
                 isDeleted: isDeleted,
@@ -2021,6 +2084,7 @@ class $$IncomesTableTableManager
               ({
                 required String id,
                 required double amount,
+                Value<String?> source = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 required DateTime incomeDate,
                 Value<bool> isDeleted = const Value.absent(),
@@ -2029,6 +2093,7 @@ class $$IncomesTableTableManager
               }) => IncomesCompanion.insert(
                 id: id,
                 amount: amount,
+                source: source,
                 note: note,
                 incomeDate: incomeDate,
                 isDeleted: isDeleted,
