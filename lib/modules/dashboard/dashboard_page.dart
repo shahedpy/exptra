@@ -30,6 +30,8 @@ class DashboardPage extends StatelessWidget {
                   children: [
                     _buildSummaryCard(dashboardController),
                     const SizedBox(height: AppConstants.defaultPadding),
+                    _buildIncomesSection(incomeController),
+                    const SizedBox(height: AppConstants.defaultPadding),
                     _buildExpensesSection(
                       expenseController,
                       categoryController,
@@ -202,6 +204,123 @@ class DashboardPage extends StatelessWidget {
 
       return _buildExpensesList(expenseController, categoryController);
     });
+  }
+
+  Widget _buildIncomesSection(IncomeController incomeController) {
+    return Obx(() {
+      if (incomeController.incomes.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.defaultPadding,
+          ),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              child: Text(
+                'No incomes yet. Use + to add expense or income.',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+          ),
+        );
+      }
+
+      return _buildIncomesList(incomeController);
+    });
+  }
+
+  Widget _buildIncomesList(IncomeController incomeController) {
+    return Obx(
+      () => ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.defaultPadding,
+        ),
+        itemCount: incomeController.incomes.length,
+        itemBuilder: (_, index) {
+          final income = incomeController.incomes[index];
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: InkWell(
+              onLongPress: () {
+                Get.dialog(
+                  AlertDialog(
+                    title: const Text('Delete Income'),
+                    content: const Text(
+                      'Are you sure you want to delete this income?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          incomeController.deleteIncome(income.id);
+                          Get.back();
+                        },
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(
+                  AppConstants.defaultPadding,
+                ),
+                leading: const CircleAvatar(
+                  backgroundColor: Colors.green,
+                  child: Icon(Icons.add_card, color: Colors.white),
+                ),
+                title: Text(
+                  income.source != null && income.source!.isNotEmpty
+                      ? income.source!
+                      : 'Income',
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (income.note != null && income.note!.isNotEmpty)
+                      Text(
+                        income.note!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    Text(
+                      DateHelper.formatDate(income.incomeDate),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      CurrencyHelper.formatAmount(income.amount),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildExpensesList(
