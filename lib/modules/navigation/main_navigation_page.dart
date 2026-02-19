@@ -45,10 +45,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           child: NavigationBarTheme(
             data: NavigationBarThemeData(
               indicatorColor: colorScheme.secondaryContainer,
-              labelTextStyle: MaterialStateProperty.resolveWith<TextStyle?>((
+              labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>((
                 states,
               ) {
-                final selected = states.contains(MaterialState.selected);
+                final selected = states.contains(WidgetState.selected);
                 return Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: selected
                       ? colorScheme.onSurface
@@ -56,10 +56,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                   fontWeight: FontWeight.w500,
                 );
               }),
-              iconTheme: MaterialStateProperty.resolveWith<IconThemeData?>((
+              iconTheme: WidgetStateProperty.resolveWith<IconThemeData?>((
                 states,
               ) {
-                final selected = states.contains(MaterialState.selected);
+                final selected = states.contains(WidgetState.selected);
                 return IconThemeData(
                   color: selected
                       ? colorScheme.onSecondaryContainer
