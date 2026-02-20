@@ -49,8 +49,13 @@ class DateHelper {
 }
 
 class CurrencyHelper {
+  static final NumberFormat _bdNumberFormat = NumberFormat(
+    '#,##,##0.00',
+    'en_BD',
+  );
+
   static String formatAmount(double amount) {
-    return '${AppConstants.currencySymbol}${amount.toStringAsFixed(2)}';
+    return '${AppConstants.currencySymbol}${_bdNumberFormat.format(amount)}';
   }
 
   static String formatAmountCompact(double amount) {
@@ -64,7 +69,11 @@ class CurrencyHelper {
 
   static double parseAmount(String amount) {
     try {
-      return double.parse(amount.replaceAll(AppConstants.currencySymbol, '').trim());
+      final normalized = amount
+          .replaceAll(AppConstants.currencySymbol, '')
+          .replaceAll(',', '')
+          .trim();
+      return double.parse(normalized);
     } catch (e) {
       return 0.0;
     }
@@ -141,6 +150,3 @@ class ValidationHelper {
     return null;
   }
 }
-
-
-
