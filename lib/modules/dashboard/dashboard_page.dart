@@ -8,7 +8,6 @@ import 'dashboard_controller.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/routes/app_routes.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -53,52 +52,6 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddEntrySheet,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  void _showAddEntrySheet() {
-    Get.bottomSheet(
-      SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(Get.context!).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.remove_circle_outline),
-                title: const Text('Add Expense'),
-                onTap: () {
-                  Get.back();
-                  Get.toNamed(AppRoutes.addExpense);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.add_circle_outline),
-                title: const Text('Add Income'),
-                onTap: () {
-                  Get.back();
-                  Get.toNamed(AppRoutes.addIncome);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.sync_alt_rounded),
-                title: const Text('Add Lend/Borrow'),
-                onTap: () {
-                  Get.back();
-                  Get.toNamed(AppRoutes.addLendBorrow);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-      isScrollControlled: true,
     );
   }
 
@@ -625,6 +578,7 @@ class _DashboardEntry {
   }
 
   bool get isIncome => income != null;
+
   bool get isLendBorrow => lendBorrow != null;
 
   DateTime get date {
