@@ -107,6 +107,26 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: InkWell(
+                            onTap: () {
+                              final orig = item.isIncome
+                                  ? incomeController.incomes.firstWhere(
+                                      (e) => e.id == item.id,
+                                    )
+                                  : expenseController.expenses.firstWhere(
+                                      (e) => e.id == item.id,
+                                    );
+                              if (item.isIncome) {
+                                Get.toNamed(
+                                  AppRoutes.addIncome,
+                                  arguments: orig,
+                                );
+                              } else {
+                                Get.toNamed(
+                                  AppRoutes.addExpense,
+                                  arguments: orig,
+                                );
+                              }
+                            },
                             onLongPress: () {
                               Get.dialog(
                                 AlertDialog(
@@ -225,6 +245,10 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: InkWell(
+                            onTap: () => Get.toNamed(
+                              AppRoutes.addIncome,
+                              arguments: entry,
+                            ),
                             onLongPress: () {
                               Get.dialog(
                                 AlertDialog(
@@ -325,6 +349,10 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: InkWell(
+                            onTap: () => Get.toNamed(
+                              AppRoutes.addExpense,
+                              arguments: entry,
+                            ),
                             onLongPress: () {
                               Get.dialog(
                                 AlertDialog(

@@ -158,6 +158,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
+        onTap: () => Get.toNamed(AppRoutes.addLendBorrow, arguments: entry),
         onLongPress: () {
           Get.dialog(
             AlertDialog(

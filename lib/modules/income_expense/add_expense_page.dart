@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'expense_controller.dart';
 import '../category/category_controller.dart';
+import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
 
@@ -21,6 +22,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   late String? _selectedCategoryId;
   late DateTime _selectedDate;
+  bool _isEdit = false;
+  String? _editingId;
 
   @override
   void initState() {
@@ -29,6 +32,15 @@ class _AddExpensePageState extends State<AddExpensePage> {
     _selectedCategoryId = categoryController.categories.isNotEmpty
         ? categoryController.categories.first.id
         : null;
+    final args = Get.arguments;
+    if (args != null && args is Expense) {
+      _isEdit = true;
+      _editingId = args.id;
+      _selectedDate = args.expenseDate;
+      _selectedCategoryId = args.categoryId;
+      _amountController.text = args.amount.toString();
+      _noteController.text = args.note ?? '';
+    }
   }
 
   @override
@@ -41,7 +53,10 @@ class _AddExpensePageState extends State<AddExpensePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Expense'), elevation: 0),
+      appBar: AppBar(
+        title: Text(_isEdit ? 'Edit Expense' : 'Add Expense'),
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Form(
@@ -161,7 +176,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _submitForm,
-                  child: const Text('Add Expense'),
+                  child: Text(_isEdit ? 'Update Expense' : 'Add Expense'),
                 ),
               ),
             ],
@@ -196,6 +211,19 @@ class _AddExpensePageState extends State<AddExpensePage> {
     final amount = double.parse(
       _amountController.text.replaceAll(AppConstants.currencySymbol, ''),
     );
+
+    if (_isEdit && _editingId != null) {
+      expenseController.updateExpense(
+        id: _editingId!,
+        categoryId: _selectedCategoryId!,
+        amount: amount,
+        note: _noteController.text.trim(),
+        date: _selectedDate,
+      );
+      Get.back();
+      Get.snackbar('Success', 'Expense updated successfully');
+      return;
+    }
 
     expenseController.addExpense(
       categoryId: _selectedCategoryId!,

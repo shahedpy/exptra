@@ -60,6 +60,29 @@ class LendBorrowController extends GetxController {
     }
   }
 
+  Future<void> updateEntry({
+    required String id,
+    required String personName,
+    required double amount,
+    required String type,
+    String? note,
+    required DateTime date,
+  }) async {
+    try {
+      await repository.updateLendBorrow(
+        id: id,
+        personName: personName,
+        amount: amount,
+        type: type,
+        note: note,
+        date: date,
+      );
+      await loadEntries();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update entry: $e');
+    }
+  }
+
   double getTotalLent() {
     return entries
         .where((entry) => entry.type == typeLend)

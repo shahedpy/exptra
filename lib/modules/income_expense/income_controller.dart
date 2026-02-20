@@ -46,6 +46,27 @@ class IncomeController extends GetxController {
     }
   }
 
+  Future<void> updateIncome({
+    required String id,
+    required double amount,
+    String? source,
+    String? note,
+    required DateTime date,
+  }) async {
+    try {
+      await repository.updateIncome(
+        id: id,
+        amount: amount,
+        source: source,
+        note: note,
+        date: date,
+      );
+      await loadIncomes();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update income: $e');
+    }
+  }
+
   double getTotalIncome() {
     return incomes.fold(0.0, (sum, income) => sum + income.amount);
   }

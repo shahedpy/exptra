@@ -48,4 +48,23 @@ class LendBorrowRepository {
       LendBorrowsCompanion(isSettled: Value(value)),
     );
   }
+
+  Future<void> updateLendBorrow({
+    required String id,
+    required String personName,
+    required double amount,
+    required String type,
+    String? note,
+    required DateTime date,
+  }) async {
+    await (db.update(db.lendBorrows)..where((tbl) => tbl.id.equals(id))).write(
+      LendBorrowsCompanion(
+        personName: Value(personName),
+        amount: Value(amount),
+        type: Value(type),
+        note: Value(note),
+        transactionDate: Value(date),
+      ),
+    );
+  }
 }

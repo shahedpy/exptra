@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/db/app_database.dart';
 import 'lend_borrow_controller.dart';
 
 class AddLendBorrowPage extends StatefulWidget {
@@ -22,12 +23,25 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
 
   late String _selectedType;
   late DateTime _selectedDate;
+  bool _isEdit = false;
+  String? _editingId;
 
   @override
   void initState() {
     super.initState();
     _selectedType = LendBorrowController.typeLend;
     _selectedDate = DateTime.now();
+
+    final args = Get.arguments;
+    if (args != null && args is LendBorrow) {
+      _isEdit = true;
+      _editingId = args.id;
+      _selectedType = args.type;
+      _selectedDate = args.transactionDate;
+      _nameController.text = args.personName;
+      _amountController.text = args.amount.toString();
+      _noteController.text = args.note ?? '';
+    }
   }
 
   @override
@@ -41,7 +55,10 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Lend/Borrow'), elevation: 0),
+      appBar: AppBar(
+        title: Text(_isEdit ? 'Edit Lend/Borrow' : 'Add Lend/Borrow'),
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Form(
@@ -157,7 +174,7 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _submitForm,
-                  child: const Text('Save Entry'),
+                  child: Text(_isEdit ? 'Update Entry' : 'Save Entry'),
                 ),
               ),
             ],
@@ -188,6 +205,20 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
     final amount = double.parse(
       _amountController.text.replaceAll(AppConstants.currencySymbol, ''),
     );
+
+    if (_isEdit && _editingId != null) {
+      controller.updateEntry(
+        id: _editingId!,
+        personName: _nameController.text.trim(),
+        amount: amount,
+        type: _selectedType,
+        note: _noteController.text.trim(),
+        date: _selectedDate,
+      );
+      Get.back();
+      Get.snackbar('Success', 'Entry updated successfully');
+      return;
+    }
 
     controller.addEntry(
       personName: _nameController.text.trim(),

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/db/app_database.dart';
 import 'income_controller.dart';
 
 class AddIncomePage extends StatefulWidget {
@@ -20,11 +21,22 @@ class _AddIncomePageState extends State<AddIncomePage> {
   late final incomeController = Get.find<IncomeController>();
 
   late DateTime _selectedDate;
+  bool _isEdit = false;
+  String? _editingId;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
+    final args = Get.arguments;
+    if (args != null && args is Income) {
+      _isEdit = true;
+      _editingId = args.id;
+      _selectedDate = args.incomeDate;
+      _amountController.text = args.amount.toString();
+      _sourceController.text = args.source ?? '';
+      _noteController.text = args.note ?? '';
+    }
   }
 
   @override
@@ -38,7 +50,10 @@ class _AddIncomePageState extends State<AddIncomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Income'), elevation: 0),
+      appBar: AppBar(
+        title: Text(_isEdit ? 'Edit Income' : 'Add Income'),
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Form(
@@ -119,7 +134,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _submitForm,
-                  child: const Text('Add Income'),
+                  child: Text(_isEdit ? 'Update Income' : 'Add Income'),
                 ),
               ),
             ],
@@ -149,6 +164,19 @@ class _AddIncomePageState extends State<AddIncomePage> {
     final amount = double.parse(
       _amountController.text.replaceAll(AppConstants.currencySymbol, ''),
     );
+
+    if (_isEdit && _editingId != null) {
+      incomeController.updateIncome(
+        id: _editingId!,
+        amount: amount,
+        source: _sourceController.text.trim(),
+        note: _noteController.text.trim(),
+        date: _selectedDate,
+      );
+      Get.back();
+      Get.snackbar('Success', 'Income updated successfully');
+      return;
+    }
 
     incomeController.addIncome(
       amount: amount,

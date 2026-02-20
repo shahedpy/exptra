@@ -40,4 +40,21 @@ class IncomeRepository {
       IncomesCompanion(isDeleted: const Value(true)),
     );
   }
+
+  Future<void> updateIncome({
+    required String id,
+    required double amount,
+    String? source,
+    String? note,
+    required DateTime date,
+  }) async {
+    await (db.update(db.incomes)..where((tbl) => tbl.id.equals(id))).write(
+      IncomesCompanion(
+        amount: Value(amount),
+        source: Value(source),
+        note: Value(note),
+        incomeDate: Value(date),
+      ),
+    );
+  }
 }

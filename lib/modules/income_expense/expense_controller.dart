@@ -45,6 +45,27 @@ class ExpenseController extends GetxController {
     }
   }
 
+  Future<void> updateExpense({
+    required String id,
+    required String categoryId,
+    required double amount,
+    String? note,
+    required DateTime date,
+  }) async {
+    try {
+      await repository.updateExpense(
+        id: id,
+        categoryId: categoryId,
+        amount: amount,
+        note: note,
+        date: date,
+      );
+      await loadExpenses();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update expense: $e');
+    }
+  }
+
   double getTotalExpenses() {
     return expenses.fold(0.0, (sum, expense) => sum + expense.amount);
   }
