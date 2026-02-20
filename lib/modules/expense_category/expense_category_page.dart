@@ -45,9 +45,6 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
                   final category = controller.categories[index];
                   return Card(
                     key: ValueKey(category.id),
-                    margin: const EdgeInsets.only(
-                      bottom: AppConstants.defaultPadding,
-                    ),
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: ColorHelper.getColorFromInt(
@@ -55,33 +52,11 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
                         ),
                       ),
                       title: Text(category.name),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          PopupMenuButton(
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                child: const Text('Edit'),
-                                onTap: () => _editCategory(category),
-                              ),
-                              PopupMenuItem(
-                                child: const Text(
-                                  'Delete',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                onTap: () =>
-                                    controller.deleteCategory(category.id),
-                              ),
-                            ],
-                          ),
-                          ReorderableDragStartListener(
-                            index: index,
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Icon(Icons.drag_handle),
-                            ),
-                          ),
-                        ],
+                      onTap: () => _editCategory(category),
+                      onLongPress: () => controller.deleteCategory(category.id),
+                      trailing: ReorderableDragStartListener(
+                        index: index,
+                        child: Icon(Icons.drag_handle),
                       ),
                     ),
                   );

@@ -56,33 +56,15 @@ class _IncomeSourcePageState extends State<IncomeSourcePage> {
                         ),
                       ),
                       title: Text(source.name),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          PopupMenuButton(
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                child: const Text('Edit'),
-                                onTap: () => _editSource(source),
-                              ),
-                              PopupMenuItem(
-                                child: const Text(
-                                  'Delete',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                onTap: () =>
-                                    controller.deleteIncomeSource(source.id),
-                              ),
-                            ],
-                          ),
-                          ReorderableDragStartListener(
-                            index: index,
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Icon(Icons.drag_handle),
-                            ),
-                          ),
-                        ],
+                      onTap: () => _editSource(source),
+                      onLongPress: () =>
+                          controller.deleteIncomeSource(source.id),
+                      trailing: ReorderableDragStartListener(
+                        index: index,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Icon(Icons.drag_handle),
+                        ),
                       ),
                     ),
                   );
