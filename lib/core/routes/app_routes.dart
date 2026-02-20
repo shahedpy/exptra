@@ -2,7 +2,8 @@ import 'package:get/get.dart';
 import '../../modules/income_expense/add_expense_page.dart';
 import '../../modules/income_expense/add_income_page.dart';
 import '../../modules/category/category_page.dart';
-import '../../modules/lend_borrow/add_lend_borrow_page.dart';
+import '../../modules/lend_borrow/add_borrow_page.dart';
+import '../../modules/lend_borrow/add_lend_page.dart';
 import '../../modules/lend_borrow/lend_borrow_page.dart';
 import '../../modules/navigation/main_navigation_page.dart';
 
@@ -11,7 +12,8 @@ class AppRoutes {
   static const String addExpense = '/add-expense';
   static const String addIncome = '/add-income';
   static const String lendBorrow = '/lend-borrow';
-  static const String addLendBorrow = '/add-lend-borrow';
+  static const String addLend = '/add-lend';
+  static const String addBorrow = '/add-borrow';
   static const String categories = '/categories';
 
   static final routes = [
@@ -19,7 +21,8 @@ class AppRoutes {
     GetPage(name: addExpense, page: () => const AddExpensePage()),
     GetPage(name: addIncome, page: () => const AddIncomePage()),
     GetPage(name: lendBorrow, page: () => const LendBorrowPage()),
-    GetPage(name: addLendBorrow, page: () => const AddLendBorrowPage()),
+    GetPage(name: addLend, page: () => const AddLendPage()),
+    GetPage(name: addBorrow, page: () => const AddBorrowPage()),
     GetPage(name: categories, page: () => CategoryPage()),
   ];
 }

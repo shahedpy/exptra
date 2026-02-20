@@ -139,9 +139,69 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppRoutes.addLendBorrow),
+        onPressed: () => _showAddDialog(context),
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  void _showAddDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const Text(
+                  'Add Entry',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                ListTile(
+                  title: const Text('Add Lend'),
+                  leading: const CircleAvatar(
+                    backgroundColor: Colors.orange,
+                    child: Icon(Icons.call_made_rounded, color: Colors.white),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.toNamed(AppRoutes.addLend);
+                  },
+                ),
+                ListTile(
+                  title: const Text('Add Borrow'),
+                  leading: const CircleAvatar(
+                    backgroundColor: Colors.blue,
+                    child: Icon(
+                      Icons.call_received_rounded,
+                      color: Colors.white,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.toNamed(AppRoutes.addBorrow);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -184,7 +244,10 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: () => Get.toNamed(AppRoutes.addLendBorrow, arguments: entry),
+        onTap: () => Get.toNamed(
+          isLend ? AppRoutes.addLend : AppRoutes.addBorrow,
+          arguments: entry,
+        ),
         onLongPress: () {
           Get.dialog(
             AlertDialog(

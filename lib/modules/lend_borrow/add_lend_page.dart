@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../../core/utils/helpers.dart';
 import '../../core/db/app_database.dart';
+import '../../core/utils/helpers.dart';
 import 'lend_borrow_controller.dart';
 
-class AddLendBorrowPage extends StatefulWidget {
-  const AddLendBorrowPage({super.key});
+class AddLendPage extends StatefulWidget {
+  const AddLendPage({super.key});
 
   @override
-  State<AddLendBorrowPage> createState() => _AddLendBorrowPageState();
+  State<AddLendPage> createState() => _AddLendPageState();
 }
 
-class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
+class _AddLendPageState extends State<AddLendPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
@@ -21,7 +21,6 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
 
   late final LendBorrowController controller = Get.find<LendBorrowController>();
 
-  late String _selectedType;
   late DateTime _selectedDate;
   bool _isEdit = false;
   String? _editingId;
@@ -29,28 +28,16 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
   @override
   void initState() {
     super.initState();
-    _selectedType = LendBorrowController.typeLend;
     _selectedDate = DateTime.now();
 
     final args = Get.arguments;
-    if (args != null) {
+    if (args != null && args is Lend) {
       _isEdit = true;
-
-      if (args is Lend) {
-        _editingId = args.id;
-        _selectedType = LendBorrowController.typeLend;
-        _selectedDate = args.lendDate;
-        _nameController.text = args.personName;
-        _amountController.text = args.amount.toString();
-        _noteController.text = args.note ?? '';
-      } else if (args is Borrow) {
-        _editingId = args.id;
-        _selectedType = LendBorrowController.typeBorrow;
-        _selectedDate = args.borrowDate;
-        _nameController.text = args.personName;
-        _amountController.text = args.amount.toString();
-        _noteController.text = args.note ?? '';
-      }
+      _editingId = args.id;
+      _selectedDate = args.lendDate;
+      _nameController.text = args.personName;
+      _amountController.text = args.amount.toString();
+      _noteController.text = args.note ?? '';
     }
   }
 
@@ -66,7 +53,7 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Lend/Borrow' : 'Add Lend/Borrow'),
+        title: Text(_isEdit ? 'Edit Lend' : 'Add Lend'),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -76,35 +63,6 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Type',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment<String>(
-                    value: LendBorrowController.typeLend,
-                    label: Text('Lend'),
-                    icon: Icon(Icons.call_made_rounded),
-                  ),
-                  ButtonSegment<String>(
-                    value: LendBorrowController.typeBorrow,
-                    label: Text('Borrow'),
-                    icon: Icon(Icons.call_received_rounded),
-                  ),
-                ],
-                selected: {_selectedType},
-                onSelectionChanged: (selection) {
-                  if (selection.isNotEmpty) {
-                    setState(() {
-                      _selectedType = selection.first;
-                    });
-                  }
-                },
-                showSelectedIcon: false,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(
                 'Person Name',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -184,7 +142,7 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _submitForm,
-                  child: Text(_isEdit ? 'Update Entry' : 'Save Entry'),
+                  child: Text(_isEdit ? 'Update Lend' : 'Save Lend'),
                 ),
               ),
             ],
@@ -221,24 +179,24 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
         id: _editingId!,
         personName: _nameController.text.trim(),
         amount: amount,
-        type: _selectedType,
+        type: LendBorrowController.typeLend,
         note: _noteController.text.trim(),
         date: _selectedDate,
       );
       Get.back();
-      Get.snackbar('Success', 'Entry updated successfully');
+      Get.snackbar('Success', 'Lend updated successfully');
       return;
     }
 
     controller.addEntry(
       personName: _nameController.text.trim(),
       amount: amount,
-      type: _selectedType,
+      type: LendBorrowController.typeLend,
       note: _noteController.text.trim(),
       date: _selectedDate,
     );
 
     Get.back();
-    Get.snackbar('Success', 'Entry added successfully');
+    Get.snackbar('Success', 'Lend added successfully');
   }
 }
