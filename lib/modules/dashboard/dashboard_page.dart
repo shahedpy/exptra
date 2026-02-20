@@ -9,7 +9,6 @@ import 'dashboard_controller.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/routes/app_routes.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
