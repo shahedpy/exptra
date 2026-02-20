@@ -156,14 +156,14 @@ class ReportPage extends StatelessWidget {
       child: SegmentedButton<ReportDataType>(
         segments: const [
           ButtonSegment<ReportDataType>(
-            value: ReportDataType.expense,
-            label: Text('Exp'),
-            icon: Icon(Icons.remove_circle_outline_rounded),
-          ),
-          ButtonSegment<ReportDataType>(
             value: ReportDataType.income,
             label: Text('Inc'),
             icon: Icon(Icons.add_circle_outline_rounded),
+          ),
+          ButtonSegment<ReportDataType>(
+            value: ReportDataType.expense,
+            label: Text('Exp'),
+            icon: Icon(Icons.remove_circle_outline_rounded),
           ),
           ButtonSegment<ReportDataType>(
             value: ReportDataType.lend,
