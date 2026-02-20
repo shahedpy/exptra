@@ -9,6 +9,7 @@ import 'dashboard_controller.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/routes/app_routes.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -226,12 +227,10 @@ class DashboardPage extends StatelessWidget {
 
       if (entries.isEmpty) {
         final message = switch (selectedTab) {
-          DashboardTransactionTab.all =>
-            'No entries yet.',
+          DashboardTransactionTab.all => 'No entries yet.',
           DashboardTransactionTab.incomeExpense =>
             'No income/expense entries yet.',
-          DashboardTransactionTab.lendBorrow =>
-            'No lend/borrow entries yet.',
+          DashboardTransactionTab.lendBorrow => 'No lend/borrow entries yet.',
         };
 
         return Padding(
@@ -382,54 +381,119 @@ class DashboardPage extends StatelessWidget {
           final amount = isLend ? entry.lend!.amount : entry.borrow!.amount;
           final note = isLend ? entry.lend!.note : entry.borrow!.note;
           final date = isLend ? entry.lend!.lendDate : entry.borrow!.borrowDate;
+          final settled = isLend
+              ? entry.lend!.isSettled
+              : entry.borrow!.isSettled;
+          final settledLabel = isLend ? 'Paid' : 'Returned';
+          final avatarColor = settled
+              ? Colors.grey.shade400
+              : (isLend ? Colors.orange : Colors.blue);
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
-            child: InkWell(
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(
-                  AppConstants.defaultPadding,
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
+              leading: CircleAvatar(
+                backgroundColor: avatarColor,
+                child: Icon(
+                  isLend
+                      ? Icons.call_made_rounded
+                      : Icons.call_received_rounded,
+                  color: Colors.white,
                 ),
-                leading: CircleAvatar(
-                  backgroundColor: isLend ? Colors.orange : Colors.blue,
-                  child: Icon(
-                    isLend
-                        ? Icons.call_made_rounded
-                        : Icons.call_received_rounded,
-                    color: Colors.white,
+              ),
+              title: Text(
+                personName,
+                style: TextStyle(
+                  decoration: settled
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
+                  color: settled ? Colors.grey : null,
+                ),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isLend ? 'Lend' : 'Borrow',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: settled ? Colors.grey : null,
+                    ),
                   ),
-                ),
-                title: Text(personName),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  if (note != null && note.isNotEmpty)
                     Text(
-                      isLend ? 'Lend' : 'Borrow',
+                      note,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12),
                     ),
-                    if (note != null && note.isNotEmpty)
-                      Text(
-                        note,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    Text(
-                      DateHelper.formatDate(date),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
+                  Text(
+                    DateHelper.formatDate(date),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    CurrencyHelper.formatAmount(amount),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: settled ? Colors.grey : null,
+                      decoration: settled
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // show settled/paid status without allowing toggling
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: settled
+                          ? Colors.green.shade100
+                          : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: settled
+                            ? Colors.green.shade400
+                            : Colors.grey.shade400,
                       ),
                     ),
-                  ],
-                ),
-                trailing: Text(
-                  CurrencyHelper.formatAmount(amount),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          settled
+                              ? Icons.check_circle_rounded
+                              : Icons.radio_button_unchecked_rounded,
+                          size: 12,
+                          color: settled
+                              ? Colors.green.shade700
+                              : Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          settledLabel,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: settled
+                                ? Colors.green.shade700
+                                : Colors.grey.shade600,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           );
