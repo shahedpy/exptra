@@ -104,6 +104,11 @@ class ReportPage extends StatelessWidget {
             child: SegmentedButton<ReportType>(
               segments: [
                 ButtonSegment<ReportType>(
+                  value: ReportType.dailyWise,
+                  label: Text('Daily'),
+                  icon: Icon(Icons.view_day_rounded),
+                ),
+                ButtonSegment<ReportType>(
                   value: ReportType.monthWise,
                   label: Text('Month'),
                   icon: Icon(Icons.calendar_month_rounded),
@@ -124,11 +129,6 @@ class ReportPage extends StatelessWidget {
                         ? Icons.account_balance_wallet_rounded
                         : Icons.person_rounded,
                   ),
-                ),
-                ButtonSegment<ReportType>(
-                  value: ReportType.dailyWise,
-                  label: Text('Daily'),
-                  icon: Icon(Icons.view_day_rounded),
                 ),
               ],
               selected: {controller.selectedType.value},
