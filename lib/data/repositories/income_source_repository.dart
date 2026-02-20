@@ -13,6 +13,12 @@ class IncomeSourceRepository {
     required String name,
     required int color,
   }) async {
+    final maxSortOrderExpr = db.incomeSources.sortOrder.max();
+    final maxSortOrder =
+        await (db.selectOnly(db.incomeSources)..addColumns([maxSortOrderExpr]))
+            .map((row) => row.read(maxSortOrderExpr))
+            .getSingle();
+
     await db
         .into(db.incomeSources)
         .insert(
@@ -20,6 +26,7 @@ class IncomeSourceRepository {
             id: _uuid.v4(),
             name: name,
             color: Value(color),
+            sortOrder: Value((maxSortOrder ?? -1) + 1),
           ),
         );
   }
@@ -27,8 +34,21 @@ class IncomeSourceRepository {
   Future<List<IncomeSource>> getAllIncomeSources() {
     return (db.select(db.incomeSources)
           ..where((tbl) => tbl.isDeleted.equals(false))
-          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.sortOrder),
+            (t) => OrderingTerm.asc(t.name),
+          ]))
         .get();
+  }
+
+  Future<void> reorderIncomeSources(List<String> orderedIds) async {
+    await db.transaction(() async {
+      for (var index = 0; index < orderedIds.length; index++) {
+        final id = orderedIds[index];
+        await (db.update(db.incomeSources)..where((tbl) => tbl.id.equals(id)))
+            .write(IncomeSourcesCompanion(sortOrder: Value(index)));
+      }
+    });
   }
 
   Future<void> updateIncomeSource({

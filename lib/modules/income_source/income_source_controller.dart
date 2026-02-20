@@ -85,6 +85,27 @@ class IncomeSourceController extends GetxController {
     }
   }
 
+  Future<void> reorderIncomeSources(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= incomeSources.length) return;
+    if (newIndex < 0 || newIndex > incomeSources.length) return;
+
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    final updated = List<IncomeSource>.from(incomeSources);
+    final moved = updated.removeAt(oldIndex);
+    updated.insert(newIndex, moved);
+    incomeSources.value = updated;
+
+    try {
+      await repository.reorderIncomeSources(updated.map((e) => e.id).toList());
+    } catch (e) {
+      await loadIncomeSources();
+      Get.snackbar('Error', 'Failed to reorder income sources: $e');
+    }
+  }
+
   IncomeSource? getIncomeSourceById(String id) {
     try {
       return incomeSources.firstWhere((source) => source.id == id);

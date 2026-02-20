@@ -83,6 +83,27 @@ class ExpenseCategoryController extends GetxController {
     }
   }
 
+  Future<void> reorderCategories(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= categories.length) return;
+    if (newIndex < 0 || newIndex > categories.length) return;
+
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    final updated = List<ExpenseCategory>.from(categories);
+    final moved = updated.removeAt(oldIndex);
+    updated.insert(newIndex, moved);
+    categories.value = updated;
+
+    try {
+      await repository.reorderCategories(updated.map((e) => e.id).toList());
+    } catch (e) {
+      await loadCategories();
+      Get.snackbar('Error', 'Failed to reorder categories: $e');
+    }
+  }
+
   ExpenseCategory? getCategoryById(String id) {
     try {
       return categories.firstWhere((cat) => cat.id == id);

@@ -36,12 +36,15 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
       body: Obx(
         () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
+            : ReorderableListView.builder(
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                buildDefaultDragHandles: false,
                 itemCount: controller.categories.length,
+                onReorder: controller.reorderCategories,
                 itemBuilder: (_, index) {
                   final category = controller.categories[index];
                   return Card(
+                    key: ValueKey(category.id),
                     margin: const EdgeInsets.only(
                       bottom: AppConstants.defaultPadding,
                     ),
@@ -52,18 +55,31 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
                         ),
                       ),
                       title: Text(category.name),
-                      trailing: PopupMenuButton(
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            child: const Text('Edit'),
-                            onTap: () => _editCategory(category),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          PopupMenuButton(
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                child: const Text('Edit'),
+                                onTap: () => _editCategory(category),
+                              ),
+                              PopupMenuItem(
+                                child: const Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                                onTap: () =>
+                                    controller.deleteCategory(category.id),
+                              ),
+                            ],
                           ),
-                          PopupMenuItem(
-                            child: const Text(
-                              'Delete',
-                              style: TextStyle(color: Colors.red),
+                          ReorderableDragStartListener(
+                            index: index,
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Icon(Icons.drag_handle),
                             ),
-                            onTap: () => controller.deleteCategory(category.id),
                           ),
                         ],
                       ),

@@ -36,6 +36,18 @@ class $ExpenseCategoriesTable extends ExpenseCategories
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _isDeletedMeta = const VerificationMeta(
     'isDeleted',
   );
@@ -52,7 +64,7 @@ class $ExpenseCategoriesTable extends ExpenseCategories
     defaultValue: const Constant(false),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, color, isDeleted];
+  List<GeneratedColumn> get $columns => [id, name, color, sortOrder, isDeleted];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -84,6 +96,12 @@ class $ExpenseCategoriesTable extends ExpenseCategories
         color.isAcceptableOrUnknown(data['color']!, _colorMeta),
       );
     }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
     if (data.containsKey('is_deleted')) {
       context.handle(
         _isDeletedMeta,
@@ -111,6 +129,10 @@ class $ExpenseCategoriesTable extends ExpenseCategories
         DriftSqlType.int,
         data['${effectivePrefix}color'],
       ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
       isDeleted: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
@@ -128,11 +150,13 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
   final String id;
   final String name;
   final int? color;
+  final int sortOrder;
   final bool isDeleted;
   const ExpenseCategory({
     required this.id,
     required this.name,
     this.color,
+    required this.sortOrder,
     required this.isDeleted,
   });
   @override
@@ -143,6 +167,7 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
     if (!nullToAbsent || color != null) {
       map['color'] = Variable<int>(color);
     }
+    map['sort_order'] = Variable<int>(sortOrder);
     map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
@@ -154,6 +179,7 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
       color: color == null && nullToAbsent
           ? const Value.absent()
           : Value(color),
+      sortOrder: Value(sortOrder),
       isDeleted: Value(isDeleted),
     );
   }
@@ -167,6 +193,7 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       color: serializer.fromJson<int?>(json['color']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
@@ -177,6 +204,7 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'color': serializer.toJson<int?>(color),
+      'sortOrder': serializer.toJson<int>(sortOrder),
       'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
@@ -185,11 +213,13 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
     String? id,
     String? name,
     Value<int?> color = const Value.absent(),
+    int? sortOrder,
     bool? isDeleted,
   }) => ExpenseCategory(
     id: id ?? this.id,
     name: name ?? this.name,
     color: color.present ? color.value : this.color,
+    sortOrder: sortOrder ?? this.sortOrder,
     isDeleted: isDeleted ?? this.isDeleted,
   );
   ExpenseCategory copyWithCompanion(ExpenseCategoriesCompanion data) {
@@ -197,6 +227,7 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       color: data.color.present ? data.color.value : this.color,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
     );
   }
@@ -207,13 +238,14 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('isDeleted: $isDeleted')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, color, isDeleted);
+  int get hashCode => Object.hash(id, name, color, sortOrder, isDeleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -221,6 +253,7 @@ class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
           other.id == this.id &&
           other.name == this.name &&
           other.color == this.color &&
+          other.sortOrder == this.sortOrder &&
           other.isDeleted == this.isDeleted);
 }
 
@@ -228,12 +261,14 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
   final Value<String> id;
   final Value<String> name;
   final Value<int?> color;
+  final Value<int> sortOrder;
   final Value<bool> isDeleted;
   final Value<int> rowid;
   const ExpenseCategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.color = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -241,6 +276,7 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
     required String id,
     required String name,
     this.color = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -249,6 +285,7 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
     Expression<String>? id,
     Expression<String>? name,
     Expression<int>? color,
+    Expression<int>? sortOrder,
     Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
@@ -256,6 +293,7 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (color != null) 'color': color,
+      if (sortOrder != null) 'sort_order': sortOrder,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (rowid != null) 'rowid': rowid,
     });
@@ -265,6 +303,7 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
     Value<String>? id,
     Value<String>? name,
     Value<int?>? color,
+    Value<int>? sortOrder,
     Value<bool>? isDeleted,
     Value<int>? rowid,
   }) {
@@ -272,6 +311,7 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
       id: id ?? this.id,
       name: name ?? this.name,
       color: color ?? this.color,
+      sortOrder: sortOrder ?? this.sortOrder,
       isDeleted: isDeleted ?? this.isDeleted,
       rowid: rowid ?? this.rowid,
     );
@@ -289,6 +329,9 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
     if (color.present) {
       map['color'] = Variable<int>(color.value);
     }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
@@ -304,6 +347,7 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1318,6 +1362,18 @@ class $IncomeSourcesTable extends IncomeSources
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _isDeletedMeta = const VerificationMeta(
     'isDeleted',
   );
@@ -1334,7 +1390,7 @@ class $IncomeSourcesTable extends IncomeSources
     defaultValue: const Constant(false),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, color, isDeleted];
+  List<GeneratedColumn> get $columns => [id, name, color, sortOrder, isDeleted];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1366,6 +1422,12 @@ class $IncomeSourcesTable extends IncomeSources
         color.isAcceptableOrUnknown(data['color']!, _colorMeta),
       );
     }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
     if (data.containsKey('is_deleted')) {
       context.handle(
         _isDeletedMeta,
@@ -1393,6 +1455,10 @@ class $IncomeSourcesTable extends IncomeSources
         DriftSqlType.int,
         data['${effectivePrefix}color'],
       ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
       isDeleted: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
@@ -1410,11 +1476,13 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
   final String id;
   final String name;
   final int? color;
+  final int sortOrder;
   final bool isDeleted;
   const IncomeSource({
     required this.id,
     required this.name,
     this.color,
+    required this.sortOrder,
     required this.isDeleted,
   });
   @override
@@ -1425,6 +1493,7 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
     if (!nullToAbsent || color != null) {
       map['color'] = Variable<int>(color);
     }
+    map['sort_order'] = Variable<int>(sortOrder);
     map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
@@ -1436,6 +1505,7 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
       color: color == null && nullToAbsent
           ? const Value.absent()
           : Value(color),
+      sortOrder: Value(sortOrder),
       isDeleted: Value(isDeleted),
     );
   }
@@ -1449,6 +1519,7 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       color: serializer.fromJson<int?>(json['color']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
@@ -1459,6 +1530,7 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'color': serializer.toJson<int?>(color),
+      'sortOrder': serializer.toJson<int>(sortOrder),
       'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
@@ -1467,11 +1539,13 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
     String? id,
     String? name,
     Value<int?> color = const Value.absent(),
+    int? sortOrder,
     bool? isDeleted,
   }) => IncomeSource(
     id: id ?? this.id,
     name: name ?? this.name,
     color: color.present ? color.value : this.color,
+    sortOrder: sortOrder ?? this.sortOrder,
     isDeleted: isDeleted ?? this.isDeleted,
   );
   IncomeSource copyWithCompanion(IncomeSourcesCompanion data) {
@@ -1479,6 +1553,7 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       color: data.color.present ? data.color.value : this.color,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
     );
   }
@@ -1489,13 +1564,14 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('isDeleted: $isDeleted')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, color, isDeleted);
+  int get hashCode => Object.hash(id, name, color, sortOrder, isDeleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1503,6 +1579,7 @@ class IncomeSource extends DataClass implements Insertable<IncomeSource> {
           other.id == this.id &&
           other.name == this.name &&
           other.color == this.color &&
+          other.sortOrder == this.sortOrder &&
           other.isDeleted == this.isDeleted);
 }
 
@@ -1510,12 +1587,14 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
   final Value<String> id;
   final Value<String> name;
   final Value<int?> color;
+  final Value<int> sortOrder;
   final Value<bool> isDeleted;
   final Value<int> rowid;
   const IncomeSourcesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.color = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1523,6 +1602,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
     required String id,
     required String name,
     this.color = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1531,6 +1611,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
     Expression<String>? id,
     Expression<String>? name,
     Expression<int>? color,
+    Expression<int>? sortOrder,
     Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
@@ -1538,6 +1619,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (color != null) 'color': color,
+      if (sortOrder != null) 'sort_order': sortOrder,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1547,6 +1629,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
     Value<String>? id,
     Value<String>? name,
     Value<int?>? color,
+    Value<int>? sortOrder,
     Value<bool>? isDeleted,
     Value<int>? rowid,
   }) {
@@ -1554,6 +1637,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
       id: id ?? this.id,
       name: name ?? this.name,
       color: color ?? this.color,
+      sortOrder: sortOrder ?? this.sortOrder,
       isDeleted: isDeleted ?? this.isDeleted,
       rowid: rowid ?? this.rowid,
     );
@@ -1571,6 +1655,9 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
     if (color.present) {
       map['color'] = Variable<int>(color.value);
     }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
@@ -1586,6 +1673,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2640,6 +2728,7 @@ typedef $$ExpenseCategoriesTableCreateCompanionBuilder =
       required String id,
       required String name,
       Value<int?> color,
+      Value<int> sortOrder,
       Value<bool> isDeleted,
       Value<int> rowid,
     });
@@ -2648,6 +2737,7 @@ typedef $$ExpenseCategoriesTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> name,
       Value<int?> color,
+      Value<int> sortOrder,
       Value<bool> isDeleted,
       Value<int> rowid,
     });
@@ -2712,6 +2802,11 @@ class $$ExpenseCategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
     builder: (column) => ColumnFilters(column),
@@ -2767,6 +2862,11 @@ class $$ExpenseCategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
     builder: (column) => ColumnOrderings(column),
@@ -2790,6 +2890,9 @@ class $$ExpenseCategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
@@ -2856,12 +2959,14 @@ class $$ExpenseCategoriesTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int?> color = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpenseCategoriesCompanion(
                 id: id,
                 name: name,
                 color: color,
+                sortOrder: sortOrder,
                 isDeleted: isDeleted,
                 rowid: rowid,
               ),
@@ -2870,12 +2975,14 @@ class $$ExpenseCategoriesTableTableManager
                 required String id,
                 required String name,
                 Value<int?> color = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpenseCategoriesCompanion.insert(
                 id: id,
                 name: name,
                 color: color,
+                sortOrder: sortOrder,
                 isDeleted: isDeleted,
                 rowid: rowid,
               ),
@@ -3553,6 +3660,7 @@ typedef $$IncomeSourcesTableCreateCompanionBuilder =
       required String id,
       required String name,
       Value<int?> color,
+      Value<int> sortOrder,
       Value<bool> isDeleted,
       Value<int> rowid,
     });
@@ -3561,6 +3669,7 @@ typedef $$IncomeSourcesTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> name,
       Value<int?> color,
+      Value<int> sortOrder,
       Value<bool> isDeleted,
       Value<int> rowid,
     });
@@ -3586,6 +3695,11 @@ class $$IncomeSourcesTableFilterComposer
 
   ColumnFilters<int> get color => $composableBuilder(
     column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3619,6 +3733,11 @@ class $$IncomeSourcesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
     builder: (column) => ColumnOrderings(column),
@@ -3642,6 +3761,9 @@ class $$IncomeSourcesTableAnnotationComposer
 
   GeneratedColumn<int> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
@@ -3681,12 +3803,14 @@ class $$IncomeSourcesTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int?> color = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IncomeSourcesCompanion(
                 id: id,
                 name: name,
                 color: color,
+                sortOrder: sortOrder,
                 isDeleted: isDeleted,
                 rowid: rowid,
               ),
@@ -3695,12 +3819,14 @@ class $$IncomeSourcesTableTableManager
                 required String id,
                 required String name,
                 Value<int?> color = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IncomeSourcesCompanion.insert(
                 id: id,
                 name: name,
                 color: color,
+                sortOrder: sortOrder,
                 isDeleted: isDeleted,
                 rowid: rowid,
               ),

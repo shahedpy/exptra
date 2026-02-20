@@ -12,6 +12,13 @@ class ExpenseCategoryRepository {
     required String name,
     required int color,
   }) async {
+    final maxSortOrderExpr = db.expenseCategories.sortOrder.max();
+    final maxSortOrder =
+        await (db.selectOnly(db.expenseCategories)
+              ..addColumns([maxSortOrderExpr]))
+            .map((row) => row.read(maxSortOrderExpr))
+            .getSingle();
+
     await db
         .into(db.expenseCategories)
         .insert(
@@ -19,6 +26,7 @@ class ExpenseCategoryRepository {
             id: _uuid.v4(),
             name: name,
             color: Value(color),
+            sortOrder: Value((maxSortOrder ?? -1) + 1),
           ),
         );
   }
@@ -26,8 +34,22 @@ class ExpenseCategoryRepository {
   Future<List<ExpenseCategory>> getAllCategories() {
     return (db.select(db.expenseCategories)
           ..where((tbl) => tbl.isDeleted.equals(false))
-          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.sortOrder),
+            (t) => OrderingTerm.asc(t.name),
+          ]))
         .get();
+  }
+
+  Future<void> reorderCategories(List<String> orderedIds) async {
+    await db.transaction(() async {
+      for (var index = 0; index < orderedIds.length; index++) {
+        final id = orderedIds[index];
+        await (db.update(db.expenseCategories)
+              ..where((tbl) => tbl.id.equals(id)))
+            .write(ExpenseCategoriesCompanion(sortOrder: Value(index)));
+      }
+    });
   }
 
   Future<ExpenseCategory?> getCategoryById(String id) {
