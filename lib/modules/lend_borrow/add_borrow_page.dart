@@ -64,6 +64,26 @@ class _AddBorrowPageState extends State<AddBorrowPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
+                'Amount',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: '0.00',
+                  prefixText: AppConstants.currencySymbol,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.defaultBorderRadius,
+                    ),
+                  ),
+                ),
+                validator: ValidationHelper.validateAmount,
+              ),
+              const SizedBox(height: AppConstants.defaultPadding * 1.5),
+              const Text(
                 'Person Name',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
@@ -84,26 +104,6 @@ class _AddBorrowPageState extends State<AddBorrowPage> {
                   }
                   return null;
                 },
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Amount',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: '0.00',
-                  prefixText: AppConstants.currencySymbol,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
-                    ),
-                  ),
-                ),
-                validator: ValidationHelper.validateAmount,
               ),
               const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(

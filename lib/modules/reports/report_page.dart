@@ -49,6 +49,7 @@ class ReportPage extends StatelessWidget {
               child: _summaryItem(
                 title: 'Transactions',
                 value: controller.totalTransactions.value.toString(),
+                alignEnd: true,
               ),
             ),
           ],
