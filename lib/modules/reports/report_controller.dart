@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../income_expense/expense_controller.dart';
 import '../income_expense/income_controller.dart';
-import '../category/category_controller.dart';
+import '../expense_category/expense_category_controller.dart';
+import '../income_source/income_source_controller.dart';
 import '../lend_borrow/lend_borrow_controller.dart';
 import '../../core/db/app_database.dart';
 
@@ -27,7 +28,8 @@ class ReportSummaryItem {
 class ReportController extends GetxController {
   late final ExpenseController expenseController;
   late final IncomeController incomeController;
-  late final CategoryController categoryController;
+  late final ExpenseCategoryController categoryController;
+  late final IncomeSourceController incomeSourceController;
   late final LendBorrowController lendBorrowController;
 
   final selectedDataType = ReportDataType.expense.obs;
@@ -57,7 +59,8 @@ class ReportController extends GetxController {
   void onInit() {
     expenseController = Get.find<ExpenseController>();
     incomeController = Get.find<IncomeController>();
-    categoryController = Get.find<CategoryController>();
+    categoryController = Get.find<ExpenseCategoryController>();
+    incomeSourceController = Get.find<IncomeSourceController>();
     lendBorrowController = Get.find<LendBorrowController>();
 
     everAll(
@@ -65,6 +68,7 @@ class ReportController extends GetxController {
         expenseController.expenses,
         incomeController.incomes,
         categoryController.categories,
+        incomeSourceController.incomeSources,
         lendBorrowController.lends,
         lendBorrowController.borrows,
         selectedMonth,
@@ -357,19 +361,29 @@ class ReportController extends GetxController {
     final grouped = <String, List<Income>>{};
 
     for (final income in monthIncomes) {
-      final source = (income.source ?? '').trim();
-      final key = source.isEmpty ? 'Unknown Source' : source;
+      final sourceName = incomeSourceController
+          .getIncomeSourceById(income.sourceId ?? '')
+          ?.name;
+      final legacySource = (income.source ?? '').trim();
+      final key = (sourceName != null && sourceName.isNotEmpty)
+          ? sourceName
+          : (legacySource.isEmpty ? 'Unknown Source' : legacySource);
       grouped.putIfAbsent(key, () => []).add(income);
     }
 
     final items = grouped.entries.map((entry) {
       final sourceIncomes = entry.value;
       final amount = sourceIncomes.fold(0.0, (sum, item) => sum + item.amount);
+      final sourceId = sourceIncomes.first.sourceId;
+      final sourceColor = sourceId == null
+          ? null
+          : incomeSourceController.getIncomeSourceById(sourceId)?.color;
 
       return ReportSummaryItem(
         label: entry.key,
         amount: amount,
         transactionCount: sourceIncomes.length,
+        color: sourceColor,
       );
     }).toList();
 

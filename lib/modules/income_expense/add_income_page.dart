@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/db/app_database.dart';
+import '../../core/routes/app_routes.dart';
+import '../income_source/income_source_controller.dart';
 import 'income_controller.dart';
 
 class AddIncomePage extends StatefulWidget {
@@ -16,10 +18,11 @@ class AddIncomePage extends StatefulWidget {
 class _AddIncomePageState extends State<AddIncomePage> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
-  final _sourceController = TextEditingController();
   final _noteController = TextEditingController();
   late final incomeController = Get.find<IncomeController>();
+  late final incomeSourceController = Get.find<IncomeSourceController>();
 
+  String? _selectedSourceId;
   late DateTime _selectedDate;
   bool _isEdit = false;
   String? _editingId;
@@ -28,13 +31,16 @@ class _AddIncomePageState extends State<AddIncomePage> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
+    _selectedSourceId = incomeSourceController.incomeSources.isNotEmpty
+        ? incomeSourceController.incomeSources.first.id
+        : null;
     final args = Get.arguments;
     if (args != null && args is Income) {
       _isEdit = true;
       _editingId = args.id;
       _selectedDate = args.incomeDate;
+      _selectedSourceId = args.sourceId;
       _amountController.text = args.amount.toString();
-      _sourceController.text = args.source ?? '';
       _noteController.text = args.note ?? '';
     }
   }
@@ -42,7 +48,6 @@ class _AddIncomePageState extends State<AddIncomePage> {
   @override
   void dispose() {
     _amountController.dispose();
-    _sourceController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -86,17 +91,60 @@ class _AddIncomePageState extends State<AddIncomePage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _sourceController,
-                decoration: InputDecoration(
-                  hintText: 'Salary, Freelance, Business, etc.',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
+              Obx(() {
+                final sources = incomeSourceController.incomeSources;
+                if (sources.isEmpty) {
+                  return Center(
+                    child: Column(
+                      children: [
+                        const Text('No income sources found'),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () => Get.toNamed(AppRoutes.incomeSources),
+                          child: const Text('Add Income Source'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (_selectedSourceId == null && sources.isNotEmpty) {
+                  _selectedSourceId = sources.first.id;
+                }
+
+                return DropdownButtonFormField<String>(
+                  initialValue: _selectedSourceId,
+                  items: sources.map((source) {
+                    return DropdownMenuItem(
+                      value: source.id,
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: ColorHelper.getColorFromInt(
+                              source.color,
+                            ),
+                            radius: 16,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(source.name),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSourceId = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.defaultBorderRadius,
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              }),
               const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(
                 'Date',
@@ -161,15 +209,25 @@ class _AddIncomePageState extends State<AddIncomePage> {
   void _submitForm() {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedSourceId == null) {
+      Get.snackbar('Error', 'Please select an income source');
+      return;
+    }
+
     final amount = double.parse(
       _amountController.text.replaceAll(AppConstants.currencySymbol, ''),
     );
+
+    final sourceName = incomeSourceController
+        .getIncomeSourceById(_selectedSourceId!)
+        ?.name;
 
     if (_isEdit && _editingId != null) {
       incomeController.updateIncome(
         id: _editingId!,
         amount: amount,
-        source: _sourceController.text.trim(),
+        sourceId: _selectedSourceId,
+        source: sourceName,
         note: _noteController.text.trim(),
         date: _selectedDate,
       );
@@ -180,7 +238,8 @@ class _AddIncomePageState extends State<AddIncomePage> {
 
     incomeController.addIncome(
       amount: amount,
-      source: _sourceController.text.trim(),
+      sourceId: _selectedSourceId,
+      source: sourceName,
       note: _noteController.text.trim(),
       date: _selectedDate,
     );

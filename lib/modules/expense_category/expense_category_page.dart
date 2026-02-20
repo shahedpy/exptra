@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'category_controller.dart';
+import 'expense_category_controller.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
 
-class CategoryPage extends StatefulWidget {
-  const CategoryPage({super.key});
+class ExpenseCategoryPage extends StatefulWidget {
+  const ExpenseCategoryPage({super.key});
 
   @override
-  State<CategoryPage> createState() => _CategoryPageState();
+  State<ExpenseCategoryPage> createState() => _ExpenseCategoryPageState();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
-  final controller = Get.put(CategoryController());
+class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
+  final controller = Get.put(ExpenseCategoryController());
   final _nameController = TextEditingController();
   late Color _selectedColor;
 

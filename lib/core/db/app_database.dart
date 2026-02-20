@@ -3,14 +3,17 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'tables/expense_table.dart';
-import 'tables/category_table.dart';
+import 'tables/expense_category_table.dart';
 import 'tables/income_table.dart';
+import 'tables/income_source_table.dart';
 import 'tables/lend_table.dart';
 import 'tables/borrow_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Expenses, Categories, Incomes, Lends, Borrows])
+@DriftDatabase(
+  tables: [Expenses, ExpenseCategories, Incomes, IncomeSources, Lends, Borrows],
+)
 class AppDatabase extends _$AppDatabase {
   static const dbFileName = 'exptra.db';
 

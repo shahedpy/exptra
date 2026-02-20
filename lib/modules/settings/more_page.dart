@@ -7,7 +7,8 @@ import '../../core/db/app_database.dart';
 import '../../core/db/database_backup_service.dart';
 import '../../core/routes/app_routes.dart';
 import '../reports/report_page.dart';
-import '../category/category_controller.dart';
+import '../expense_category/expense_category_controller.dart';
+import '../income_source/income_source_controller.dart';
 import '../income_expense/expense_controller.dart';
 import '../income_expense/income_controller.dart';
 
@@ -28,9 +29,15 @@ class MorePage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.category_outlined),
-            title: const Text('Categories'),
-            subtitle: const Text('Manage income and expense categories'),
-            onTap: () => Get.toNamed(AppRoutes.categories),
+            title: const Text('Expense Categories'),
+            subtitle: const Text('Manage expense category list'),
+            onTap: () => Get.toNamed(AppRoutes.expenseCategories),
+          ),
+          ListTile(
+            leading: const Icon(Icons.account_balance_wallet_outlined),
+            title: const Text('Income Sources'),
+            subtitle: const Text('Manage income source list'),
+            onTap: () => Get.toNamed(AppRoutes.incomeSources),
           ),
           ListTile(
             leading: const Icon(Icons.backup_outlined),
@@ -111,10 +118,12 @@ class MorePage extends StatelessWidget {
       );
 
       final categoryController = _resolveCategoryController();
+      final incomeSourceController = _resolveIncomeSourceController();
       final expenseController = _resolveExpenseController();
       final incomeController = _resolveIncomeController();
 
       await categoryController.loadCategories();
+      await incomeSourceController.loadIncomeSources();
       await expenseController.loadExpenses();
       await incomeController.loadIncomes();
 
@@ -124,11 +133,18 @@ class MorePage extends StatelessWidget {
     }
   }
 
-  CategoryController _resolveCategoryController() {
-    if (Get.isRegistered<CategoryController>()) {
-      return Get.find<CategoryController>();
+  ExpenseCategoryController _resolveCategoryController() {
+    if (Get.isRegistered<ExpenseCategoryController>()) {
+      return Get.find<ExpenseCategoryController>();
     }
-    return Get.put(CategoryController());
+    return Get.put(ExpenseCategoryController());
+  }
+
+  IncomeSourceController _resolveIncomeSourceController() {
+    if (Get.isRegistered<IncomeSourceController>()) {
+      return Get.find<IncomeSourceController>();
+    }
+    return Get.put(IncomeSourceController());
   }
 
   ExpenseController _resolveExpenseController() {

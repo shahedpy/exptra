@@ -6,7 +6,8 @@ import '../../core/routes/app_routes.dart';
 import '../../core/utils/helpers.dart';
 import 'expense_controller.dart';
 import 'income_controller.dart';
-import '../category/category_controller.dart';
+import '../expense_category/expense_category_controller.dart';
+import '../income_source/income_source_controller.dart';
 
 class IncomeExpensePage extends StatefulWidget {
   const IncomeExpensePage({super.key});
@@ -22,7 +23,8 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
   Widget build(BuildContext context) {
     final incomeController = Get.find<IncomeController>();
     final expenseController = Get.find<ExpenseController>();
-    final categoryController = Get.find<CategoryController>();
+    final categoryController = Get.find<ExpenseCategoryController>();
+    final incomeSourceController = Get.find<IncomeSourceController>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Income & Expense')),
@@ -72,7 +74,12 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                         (e) => _TransactionItem(
                           isIncome: true,
                           date: e.incomeDate,
-                          title: e.source ?? 'Income',
+                          title:
+                              incomeSourceController
+                                  .getIncomeSourceById(e.sourceId ?? '')
+                                  ?.name ??
+                              e.source ??
+                              'Income',
                           note: e.note,
                           amount: e.amount,
                           id: e.id,
@@ -291,7 +298,15 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                                   color: Colors.white,
                                 ),
                               ),
-                              title: Text(entry.source ?? 'Income'),
+                              title: Text(
+                                incomeSourceController
+                                        .getIncomeSourceById(
+                                          entry.sourceId ?? '',
+                                        )
+                                        ?.name ??
+                                    entry.source ??
+                                    'Income',
+                              ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

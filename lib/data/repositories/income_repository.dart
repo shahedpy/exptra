@@ -11,6 +11,7 @@ class IncomeRepository {
 
   Future<void> insertIncome({
     required double amount,
+    String? sourceId,
     String? source,
     String? note,
     required DateTime date,
@@ -21,6 +22,7 @@ class IncomeRepository {
           IncomesCompanion.insert(
             id: _uuid.v4(),
             amount: amount,
+            sourceId: Value(sourceId),
             source: Value(source),
             note: Value(note),
             incomeDate: date,
@@ -44,6 +46,7 @@ class IncomeRepository {
   Future<void> updateIncome({
     required String id,
     required double amount,
+    String? sourceId,
     String? source,
     String? note,
     required DateTime date,
@@ -51,6 +54,7 @@ class IncomeRepository {
     await (db.update(db.incomes)..where((tbl) => tbl.id.equals(id))).write(
       IncomesCompanion(
         amount: Value(amount),
+        sourceId: Value(sourceId),
         source: Value(source),
         note: Value(note),
         incomeDate: Value(date),

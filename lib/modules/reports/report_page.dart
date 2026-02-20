@@ -112,7 +112,7 @@ class ReportPage extends StatelessWidget {
                   value: ReportType.categoryWise,
                   label: Text(
                     isExpense
-                        ? 'Category'
+                        ? 'Expense Category'
                         : isIncome
                         ? 'Source'
                         : 'Person',
@@ -290,7 +290,7 @@ class ReportPage extends StatelessWidget {
         return 'Month';
       case ReportType.categoryWise:
         if (dataType == ReportDataType.expense) {
-          return 'Category';
+          return 'Expense Category';
         }
         if (dataType == ReportDataType.income) {
           return 'Source';

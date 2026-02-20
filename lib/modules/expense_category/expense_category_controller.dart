@@ -1,16 +1,16 @@
 import 'package:get/get.dart';
-import '../../../data/repositories/category_repository.dart';
+import '../../../data/repositories/expense_category_repository.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/constants/app_constants.dart';
 
-class CategoryController extends GetxController {
-  late final CategoryRepository repository;
+class ExpenseCategoryController extends GetxController {
+  late final ExpenseCategoryRepository repository;
   final categories = <Category>[].obs;
   final isLoading = false.obs;
 
   @override
   void onInit() {
-    repository = CategoryRepository(Get.find<AppDatabase>());
+    repository = ExpenseCategoryRepository(Get.find<AppDatabase>());
     loadCategories();
     super.onInit();
   }
@@ -41,10 +41,7 @@ class CategoryController extends GetxController {
     categories.value = await repository.getAllCategories();
   }
 
-  Future<void> addCategory({
-    required String name,
-    required int color,
-  }) async {
+  Future<void> addCategory({required String name, required int color}) async {
     try {
       await repository.insertCategory(name: name, color: color);
       await loadCategories();
@@ -94,5 +91,3 @@ class CategoryController extends GetxController {
     }
   }
 }
-
-

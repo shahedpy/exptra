@@ -20,6 +20,7 @@ class IncomeController extends GetxController {
 
   Future<void> addIncome({
     required double amount,
+    String? sourceId,
     String? source,
     String? note,
     required DateTime date,
@@ -27,6 +28,7 @@ class IncomeController extends GetxController {
     try {
       await repository.insertIncome(
         amount: amount,
+        sourceId: sourceId,
         source: source,
         note: note,
         date: date,
@@ -49,6 +51,7 @@ class IncomeController extends GetxController {
   Future<void> updateIncome({
     required String id,
     required double amount,
+    String? sourceId,
     String? source,
     String? note,
     required DateTime date,
@@ -57,6 +60,7 @@ class IncomeController extends GetxController {
       await repository.updateIncome(
         id: id,
         amount: amount,
+        sourceId: sourceId,
         source: source,
         note: note,
         date: date,

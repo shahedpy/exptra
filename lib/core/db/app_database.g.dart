@@ -3,12 +3,12 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $CategoriesTable extends Categories
-    with TableInfo<$CategoriesTable, Category> {
+class $ExpenseCategoriesTable extends ExpenseCategories
+    with TableInfo<$ExpenseCategoriesTable, ExpenseCategory> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $CategoriesTable(this.attachedDatabase, [this._alias]);
+  $ExpenseCategoriesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -57,10 +57,10 @@ class $CategoriesTable extends Categories
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'categories';
+  static const String $name = 'expense_categories';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Category> instance, {
+    Insertable<ExpenseCategory> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -96,9 +96,9 @@ class $CategoriesTable extends Categories
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Category map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ExpenseCategory map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Category(
+    return ExpenseCategory(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -119,17 +119,17 @@ class $CategoriesTable extends Categories
   }
 
   @override
-  $CategoriesTable createAlias(String alias) {
-    return $CategoriesTable(attachedDatabase, alias);
+  $ExpenseCategoriesTable createAlias(String alias) {
+    return $ExpenseCategoriesTable(attachedDatabase, alias);
   }
 }
 
-class Category extends DataClass implements Insertable<Category> {
+class ExpenseCategory extends DataClass implements Insertable<ExpenseCategory> {
   final String id;
   final String name;
   final int? color;
   final bool isDeleted;
-  const Category({
+  const ExpenseCategory({
     required this.id,
     required this.name,
     this.color,
@@ -147,8 +147,8 @@ class Category extends DataClass implements Insertable<Category> {
     return map;
   }
 
-  CategoriesCompanion toCompanion(bool nullToAbsent) {
-    return CategoriesCompanion(
+  ExpenseCategoriesCompanion toCompanion(bool nullToAbsent) {
+    return ExpenseCategoriesCompanion(
       id: Value(id),
       name: Value(name),
       color: color == null && nullToAbsent
@@ -158,12 +158,12 @@ class Category extends DataClass implements Insertable<Category> {
     );
   }
 
-  factory Category.fromJson(
+  factory ExpenseCategory.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Category(
+    return ExpenseCategory(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       color: serializer.fromJson<int?>(json['color']),
@@ -181,19 +181,19 @@ class Category extends DataClass implements Insertable<Category> {
     };
   }
 
-  Category copyWith({
+  ExpenseCategory copyWith({
     String? id,
     String? name,
     Value<int?> color = const Value.absent(),
     bool? isDeleted,
-  }) => Category(
+  }) => ExpenseCategory(
     id: id ?? this.id,
     name: name ?? this.name,
     color: color.present ? color.value : this.color,
     isDeleted: isDeleted ?? this.isDeleted,
   );
-  Category copyWithCompanion(CategoriesCompanion data) {
-    return Category(
+  ExpenseCategory copyWithCompanion(ExpenseCategoriesCompanion data) {
+    return ExpenseCategory(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       color: data.color.present ? data.color.value : this.color,
@@ -203,7 +203,7 @@ class Category extends DataClass implements Insertable<Category> {
 
   @override
   String toString() {
-    return (StringBuffer('Category(')
+    return (StringBuffer('ExpenseCategory(')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
@@ -217,27 +217,27 @@ class Category extends DataClass implements Insertable<Category> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Category &&
+      (other is ExpenseCategory &&
           other.id == this.id &&
           other.name == this.name &&
           other.color == this.color &&
           other.isDeleted == this.isDeleted);
 }
 
-class CategoriesCompanion extends UpdateCompanion<Category> {
+class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
   final Value<String> id;
   final Value<String> name;
   final Value<int?> color;
   final Value<bool> isDeleted;
   final Value<int> rowid;
-  const CategoriesCompanion({
+  const ExpenseCategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.color = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  CategoriesCompanion.insert({
+  ExpenseCategoriesCompanion.insert({
     required String id,
     required String name,
     this.color = const Value.absent(),
@@ -245,7 +245,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name);
-  static Insertable<Category> custom({
+  static Insertable<ExpenseCategory> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<int>? color,
@@ -261,14 +261,14 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     });
   }
 
-  CategoriesCompanion copyWith({
+  ExpenseCategoriesCompanion copyWith({
     Value<String>? id,
     Value<String>? name,
     Value<int?>? color,
     Value<bool>? isDeleted,
     Value<int>? rowid,
   }) {
-    return CategoriesCompanion(
+    return ExpenseCategoriesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       color: color ?? this.color,
@@ -300,7 +300,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
 
   @override
   String toString() {
-    return (StringBuffer('CategoriesCompanion(')
+    return (StringBuffer('ExpenseCategoriesCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
@@ -336,7 +336,7 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES categories (id)',
+      'REFERENCES expense_categories (id)',
     ),
   );
   static const VerificationMeta _amountMeta = const VerificationMeta('amount');
@@ -801,6 +801,17 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sourceMeta = const VerificationMeta('source');
   @override
   late final GeneratedColumn<String> source = GeneratedColumn<String>(
@@ -861,6 +872,7 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
   List<GeneratedColumn> get $columns => [
     id,
     amount,
+    sourceId,
     source,
     note,
     incomeDate,
@@ -891,6 +903,12 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
       );
     } else if (isInserting) {
       context.missing(_amountMeta);
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
     }
     if (data.containsKey('source')) {
       context.handle(
@@ -941,6 +959,10 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
         DriftSqlType.double,
         data['${effectivePrefix}amount'],
       )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      ),
       source: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}source'],
@@ -973,6 +995,7 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
 class Income extends DataClass implements Insertable<Income> {
   final String id;
   final double amount;
+  final String? sourceId;
   final String? source;
   final String? note;
   final DateTime incomeDate;
@@ -981,6 +1004,7 @@ class Income extends DataClass implements Insertable<Income> {
   const Income({
     required this.id,
     required this.amount,
+    this.sourceId,
     this.source,
     this.note,
     required this.incomeDate,
@@ -992,6 +1016,9 @@ class Income extends DataClass implements Insertable<Income> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['amount'] = Variable<double>(amount);
+    if (!nullToAbsent || sourceId != null) {
+      map['source_id'] = Variable<String>(sourceId);
+    }
     if (!nullToAbsent || source != null) {
       map['source'] = Variable<String>(source);
     }
@@ -1008,6 +1035,9 @@ class Income extends DataClass implements Insertable<Income> {
     return IncomesCompanion(
       id: Value(id),
       amount: Value(amount),
+      sourceId: sourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceId),
       source: source == null && nullToAbsent
           ? const Value.absent()
           : Value(source),
@@ -1026,6 +1056,7 @@ class Income extends DataClass implements Insertable<Income> {
     return Income(
       id: serializer.fromJson<String>(json['id']),
       amount: serializer.fromJson<double>(json['amount']),
+      sourceId: serializer.fromJson<String?>(json['sourceId']),
       source: serializer.fromJson<String?>(json['source']),
       note: serializer.fromJson<String?>(json['note']),
       incomeDate: serializer.fromJson<DateTime>(json['incomeDate']),
@@ -1039,6 +1070,7 @@ class Income extends DataClass implements Insertable<Income> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'amount': serializer.toJson<double>(amount),
+      'sourceId': serializer.toJson<String?>(sourceId),
       'source': serializer.toJson<String?>(source),
       'note': serializer.toJson<String?>(note),
       'incomeDate': serializer.toJson<DateTime>(incomeDate),
@@ -1050,6 +1082,7 @@ class Income extends DataClass implements Insertable<Income> {
   Income copyWith({
     String? id,
     double? amount,
+    Value<String?> sourceId = const Value.absent(),
     Value<String?> source = const Value.absent(),
     Value<String?> note = const Value.absent(),
     DateTime? incomeDate,
@@ -1058,6 +1091,7 @@ class Income extends DataClass implements Insertable<Income> {
   }) => Income(
     id: id ?? this.id,
     amount: amount ?? this.amount,
+    sourceId: sourceId.present ? sourceId.value : this.sourceId,
     source: source.present ? source.value : this.source,
     note: note.present ? note.value : this.note,
     incomeDate: incomeDate ?? this.incomeDate,
@@ -1068,6 +1102,7 @@ class Income extends DataClass implements Insertable<Income> {
     return Income(
       id: data.id.present ? data.id.value : this.id,
       amount: data.amount.present ? data.amount.value : this.amount,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
       source: data.source.present ? data.source.value : this.source,
       note: data.note.present ? data.note.value : this.note,
       incomeDate: data.incomeDate.present
@@ -1083,6 +1118,7 @@ class Income extends DataClass implements Insertable<Income> {
     return (StringBuffer('Income(')
           ..write('id: $id, ')
           ..write('amount: $amount, ')
+          ..write('sourceId: $sourceId, ')
           ..write('source: $source, ')
           ..write('note: $note, ')
           ..write('incomeDate: $incomeDate, ')
@@ -1093,14 +1129,23 @@ class Income extends DataClass implements Insertable<Income> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, amount, source, note, incomeDate, isDeleted, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    amount,
+    sourceId,
+    source,
+    note,
+    incomeDate,
+    isDeleted,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Income &&
           other.id == this.id &&
           other.amount == this.amount &&
+          other.sourceId == this.sourceId &&
           other.source == this.source &&
           other.note == this.note &&
           other.incomeDate == this.incomeDate &&
@@ -1111,6 +1156,7 @@ class Income extends DataClass implements Insertable<Income> {
 class IncomesCompanion extends UpdateCompanion<Income> {
   final Value<String> id;
   final Value<double> amount;
+  final Value<String?> sourceId;
   final Value<String?> source;
   final Value<String?> note;
   final Value<DateTime> incomeDate;
@@ -1120,6 +1166,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   const IncomesCompanion({
     this.id = const Value.absent(),
     this.amount = const Value.absent(),
+    this.sourceId = const Value.absent(),
     this.source = const Value.absent(),
     this.note = const Value.absent(),
     this.incomeDate = const Value.absent(),
@@ -1130,6 +1177,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   IncomesCompanion.insert({
     required String id,
     required double amount,
+    this.sourceId = const Value.absent(),
     this.source = const Value.absent(),
     this.note = const Value.absent(),
     required DateTime incomeDate,
@@ -1142,6 +1190,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   static Insertable<Income> custom({
     Expression<String>? id,
     Expression<double>? amount,
+    Expression<String>? sourceId,
     Expression<String>? source,
     Expression<String>? note,
     Expression<DateTime>? incomeDate,
@@ -1152,6 +1201,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (amount != null) 'amount': amount,
+      if (sourceId != null) 'source_id': sourceId,
       if (source != null) 'source': source,
       if (note != null) 'note': note,
       if (incomeDate != null) 'income_date': incomeDate,
@@ -1164,6 +1214,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   IncomesCompanion copyWith({
     Value<String>? id,
     Value<double>? amount,
+    Value<String?>? sourceId,
     Value<String?>? source,
     Value<String?>? note,
     Value<DateTime>? incomeDate,
@@ -1174,6 +1225,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     return IncomesCompanion(
       id: id ?? this.id,
       amount: amount ?? this.amount,
+      sourceId: sourceId ?? this.sourceId,
       source: source ?? this.source,
       note: note ?? this.note,
       incomeDate: incomeDate ?? this.incomeDate,
@@ -1191,6 +1243,9 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
     }
     if (source.present) {
       map['source'] = Variable<String>(source.value);
@@ -1218,11 +1273,320 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     return (StringBuffer('IncomesCompanion(')
           ..write('id: $id, ')
           ..write('amount: $amount, ')
+          ..write('sourceId: $sourceId, ')
           ..write('source: $source, ')
           ..write('note: $note, ')
           ..write('incomeDate: $incomeDate, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $IncomeSourcesTable extends IncomeSources
+    with TableInfo<$IncomeSourcesTable, IncomeSource> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IncomeSourcesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<int> color = GeneratedColumn<int>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, color, isDeleted];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'income_sources';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<IncomeSource> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  IncomeSource map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return IncomeSource(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color'],
+      ),
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+    );
+  }
+
+  @override
+  $IncomeSourcesTable createAlias(String alias) {
+    return $IncomeSourcesTable(attachedDatabase, alias);
+  }
+}
+
+class IncomeSource extends DataClass implements Insertable<IncomeSource> {
+  final String id;
+  final String name;
+  final int? color;
+  final bool isDeleted;
+  const IncomeSource({
+    required this.id,
+    required this.name,
+    this.color,
+    required this.isDeleted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<int>(color);
+    }
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    return map;
+  }
+
+  IncomeSourcesCompanion toCompanion(bool nullToAbsent) {
+    return IncomeSourcesCompanion(
+      id: Value(id),
+      name: Value(name),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
+      isDeleted: Value(isDeleted),
+    );
+  }
+
+  factory IncomeSource.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return IncomeSource(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      color: serializer.fromJson<int?>(json['color']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'color': serializer.toJson<int?>(color),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+    };
+  }
+
+  IncomeSource copyWith({
+    String? id,
+    String? name,
+    Value<int?> color = const Value.absent(),
+    bool? isDeleted,
+  }) => IncomeSource(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    color: color.present ? color.value : this.color,
+    isDeleted: isDeleted ?? this.isDeleted,
+  );
+  IncomeSource copyWithCompanion(IncomeSourcesCompanion data) {
+    return IncomeSource(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      color: data.color.present ? data.color.value : this.color,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IncomeSource(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('isDeleted: $isDeleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, color, isDeleted);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is IncomeSource &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.color == this.color &&
+          other.isDeleted == this.isDeleted);
+}
+
+class IncomeSourcesCompanion extends UpdateCompanion<IncomeSource> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<int?> color;
+  final Value<bool> isDeleted;
+  final Value<int> rowid;
+  const IncomeSourcesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.color = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  IncomeSourcesCompanion.insert({
+    required String id,
+    required String name,
+    this.color = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name);
+  static Insertable<IncomeSource> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<int>? color,
+    Expression<bool>? isDeleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (color != null) 'color': color,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  IncomeSourcesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<int?>? color,
+    Value<bool>? isDeleted,
+    Value<int>? rowid,
+  }) {
+    return IncomeSourcesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      isDeleted: isDeleted ?? this.isDeleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<int>(color.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IncomeSourcesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('isDeleted: $isDeleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2250,9 +2614,11 @@ class BorrowsCompanion extends UpdateCompanion<Borrow> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $CategoriesTable categories = $CategoriesTable(this);
+  late final $ExpenseCategoriesTable expenseCategories =
+      $ExpenseCategoriesTable(this);
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $IncomesTable incomes = $IncomesTable(this);
+  late final $IncomeSourcesTable incomeSources = $IncomeSourcesTable(this);
   late final $LendsTable lends = $LendsTable(this);
   late final $BorrowsTable borrows = $BorrowsTable(this);
   @override
@@ -2260,24 +2626,25 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    categories,
+    expenseCategories,
     expenses,
     incomes,
+    incomeSources,
     lends,
     borrows,
   ];
 }
 
-typedef $$CategoriesTableCreateCompanionBuilder =
-    CategoriesCompanion Function({
+typedef $$ExpenseCategoriesTableCreateCompanionBuilder =
+    ExpenseCategoriesCompanion Function({
       required String id,
       required String name,
       Value<int?> color,
       Value<bool> isDeleted,
       Value<int> rowid,
     });
-typedef $$CategoriesTableUpdateCompanionBuilder =
-    CategoriesCompanion Function({
+typedef $$ExpenseCategoriesTableUpdateCompanionBuilder =
+    ExpenseCategoriesCompanion Function({
       Value<String> id,
       Value<String> name,
       Value<int?> color,
@@ -2285,15 +2652,27 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$CategoriesTableReferences
-    extends BaseReferences<_$AppDatabase, $CategoriesTable, Category> {
-  $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+final class $$ExpenseCategoriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ExpenseCategoriesTable,
+          ExpenseCategory
+        > {
+  $$ExpenseCategoriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
 
   static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.expenses,
-    aliasName: $_aliasNameGenerator(db.categories.id, db.expenses.categoryId),
+    aliasName: $_aliasNameGenerator(
+      db.expenseCategories.id,
+      db.expenses.categoryId,
+    ),
   );
 
   $$ExpensesTableProcessedTableManager get expensesRefs {
@@ -2309,9 +2688,9 @@ final class $$CategoriesTableReferences
   }
 }
 
-class $$CategoriesTableFilterComposer
-    extends Composer<_$AppDatabase, $CategoriesTable> {
-  $$CategoriesTableFilterComposer({
+class $$ExpenseCategoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $ExpenseCategoriesTable> {
+  $$ExpenseCategoriesTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2364,9 +2743,9 @@ class $$CategoriesTableFilterComposer
   }
 }
 
-class $$CategoriesTableOrderingComposer
-    extends Composer<_$AppDatabase, $CategoriesTable> {
-  $$CategoriesTableOrderingComposer({
+class $$ExpenseCategoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExpenseCategoriesTable> {
+  $$ExpenseCategoriesTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2394,9 +2773,9 @@ class $$CategoriesTableOrderingComposer
   );
 }
 
-class $$CategoriesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CategoriesTable> {
-  $$CategoriesTableAnnotationComposer({
+class $$ExpenseCategoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExpenseCategoriesTable> {
+  $$ExpenseCategoriesTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2441,32 +2820,37 @@ class $$CategoriesTableAnnotationComposer
   }
 }
 
-class $$CategoriesTableTableManager
+class $$ExpenseCategoriesTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $CategoriesTable,
-          Category,
-          $$CategoriesTableFilterComposer,
-          $$CategoriesTableOrderingComposer,
-          $$CategoriesTableAnnotationComposer,
-          $$CategoriesTableCreateCompanionBuilder,
-          $$CategoriesTableUpdateCompanionBuilder,
-          (Category, $$CategoriesTableReferences),
-          Category,
+          $ExpenseCategoriesTable,
+          ExpenseCategory,
+          $$ExpenseCategoriesTableFilterComposer,
+          $$ExpenseCategoriesTableOrderingComposer,
+          $$ExpenseCategoriesTableAnnotationComposer,
+          $$ExpenseCategoriesTableCreateCompanionBuilder,
+          $$ExpenseCategoriesTableUpdateCompanionBuilder,
+          (ExpenseCategory, $$ExpenseCategoriesTableReferences),
+          ExpenseCategory,
           PrefetchHooks Function({bool expensesRefs})
         > {
-  $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
-    : super(
+  $$ExpenseCategoriesTableTableManager(
+    _$AppDatabase db,
+    $ExpenseCategoriesTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$CategoriesTableFilterComposer($db: db, $table: table),
+              $$ExpenseCategoriesTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$CategoriesTableOrderingComposer($db: db, $table: table),
+              $$ExpenseCategoriesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$CategoriesTableAnnotationComposer($db: db, $table: table),
+              $$ExpenseCategoriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -2474,7 +2858,7 @@ class $$CategoriesTableTableManager
                 Value<int?> color = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => CategoriesCompanion(
+              }) => ExpenseCategoriesCompanion(
                 id: id,
                 name: name,
                 color: color,
@@ -2488,7 +2872,7 @@ class $$CategoriesTableTableManager
                 Value<int?> color = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => CategoriesCompanion.insert(
+              }) => ExpenseCategoriesCompanion.insert(
                 id: id,
                 name: name,
                 color: color,
@@ -2499,7 +2883,7 @@ class $$CategoriesTableTableManager
               .map(
                 (e) => (
                   e.readTable(table),
-                  $$CategoriesTableReferences(db, table, e),
+                  $$ExpenseCategoriesTableReferences(db, table, e),
                 ),
               )
               .toList(),
@@ -2512,15 +2896,15 @@ class $$CategoriesTableTableManager
                 return [
                   if (expensesRefs)
                     await $_getPrefetchedData<
-                      Category,
-                      $CategoriesTable,
+                      ExpenseCategory,
+                      $ExpenseCategoriesTable,
                       Expense
                     >(
                       currentTable: table,
-                      referencedTable: $$CategoriesTableReferences
+                      referencedTable: $$ExpenseCategoriesTableReferences
                           ._expensesRefsTable(db),
                       managerFromTypedResult: (p0) =>
-                          $$CategoriesTableReferences(
+                          $$ExpenseCategoriesTableReferences(
                             db,
                             table,
                             p0,
@@ -2537,18 +2921,18 @@ class $$CategoriesTableTableManager
       );
 }
 
-typedef $$CategoriesTableProcessedTableManager =
+typedef $$ExpenseCategoriesTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $CategoriesTable,
-      Category,
-      $$CategoriesTableFilterComposer,
-      $$CategoriesTableOrderingComposer,
-      $$CategoriesTableAnnotationComposer,
-      $$CategoriesTableCreateCompanionBuilder,
-      $$CategoriesTableUpdateCompanionBuilder,
-      (Category, $$CategoriesTableReferences),
-      Category,
+      $ExpenseCategoriesTable,
+      ExpenseCategory,
+      $$ExpenseCategoriesTableFilterComposer,
+      $$ExpenseCategoriesTableOrderingComposer,
+      $$ExpenseCategoriesTableAnnotationComposer,
+      $$ExpenseCategoriesTableCreateCompanionBuilder,
+      $$ExpenseCategoriesTableUpdateCompanionBuilder,
+      (ExpenseCategory, $$ExpenseCategoriesTableReferences),
+      ExpenseCategory,
       PrefetchHooks Function({bool expensesRefs})
     >;
 typedef $$ExpensesTableCreateCompanionBuilder =
@@ -2578,17 +2962,17 @@ final class $$ExpensesTableReferences
     extends BaseReferences<_$AppDatabase, $ExpensesTable, Expense> {
   $$ExpensesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias(
-        $_aliasNameGenerator(db.expenses.categoryId, db.categories.id),
+  static $ExpenseCategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.expenseCategories.createAlias(
+        $_aliasNameGenerator(db.expenses.categoryId, db.expenseCategories.id),
       );
 
-  $$CategoriesTableProcessedTableManager get categoryId {
+  $$ExpenseCategoriesTableProcessedTableManager get categoryId {
     final $_column = $_itemColumn<String>('category_id')!;
 
-    final manager = $$CategoriesTableTableManager(
+    final manager = $$ExpenseCategoriesTableTableManager(
       $_db,
-      $_db.categories,
+      $_db.expenseCategories,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
     if (item == null) return manager;
@@ -2637,20 +3021,20 @@ class $$ExpensesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  $$CategoriesTableFilterComposer get categoryId {
-    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+  $$ExpenseCategoriesTableFilterComposer get categoryId {
+    final $$ExpenseCategoriesTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
+      referencedTable: $db.expenseCategories,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableFilterComposer(
+          }) => $$ExpenseCategoriesTableFilterComposer(
             $db: $db,
-            $table: $db.categories,
+            $table: $db.expenseCategories,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2700,20 +3084,20 @@ class $$ExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$CategoriesTableOrderingComposer get categoryId {
-    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+  $$ExpenseCategoriesTableOrderingComposer get categoryId {
+    final $$ExpenseCategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
+      referencedTable: $db.expenseCategories,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableOrderingComposer(
+          }) => $$ExpenseCategoriesTableOrderingComposer(
             $db: $db,
-            $table: $db.categories,
+            $table: $db.expenseCategories,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2753,26 +3137,27 @@ class $$ExpensesTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  $$CategoriesTableAnnotationComposer get categoryId {
-    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
+  $$ExpenseCategoriesTableAnnotationComposer get categoryId {
+    final $$ExpenseCategoriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.categoryId,
+          referencedTable: $db.expenseCategories,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-          ),
-    );
+              }) => $$ExpenseCategoriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.expenseCategories,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
@@ -2914,6 +3299,7 @@ typedef $$IncomesTableCreateCompanionBuilder =
     IncomesCompanion Function({
       required String id,
       required double amount,
+      Value<String?> sourceId,
       Value<String?> source,
       Value<String?> note,
       required DateTime incomeDate,
@@ -2925,6 +3311,7 @@ typedef $$IncomesTableUpdateCompanionBuilder =
     IncomesCompanion Function({
       Value<String> id,
       Value<double> amount,
+      Value<String?> sourceId,
       Value<String?> source,
       Value<String?> note,
       Value<DateTime> incomeDate,
@@ -2949,6 +3336,11 @@ class $$IncomesTableFilterComposer
 
   ColumnFilters<double> get amount => $composableBuilder(
     column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2997,6 +3389,11 @@ class $$IncomesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get source => $composableBuilder(
     column: $table.source,
     builder: (column) => ColumnOrderings(column),
@@ -3037,6 +3434,9 @@ class $$IncomesTableAnnotationComposer
 
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
 
   GeneratedColumn<String> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
@@ -3086,6 +3486,7 @@ class $$IncomesTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<double> amount = const Value.absent(),
+                Value<String?> sourceId = const Value.absent(),
                 Value<String?> source = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> incomeDate = const Value.absent(),
@@ -3095,6 +3496,7 @@ class $$IncomesTableTableManager
               }) => IncomesCompanion(
                 id: id,
                 amount: amount,
+                sourceId: sourceId,
                 source: source,
                 note: note,
                 incomeDate: incomeDate,
@@ -3106,6 +3508,7 @@ class $$IncomesTableTableManager
               ({
                 required String id,
                 required double amount,
+                Value<String?> sourceId = const Value.absent(),
                 Value<String?> source = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 required DateTime incomeDate,
@@ -3115,6 +3518,7 @@ class $$IncomesTableTableManager
               }) => IncomesCompanion.insert(
                 id: id,
                 amount: amount,
+                sourceId: sourceId,
                 source: source,
                 note: note,
                 incomeDate: incomeDate,
@@ -3142,6 +3546,187 @@ typedef $$IncomesTableProcessedTableManager =
       $$IncomesTableUpdateCompanionBuilder,
       (Income, BaseReferences<_$AppDatabase, $IncomesTable, Income>),
       Income,
+      PrefetchHooks Function()
+    >;
+typedef $$IncomeSourcesTableCreateCompanionBuilder =
+    IncomeSourcesCompanion Function({
+      required String id,
+      required String name,
+      Value<int?> color,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+typedef $$IncomeSourcesTableUpdateCompanionBuilder =
+    IncomeSourcesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<int?> color,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+
+class $$IncomeSourcesTableFilterComposer
+    extends Composer<_$AppDatabase, $IncomeSourcesTable> {
+  $$IncomeSourcesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$IncomeSourcesTableOrderingComposer
+    extends Composer<_$AppDatabase, $IncomeSourcesTable> {
+  $$IncomeSourcesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$IncomeSourcesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $IncomeSourcesTable> {
+  $$IncomeSourcesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+}
+
+class $$IncomeSourcesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $IncomeSourcesTable,
+          IncomeSource,
+          $$IncomeSourcesTableFilterComposer,
+          $$IncomeSourcesTableOrderingComposer,
+          $$IncomeSourcesTableAnnotationComposer,
+          $$IncomeSourcesTableCreateCompanionBuilder,
+          $$IncomeSourcesTableUpdateCompanionBuilder,
+          (
+            IncomeSource,
+            BaseReferences<_$AppDatabase, $IncomeSourcesTable, IncomeSource>,
+          ),
+          IncomeSource,
+          PrefetchHooks Function()
+        > {
+  $$IncomeSourcesTableTableManager(_$AppDatabase db, $IncomeSourcesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IncomeSourcesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$IncomeSourcesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$IncomeSourcesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int?> color = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IncomeSourcesCompanion(
+                id: id,
+                name: name,
+                color: color,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<int?> color = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IncomeSourcesCompanion.insert(
+                id: id,
+                name: name,
+                color: color,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$IncomeSourcesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $IncomeSourcesTable,
+      IncomeSource,
+      $$IncomeSourcesTableFilterComposer,
+      $$IncomeSourcesTableOrderingComposer,
+      $$IncomeSourcesTableAnnotationComposer,
+      $$IncomeSourcesTableCreateCompanionBuilder,
+      $$IncomeSourcesTableUpdateCompanionBuilder,
+      (
+        IncomeSource,
+        BaseReferences<_$AppDatabase, $IncomeSourcesTable, IncomeSource>,
+      ),
+      IncomeSource,
       PrefetchHooks Function()
     >;
 typedef $$LendsTableCreateCompanionBuilder =
@@ -3655,12 +4240,14 @@ typedef $$BorrowsTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$CategoriesTableTableManager get categories =>
-      $$CategoriesTableTableManager(_db, _db.categories);
+  $$ExpenseCategoriesTableTableManager get expenseCategories =>
+      $$ExpenseCategoriesTableTableManager(_db, _db.expenseCategories);
   $$ExpensesTableTableManager get expenses =>
       $$ExpensesTableTableManager(_db, _db.expenses);
   $$IncomesTableTableManager get incomes =>
       $$IncomesTableTableManager(_db, _db.incomes);
+  $$IncomeSourcesTableTableManager get incomeSources =>
+      $$IncomeSourcesTableTableManager(_db, _db.incomeSources);
   $$LendsTableTableManager get lends =>
       $$LendsTableTableManager(_db, _db.lends);
   $$BorrowsTableTableManager get borrows =>

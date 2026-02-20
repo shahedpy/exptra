@@ -5,7 +5,8 @@ import 'core/theme/app_theme.dart';
 import 'core/routes/app_routes.dart';
 import 'modules/income_expense/expense_controller.dart';
 import 'modules/income_expense/income_controller.dart';
-import 'modules/category/category_controller.dart';
+import 'modules/expense_category/expense_category_controller.dart';
+import 'modules/income_source/income_source_controller.dart';
 import 'modules/lend_borrow/lend_borrow_controller.dart';
 
 void main() {
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
     // Initialize controllers
     Get.put(ExpenseController());
     Get.put(IncomeController());
-    Get.put(CategoryController());
+    Get.put(ExpenseCategoryController());
+    Get.put(IncomeSourceController());
     Get.put(LendBorrowController());
 
     return GetMaterialApp(

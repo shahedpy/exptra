@@ -19,6 +19,16 @@ class AppConstants {
     {'name': 'Other', 'color': 0xFFBB86FC},
   ];
 
+  static const List<Map<String, dynamic>> defaultIncomeSources = [
+    {'name': 'Salary', 'color': 0xFF4CAF50},
+    {'name': 'Freelance', 'color': 0xFF00BCD4},
+    {'name': 'Business', 'color': 0xFF3F51B5},
+    {'name': 'Bonus', 'color': 0xFFFFC107},
+    {'name': 'Interest', 'color': 0xFF009688},
+    {'name': 'Gift', 'color': 0xFFE91E63},
+    {'name': 'Other', 'color': 0xFF9C27B0},
+  ];
+
   // Validation
   static const double minExpenseAmount = 0.01;
   static const double maxExpenseAmount = 999999.99;

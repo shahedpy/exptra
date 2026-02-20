@@ -1,15 +1,14 @@
 import 'package:drift/drift.dart';
-import 'category_table.dart';
+import 'expense_category_table.dart';
 
 class Expenses extends Table {
   TextColumn get id => text()();
-  TextColumn get categoryId => text().references(Categories, #id)();
+  TextColumn get categoryId => text().references(ExpenseCategories, #id)();
   RealColumn get amount => real()();
   TextColumn get note => text().nullable()();
   DateTimeColumn get expenseDate => dateTime()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
-  DateTimeColumn get createdAt =>
-      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {id};

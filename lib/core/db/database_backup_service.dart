@@ -10,6 +10,7 @@ import 'app_database.dart';
 class DatabaseBackupService {
   Future<File> createBackupFile(AppDatabase database) async {
     final categories = await database.select(database.categories).get();
+    final incomeSources = await database.select(database.incomeSources).get();
     final expenses = await database.select(database.expenses).get();
     final incomes = await database.select(database.incomes).get();
     final lends = await database.select(database.lends).get();
@@ -20,7 +21,7 @@ class DatabaseBackupService {
     final backupPath = p.join(tempDir.path, 'exptra-backup-$timestamp.exptra');
 
     final backupPayload = {
-      'version': 1,
+      'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
       'categories': categories
           .map(
@@ -29,6 +30,16 @@ class DatabaseBackupService {
               'name': category.name,
               'color': category.color,
               'isDeleted': category.isDeleted,
+            },
+          )
+          .toList(),
+      'incomeSources': incomeSources
+          .map(
+            (source) => {
+              'id': source.id,
+              'name': source.name,
+              'color': source.color,
+              'isDeleted': source.isDeleted,
             },
           )
           .toList(),
@@ -50,6 +61,7 @@ class DatabaseBackupService {
             (income) => {
               'id': income.id,
               'amount': income.amount,
+              'sourceId': income.sourceId,
               'source': income.source,
               'note': income.note,
               'incomeDate': income.incomeDate.toIso8601String(),
@@ -111,6 +123,7 @@ class DatabaseBackupService {
     }
 
     final categoriesRaw = decoded['categories'];
+    final incomeSourcesRaw = decoded['incomeSources'];
     final expensesRaw = decoded['expenses'];
     final incomesRaw = decoded['incomes'];
     final lendsRaw = decoded['lends'];
@@ -121,6 +134,9 @@ class DatabaseBackupService {
     }
 
     final parsedIncomes = incomesRaw is List ? incomesRaw : const [];
+    final parsedIncomeSources = incomeSourcesRaw is List
+        ? incomeSourcesRaw
+        : const [];
     final parsedLends = lendsRaw is List ? lendsRaw : const [];
     final parsedBorrows = borrowsRaw is List ? borrowsRaw : const [];
 
@@ -128,6 +144,7 @@ class DatabaseBackupService {
       await database.delete(database.borrows).go();
       await database.delete(database.lends).go();
       await database.delete(database.incomes).go();
+      await database.delete(database.incomeSources).go();
       await database.delete(database.expenses).go();
       await database.delete(database.categories).go();
 
@@ -164,8 +181,51 @@ class DatabaseBackupService {
             );
       }
 
+      for (final item in parsedIncomeSources) {
+        if (item is! Map<String, dynamic>) continue;
+
+        await database
+            .into(database.incomeSources)
+            .insert(
+              IncomeSourcesCompanion.insert(
+                id: item['id'] as String,
+                name: item['name'] as String,
+                color: Value(item['color'] as int?),
+                isDeleted: Value(item['isDeleted'] as bool? ?? false),
+              ),
+            );
+      }
+
+      final legacySourceMap = <String, String>{};
+
       for (final item in parsedIncomes) {
         if (item is! Map<String, dynamic>) continue;
+
+        String? sourceId = item['sourceId'] as String?;
+        final sourceName = (item['source'] as String?)?.trim();
+
+        if ((sourceId == null || sourceId.isEmpty) &&
+            sourceName != null &&
+            sourceName.isNotEmpty) {
+          final existingId = legacySourceMap[sourceName];
+          if (existingId != null) {
+            sourceId = existingId;
+          } else {
+            final generatedId =
+                'legacy-${sourceName.toLowerCase().replaceAll(' ', '-')}-${legacySourceMap.length + 1}';
+            legacySourceMap[sourceName] = generatedId;
+            sourceId = generatedId;
+            await database
+                .into(database.incomeSources)
+                .insert(
+                  IncomeSourcesCompanion.insert(
+                    id: generatedId,
+                    name: sourceName,
+                    color: const Value(0xFF4CAF50),
+                  ),
+                );
+          }
+        }
 
         await database
             .into(database.incomes)
@@ -173,6 +233,7 @@ class DatabaseBackupService {
               IncomesCompanion.insert(
                 id: item['id'] as String,
                 amount: (item['amount'] as num).toDouble(),
+                sourceId: Value(sourceId),
                 source: Value(item['source'] as String?),
                 note: Value(item['note'] as String?),
                 incomeDate: DateTime.parse(item['incomeDate'] as String),

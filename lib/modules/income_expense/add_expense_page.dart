@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'expense_controller.dart';
-import '../category/category_controller.dart';
+import '../expense_category/expense_category_controller.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/routes/app_routes.dart';
 
 class AddExpensePage extends StatefulWidget {
   const AddExpensePage({super.key});
@@ -18,7 +19,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   late final expenseController = Get.find<ExpenseController>();
-  late final categoryController = Get.find<CategoryController>();
+  late final categoryController = Get.find<ExpenseCategoryController>();
 
   late String? _selectedCategoryId;
   late DateTime _selectedDate;
@@ -85,7 +86,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
               ),
               const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(
-                'Category',
+                'Expense Category',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 8),
@@ -95,11 +96,12 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   return Center(
                     child: Column(
                       children: [
-                        const Text('No categories found'),
+                        const Text('No expense categories found'),
                         const SizedBox(height: 8),
                         ElevatedButton(
-                          onPressed: () => Get.toNamed('/categories'),
-                          child: const Text('Add Category'),
+                          onPressed: () =>
+                              Get.toNamed(AppRoutes.expenseCategories),
+                          child: const Text('Add Expense Category'),
                         ),
                       ],
                     ),
@@ -204,7 +206,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedCategoryId == null) {
-      Get.snackbar('Error', 'Please select a category');
+      Get.snackbar('Error', 'Please select an expense category');
       return;
     }
 

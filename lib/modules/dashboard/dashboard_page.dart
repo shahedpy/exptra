@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import '../income_expense/expense_controller.dart';
 import '../income_expense/income_controller.dart';
 import '../lend_borrow/lend_borrow_controller.dart';
-import '../category/category_controller.dart';
+import '../expense_category/expense_category_controller.dart';
+import '../income_source/income_source_controller.dart';
 import 'dashboard_controller.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
@@ -17,7 +18,8 @@ class DashboardPage extends StatelessWidget {
     final expenseController = Get.find<ExpenseController>();
     final incomeController = Get.find<IncomeController>();
     final lendBorrowController = Get.find<LendBorrowController>();
-    final categoryController = Get.find<CategoryController>();
+    final categoryController = Get.find<ExpenseCategoryController>();
+    final incomeSourceController = Get.find<IncomeSourceController>();
     final dashboardController = Get.put(DashboardController());
 
     return Scaffold(
@@ -47,6 +49,7 @@ class DashboardPage extends StatelessWidget {
                       incomeController,
                       lendBorrowController,
                       categoryController,
+                      incomeSourceController,
                       dashboardController,
                     ),
                   ],
@@ -208,7 +211,8 @@ class DashboardPage extends StatelessWidget {
     ExpenseController expenseController,
     IncomeController incomeController,
     LendBorrowController lendBorrowController,
-    CategoryController categoryController,
+    ExpenseCategoryController categoryController,
+    IncomeSourceController incomeSourceController,
     DashboardController dashboardController,
   ) {
     return Obx(() {
@@ -252,6 +256,7 @@ class DashboardPage extends StatelessWidget {
         incomeController,
         lendBorrowController,
         categoryController,
+        incomeSourceController,
       );
     });
   }
@@ -303,7 +308,8 @@ class DashboardPage extends StatelessWidget {
     ExpenseController expenseController,
     IncomeController incomeController,
     LendBorrowController lendBorrowController,
-    CategoryController categoryController,
+    ExpenseCategoryController categoryController,
+    IncomeSourceController incomeSourceController,
   ) {
     return ListView.builder(
       shrinkWrap: true,
@@ -328,9 +334,12 @@ class DashboardPage extends StatelessWidget {
                 child: Icon(Icons.add_card, color: Colors.white),
               ),
               title: Text(
-                income.source != null && income.source!.isNotEmpty
-                    ? income.source!
-                    : 'Income',
+                incomeSourceController
+                        .getIncomeSourceById(income.sourceId ?? '')
+                        ?.name ??
+                    (income.source != null && income.source!.isNotEmpty
+                        ? income.source!
+                        : 'Income'),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

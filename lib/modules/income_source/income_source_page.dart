@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'category_controller.dart';
+
+import '../../core/constants/app_constants.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
-import '../../core/constants/app_constants.dart';
+import 'income_source_controller.dart';
 
-class CategoryPage extends StatefulWidget {
-  const CategoryPage({super.key});
+class IncomeSourcePage extends StatefulWidget {
+  const IncomeSourcePage({super.key});
 
   @override
-  State<CategoryPage> createState() => _CategoryPageState();
+  State<IncomeSourcePage> createState() => _IncomeSourcePageState();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
-  final controller = Get.put(CategoryController());
+class _IncomeSourcePageState extends State<IncomeSourcePage> {
+  final controller = Get.put(IncomeSourceController());
   final _nameController = TextEditingController();
   late Color _selectedColor;
 
   @override
   void initState() {
     super.initState();
-    _selectedColor = const Color(0xFFFF6B6B);
+    _selectedColor = const Color(0xFF4CAF50);
   }
 
   @override
@@ -32,15 +33,15 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Expense Categories'), elevation: 0),
+      appBar: AppBar(title: const Text('Income Sources'), elevation: 0),
       body: Obx(
         () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
             : ListView.builder(
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                itemCount: controller.categories.length,
+                itemCount: controller.incomeSources.length,
                 itemBuilder: (_, index) {
-                  final category = controller.categories[index];
+                  final source = controller.incomeSources[index];
                   return Card(
                     margin: const EdgeInsets.only(
                       bottom: AppConstants.defaultPadding,
@@ -48,22 +49,23 @@ class _CategoryPageState extends State<CategoryPage> {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: ColorHelper.getColorFromInt(
-                          category.color,
+                          source.color,
                         ),
                       ),
-                      title: Text(category.name),
+                      title: Text(source.name),
                       trailing: PopupMenuButton(
                         itemBuilder: (context) => [
                           PopupMenuItem(
                             child: const Text('Edit'),
-                            onTap: () => _editCategory(category),
+                            onTap: () => _editSource(source),
                           ),
                           PopupMenuItem(
                             child: const Text(
                               'Delete',
                               style: TextStyle(color: Colors.red),
                             ),
-                            onTap: () => controller.deleteCategory(category.id),
+                            onTap: () =>
+                                controller.deleteIncomeSource(source.id),
                           ),
                         ],
                       ),
@@ -73,32 +75,28 @@ class _CategoryPageState extends State<CategoryPage> {
               ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addCategory,
+        onPressed: _addSource,
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _addCategory() {
+  void _addSource() {
     _nameController.clear();
-    _selectedColor = const Color(0xFFFF6B6B);
-    _showCategoryDialog('Add Expense Category', isEdit: false);
+    _selectedColor = const Color(0xFF4CAF50);
+    _showSourceDialog('Add Source', isEdit: false);
   }
 
-  void _editCategory(Category category) {
-    _nameController.text = category.name;
-    _selectedColor = ColorHelper.getColorFromInt(category.color);
-    _showCategoryDialog(
-      'Edit Expense Category',
-      isEdit: true,
-      category: category,
-    );
+  void _editSource(IncomeSource source) {
+    _nameController.text = source.name;
+    _selectedColor = ColorHelper.getColorFromInt(source.color);
+    _showSourceDialog('Edit Source', isEdit: true, source: source);
   }
 
-  void _showCategoryDialog(
+  void _showSourceDialog(
     String title, {
     required bool isEdit,
-    Category? category,
+    IncomeSource? source,
   }) {
     showDialog(
       context: context,
@@ -112,8 +110,8 @@ class _CategoryPageState extends State<CategoryPage> {
                 TextField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: 'Expense Category Name',
-                    hintText: 'e.g., Food, Transport',
+                    labelText: 'Source Name',
+                    hintText: 'e.g., Salary, Freelance',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(
                         AppConstants.defaultBorderRadius,
@@ -163,22 +161,23 @@ class _CategoryPageState extends State<CategoryPage> {
               onPressed: () {
                 final name = _nameController.text.trim();
                 if (name.isEmpty) {
-                  Get.snackbar('Error', 'Category name is required');
+                  Get.snackbar('Error', 'Source name is required');
                   return;
                 }
 
-                if (isEdit && category != null) {
-                  controller.updateCategory(
-                    id: category.id,
+                if (isEdit && source != null) {
+                  controller.updateIncomeSource(
+                    id: source.id,
                     name: name,
                     color: ColorHelper.getColorAsInt(_selectedColor),
                   );
                 } else {
-                  controller.addCategory(
+                  controller.addIncomeSource(
                     name: name,
                     color: ColorHelper.getColorAsInt(_selectedColor),
                   );
                 }
+
                 Navigator.pop(context);
               },
               child: Text(isEdit ? 'Update' : 'Add'),
