@@ -1,19 +1,22 @@
 import 'package:get/get.dart';
 import '../expense/expense_controller.dart';
 import '../income/income_controller.dart';
+import '../lend_borrow/lend_borrow_controller.dart';
 import '../../core/utils/helpers.dart';
 
-enum DashboardTransactionTab { all, income, expense }
+enum DashboardTransactionTab { all, income, expense, lendBorrow }
 
 class DashboardController extends GetxController {
   late final ExpenseController expenseController;
   late final IncomeController incomeController;
+  late final LendBorrowController lendBorrowController;
   final selectedTransactionTab = DashboardTransactionTab.all.obs;
 
   @override
   void onInit() {
     expenseController = Get.find<ExpenseController>();
     incomeController = Get.find<IncomeController>();
+    lendBorrowController = Get.find<LendBorrowController>();
     super.onInit();
   }
 
@@ -26,7 +29,18 @@ class DashboardController extends GetxController {
   }
 
   double getBalance() {
-    return getTotalIncome() - getTotalExpenses();
+    return getTotalIncome() +
+        getTotalBorrowed() -
+        getTotalExpenses() -
+        getTotalLent();
+  }
+
+  double getTotalLent() {
+    return lendBorrowController.getTotalLent();
+  }
+
+  double getTotalBorrowed() {
+    return lendBorrowController.getTotalBorrowed();
   }
 
   String getFormattedIncome() {
@@ -39,6 +53,14 @@ class DashboardController extends GetxController {
 
   String getFormattedBalance() {
     return CurrencyHelper.formatAmount(getBalance());
+  }
+
+  String getFormattedLent() {
+    return CurrencyHelper.formatAmount(getTotalLent());
+  }
+
+  String getFormattedBorrowed() {
+    return CurrencyHelper.formatAmount(getTotalBorrowed());
   }
 
   int getExpenseCount() {

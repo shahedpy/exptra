@@ -6,6 +6,7 @@ import 'core/routes/app_routes.dart';
 import 'modules/expense/expense_controller.dart';
 import 'modules/income/income_controller.dart';
 import 'modules/category/category_controller.dart';
+import 'modules/lend_borrow/lend_borrow_controller.dart';
 
 void main() {
   final db = AppDatabase();
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
     Get.put(ExpenseController());
     Get.put(IncomeController());
     Get.put(CategoryController());
+    Get.put(LendBorrowController());
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,

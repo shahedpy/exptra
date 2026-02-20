@@ -20,9 +20,9 @@ EXPTRA is a comprehensive expense tracking solution built with Flutter, featurin
 
 ## ✨ Key Features
 
-### 💰 Expense Management
-- **Intuitive Entry**: Quick expense logging with amount, category, date, and notes
-- **Smart Organization**: Chronologically sorted expense list with visual category indicators
+### 💰 Expense, Income & Lend/Borrow Management
+- **Intuitive Entry**: Quick logging for expenses, incomes, and lend/borrow transactions
+- **Smart Organization**: Chronologically sorted entries with clear transaction-type indicators
 - **Safe Deletion**: Confirmation dialogs with soft-delete data preservation
 - **Real-time Updates**: Instant dashboard synchronization across all views
 
@@ -33,10 +33,10 @@ EXPTRA is a comprehensive expense tracking solution built with Flutter, featurin
 - **Smart Deletion**: Prevents removal of categories currently in use
 
 ### 📊 Dashboard Analytics
-- **Financial Summary**: Total expenses, transaction count, and average spending
+- **Financial Summary**: Income, expense, borrowed, lent, and live balance overview
 - **Visual Insights**: Gradient-enhanced summary cards with category color coding
 - **Empty States**: Helpful guidance when no data is available
-- **Quick Actions**: One-tap access to add expenses or manage categories
+- **Quick Actions**: One-tap access to add expense, income, or lend/borrow entries
 
 ### 🎨 User Experience
 - **Material Design 3**: Modern, clean interface following latest design guidelines
@@ -86,7 +86,9 @@ lib/
 │   └── repositories/             # Data repositories
 └── modules/                      # Feature modules
     ├── dashboard/                # Dashboard feature
-    ├── expense/                  # Expense management
+   ├── expense/                  # Expense management
+   ├── income/                   # Income management
+   ├── lend_borrow/              # Lend and borrow management
     └── category/                 # Category management
 ```
 
@@ -156,6 +158,12 @@ flutter build web --release
 5. Optionally add notes
 6. Tap **Add Expense**
 
+### Adding Income or Lend/Borrow
+1. Tap the **+** floating action button on the dashboard
+2. Choose **Add Income** or **Add Lend/Borrow**
+3. Fill required fields (amount + type/person for lend/borrow)
+4. Save the entry to update dashboard totals instantly
+
 ### Managing Categories
 1. Navigate to **Categories** from the dashboard app bar
 2. View all existing categories with color indicators
@@ -164,9 +172,9 @@ flutter build web --release
 5. Note: Categories with associated expenses cannot be deleted
 
 ### Viewing Analytics
-- Dashboard automatically displays total expenses, transaction count, and average spending
-- Scroll through the expense list to see all transactions
-- Delete expenses by tapping the delete icon with confirmation
+- Dashboard displays live balance from income, expense, borrowed, and lent totals
+- Use transaction tabs to filter All, Income, Expense, and Lend/Borrow entries
+- Delete entries with confirmation dialogs from list items
 
 ## 🔒 Data & Security
 

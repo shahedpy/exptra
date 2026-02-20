@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../expense/expense_controller.dart';
 import '../income/income_controller.dart';
+import '../lend_borrow/lend_borrow_controller.dart';
 import '../category/category_controller.dart';
 import 'dashboard_controller.dart';
 import '../../core/db/app_database.dart';
@@ -16,6 +17,7 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final expenseController = Get.find<ExpenseController>();
     final incomeController = Get.find<IncomeController>();
+    final lendBorrowController = Get.find<LendBorrowController>();
     final categoryController = Get.find<CategoryController>();
     final dashboardController = Get.put(DashboardController());
 
@@ -30,7 +32,8 @@ class DashboardPage extends StatelessWidget {
       body: Obx(
         () =>
             expenseController.expenses.isEmpty &&
-                incomeController.incomes.isEmpty
+                incomeController.incomes.isEmpty &&
+                lendBorrowController.entries.isEmpty
             ? _buildEmptyState()
             : SingleChildScrollView(
                 child: Column(
@@ -42,6 +45,7 @@ class DashboardPage extends StatelessWidget {
                     _buildTransactionsSection(
                       expenseController,
                       incomeController,
+                      lendBorrowController,
                       categoryController,
                       dashboardController,
                     ),
@@ -82,6 +86,14 @@ class DashboardPage extends StatelessWidget {
                   Get.toNamed(AppRoutes.addIncome);
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.sync_alt_rounded),
+                title: const Text('Add Lend/Borrow'),
+                onTap: () {
+                  Get.back();
+                  Get.toNamed(AppRoutes.addLendBorrow);
+                },
+              ),
             ],
           ),
         ),
@@ -103,7 +115,7 @@ class DashboardPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Add your first income or expense to get started',
+            'Add income, expense, or lend/borrow to get started',
             style: TextStyle(color: Colors.grey.shade500),
           ),
         ],
@@ -163,6 +175,17 @@ class DashboardPage extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildStatItem(
+                  'Borrowed',
+                  dashboardController.getFormattedBorrowed(),
+                ),
+                _buildStatItem('Lent', dashboardController.getFormattedLent()),
+              ],
+            ),
           ],
         ),
       ),
@@ -214,6 +237,11 @@ class DashboardPage extends StatelessWidget {
               label: Text('Expense'),
               icon: Icon(Icons.remove_circle_outline_rounded),
             ),
+            ButtonSegment<DashboardTransactionTab>(
+              value: DashboardTransactionTab.lendBorrow,
+              label: Text('L/B'),
+              icon: Icon(Icons.sync_alt_rounded),
+            ),
           ],
           selected: {dashboardController.selectedTransactionTab.value},
           onSelectionChanged: (tabs) {
@@ -230,6 +258,7 @@ class DashboardPage extends StatelessWidget {
   Widget _buildTransactionsSection(
     ExpenseController expenseController,
     IncomeController incomeController,
+    LendBorrowController lendBorrowController,
     CategoryController categoryController,
     DashboardController dashboardController,
   ) {
@@ -238,6 +267,7 @@ class DashboardPage extends StatelessWidget {
       final entries = _getFilteredEntries(
         expenseController,
         incomeController,
+        lendBorrowController,
         selectedTab,
       );
 
@@ -249,6 +279,8 @@ class DashboardPage extends StatelessWidget {
             'No incomes yet. Use + to add income.',
           DashboardTransactionTab.expense =>
             'No expenses yet. Use + to add expense.',
+          DashboardTransactionTab.lendBorrow =>
+            'No lend/borrow entries yet. Use + to add one.',
         };
 
         return Padding(
@@ -271,6 +303,7 @@ class DashboardPage extends StatelessWidget {
         entries,
         expenseController,
         incomeController,
+        lendBorrowController,
         categoryController,
       );
     });
@@ -279,11 +312,13 @@ class DashboardPage extends StatelessWidget {
   List<_DashboardEntry> _getFilteredEntries(
     ExpenseController expenseController,
     IncomeController incomeController,
+    LendBorrowController lendBorrowController,
     DashboardTransactionTab selectedTab,
   ) {
     final entries = <_DashboardEntry>[];
 
-    if (selectedTab != DashboardTransactionTab.expense) {
+    if (selectedTab == DashboardTransactionTab.all ||
+        selectedTab == DashboardTransactionTab.income) {
       entries.addAll(
         incomeController.incomes.map(
           (income) => _DashboardEntry.income(income),
@@ -291,10 +326,20 @@ class DashboardPage extends StatelessWidget {
       );
     }
 
-    if (selectedTab != DashboardTransactionTab.income) {
+    if (selectedTab == DashboardTransactionTab.all ||
+        selectedTab == DashboardTransactionTab.expense) {
       entries.addAll(
         expenseController.expenses.map(
           (expense) => _DashboardEntry.expense(expense),
+        ),
+      );
+    }
+
+    if (selectedTab == DashboardTransactionTab.all ||
+        selectedTab == DashboardTransactionTab.lendBorrow) {
+      entries.addAll(
+        lendBorrowController.entries.map(
+          (entry) => _DashboardEntry.lendBorrow(entry),
         ),
       );
     }
@@ -307,6 +352,7 @@ class DashboardPage extends StatelessWidget {
     List<_DashboardEntry> entries,
     ExpenseController expenseController,
     IncomeController incomeController,
+    LendBorrowController lendBorrowController,
     CategoryController categoryController,
   ) {
     return ListView.builder(
@@ -401,6 +447,88 @@ class DashboardPage extends StatelessWidget {
           );
         }
 
+        if (entry.isLendBorrow) {
+          final lendBorrow = entry.lendBorrow!;
+          final isLend = lendBorrow.type == LendBorrowController.typeLend;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: InkWell(
+              onLongPress: () {
+                Get.dialog(
+                  AlertDialog(
+                    title: const Text('Delete Entry'),
+                    content: const Text(
+                      'Are you sure you want to delete this entry?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          lendBorrowController.deleteEntry(lendBorrow.id);
+                          Get.back();
+                        },
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(
+                  AppConstants.defaultPadding,
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: isLend ? Colors.orange : Colors.blue,
+                  child: Icon(
+                    isLend
+                        ? Icons.call_made_rounded
+                        : Icons.call_received_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                title: Text(lendBorrow.personName),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isLend ? 'Lend' : 'Borrow',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    if (lendBorrow.note != null && lendBorrow.note!.isNotEmpty)
+                      Text(
+                        lendBorrow.note!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    Text(
+                      DateHelper.formatDate(lendBorrow.transactionDate),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+                trailing: Text(
+                  CurrencyHelper.formatAmount(lendBorrow.amount),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
         final expense = entry.expense!;
         final category = categoryController.getCategoryById(expense.categoryId);
 
@@ -480,8 +608,9 @@ class DashboardPage extends StatelessWidget {
 class _DashboardEntry {
   final Income? income;
   final Expense? expense;
+  final LendBorrow? lendBorrow;
 
-  const _DashboardEntry._({this.income, this.expense});
+  const _DashboardEntry._({this.income, this.expense, this.lendBorrow});
 
   factory _DashboardEntry.income(Income income) {
     return _DashboardEntry._(income: income);
@@ -491,11 +620,20 @@ class _DashboardEntry {
     return _DashboardEntry._(expense: expense);
   }
 
+  factory _DashboardEntry.lendBorrow(LendBorrow lendBorrow) {
+    return _DashboardEntry._(lendBorrow: lendBorrow);
+  }
+
   bool get isIncome => income != null;
+  bool get isLendBorrow => lendBorrow != null;
 
   DateTime get date {
     if (isIncome) {
       return income!.incomeDate;
+    }
+
+    if (isLendBorrow) {
+      return lendBorrow!.transactionDate;
     }
 
     return expense!.expenseDate;
