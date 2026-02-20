@@ -50,21 +50,12 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
                 ),
               ],
               selected: {_selectedIndex},
+              showSelectedIcon: false,
               onSelectionChanged: (selected) {
                 setState(() {
                   _selectedIndex = selected.first;
                 });
               },
-              style: ButtonStyle(
-                iconColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    if (_selectedIndex == 1) return Colors.orange;
-                    if (_selectedIndex == 2) return Colors.blue;
-                    return null;
-                  }
-                  return null;
-                }),
-              ),
             ),
           ),
 

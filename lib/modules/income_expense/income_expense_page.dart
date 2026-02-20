@@ -51,21 +51,12 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                 ),
               ],
               selected: {_selectedIndex},
+              showSelectedIcon: false,
               onSelectionChanged: (selected) {
                 setState(() {
                   _selectedIndex = selected.first;
                 });
               },
-              style: ButtonStyle(
-                iconColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    if (_selectedIndex == 1) return Colors.green;
-                    if (_selectedIndex == 2) return Colors.red;
-                    return null;
-                  }
-                  return null;
-                }),
-              ),
             ),
           ),
 
