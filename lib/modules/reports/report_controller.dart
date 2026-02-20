@@ -32,7 +32,7 @@ class ReportController extends GetxController {
   late final IncomeSourceController incomeSourceController;
   late final LendBorrowController lendBorrowController;
 
-  final selectedDataType = ReportDataType.expense.obs;
+  final selectedDataType = ReportDataType.income.obs;
   final selectedType = ReportType.monthWise.obs;
   final selectedMonth = DateTime(DateTime.now().year, DateTime.now().month).obs;
 
