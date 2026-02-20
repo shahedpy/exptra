@@ -274,37 +274,66 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
   }
 
   void _showAddDialog(BuildContext context) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Add Entry'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('Add Income'),
-              leading: const Icon(
-                Icons.trending_up_rounded,
-                color: Colors.green,
-              ),
-              onTap: () {
-                Get.back();
-                Get.toNamed(AppRoutes.addIncome);
-              },
-            ),
-            ListTile(
-              title: const Text('Add Expense'),
-              leading: const Icon(
-                Icons.trending_down_rounded,
-                color: Colors.red,
-              ),
-              onTap: () {
-                Get.back();
-                Get.toNamed(AppRoutes.addExpense);
-              },
-            ),
-          ],
-        ),
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const Text(
+                  'Add Entry',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                ListTile(
+                  title: const Text('Add Income'),
+                  leading: const CircleAvatar(
+                    backgroundColor: Colors.green,
+                    child: Icon(
+                      Icons.trending_up_rounded,
+                      color: Colors.white,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.toNamed(AppRoutes.addIncome);
+                  },
+                ),
+                ListTile(
+                  title: const Text('Add Expense'),
+                  leading: const CircleAvatar(
+                    backgroundColor: Colors.red,
+                    child: Icon(
+                      Icons.trending_down_rounded,
+                      color: Colors.white,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.toNamed(AppRoutes.addExpense);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
