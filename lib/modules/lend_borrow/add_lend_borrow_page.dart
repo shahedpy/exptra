@@ -33,14 +33,24 @@ class _AddLendBorrowPageState extends State<AddLendBorrowPage> {
     _selectedDate = DateTime.now();
 
     final args = Get.arguments;
-    if (args != null && args is LendBorrow) {
+    if (args != null) {
       _isEdit = true;
-      _editingId = args.id;
-      _selectedType = args.type;
-      _selectedDate = args.transactionDate;
-      _nameController.text = args.personName;
-      _amountController.text = args.amount.toString();
-      _noteController.text = args.note ?? '';
+
+      if (args is Lend) {
+        _editingId = args.id;
+        _selectedType = LendBorrowController.typeLend;
+        _selectedDate = args.lendDate;
+        _nameController.text = args.personName;
+        _amountController.text = args.amount.toString();
+        _noteController.text = args.note ?? '';
+      } else if (args is Borrow) {
+        _editingId = args.id;
+        _selectedType = LendBorrowController.typeBorrow;
+        _selectedDate = args.borrowDate;
+        _nameController.text = args.personName;
+        _amountController.text = args.amount.toString();
+        _noteController.text = args.note ?? '';
+      }
     }
   }
 

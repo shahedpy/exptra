@@ -1,24 +1,30 @@
 import 'package:get/get.dart';
 
 import '../../core/db/app_database.dart';
-import '../../data/repositories/lend_borrow_repository.dart';
+import '../../data/repositories/lend_repository.dart';
+import '../../data/repositories/borrow_repository.dart';
 
 class LendBorrowController extends GetxController {
   static const String typeLend = 'lend';
   static const String typeBorrow = 'borrow';
 
-  late final LendBorrowRepository repository;
-  final entries = <LendBorrow>[].obs;
+  late final LendRepository lendRepository;
+  late final BorrowRepository borrowRepository;
+  final lends = <Lend>[].obs;
+  final borrows = <Borrow>[].obs;
 
   @override
   void onInit() {
-    repository = LendBorrowRepository(Get.find<AppDatabase>());
+    final db = Get.find<AppDatabase>();
+    lendRepository = LendRepository(db);
+    borrowRepository = BorrowRepository(db);
     loadEntries();
     super.onInit();
   }
 
   Future<void> loadEntries() async {
-    entries.value = await repository.getAllEntries();
+    lends.value = await lendRepository.getAllLends();
+    borrows.value = await borrowRepository.getAllBorrows();
   }
 
   Future<void> addEntry({
@@ -29,31 +35,47 @@ class LendBorrowController extends GetxController {
     required DateTime date,
   }) async {
     try {
-      await repository.insertLendBorrow(
-        personName: personName,
-        amount: amount,
-        type: type,
-        note: note,
-        date: date,
-      );
+      if (type == typeLend) {
+        await lendRepository.insertLend(
+          personName: personName,
+          amount: amount,
+          note: note,
+          date: date,
+        );
+      } else if (type == typeBorrow) {
+        await borrowRepository.insertBorrow(
+          personName: personName,
+          amount: amount,
+          note: note,
+          date: date,
+        );
+      }
       await loadEntries();
     } catch (e) {
       Get.snackbar('Error', 'Failed to add entry: $e');
     }
   }
 
-  Future<void> deleteEntry(String id) async {
+  Future<void> deleteEntry(String id, String type) async {
     try {
-      await repository.softDelete(id);
+      if (type == typeLend) {
+        await lendRepository.softDelete(id);
+      } else if (type == typeBorrow) {
+        await borrowRepository.softDelete(id);
+      }
       await loadEntries();
     } catch (e) {
       Get.snackbar('Error', 'Failed to delete entry: $e');
     }
   }
 
-  Future<void> toggleSettled(String id, bool currentValue) async {
+  Future<void> toggleSettled(String id, bool currentValue, String type) async {
     try {
-      await repository.toggleSettled(id, !currentValue);
+      if (type == typeLend) {
+        await lendRepository.toggleSettled(id, !currentValue);
+      } else if (type == typeBorrow) {
+        await borrowRepository.toggleSettled(id, !currentValue);
+      }
       await loadEntries();
     } catch (e) {
       Get.snackbar('Error', 'Failed to update entry: $e');
@@ -69,14 +91,23 @@ class LendBorrowController extends GetxController {
     required DateTime date,
   }) async {
     try {
-      await repository.updateLendBorrow(
-        id: id,
-        personName: personName,
-        amount: amount,
-        type: type,
-        note: note,
-        date: date,
-      );
+      if (type == typeLend) {
+        await lendRepository.updateLend(
+          id: id,
+          personName: personName,
+          amount: amount,
+          note: note,
+          date: date,
+        );
+      } else if (type == typeBorrow) {
+        await borrowRepository.updateBorrow(
+          id: id,
+          personName: personName,
+          amount: amount,
+          note: note,
+          date: date,
+        );
+      }
       await loadEntries();
     } catch (e) {
       Get.snackbar('Error', 'Failed to update entry: $e');
@@ -84,14 +115,10 @@ class LendBorrowController extends GetxController {
   }
 
   double getTotalLent() {
-    return entries
-        .where((entry) => entry.type == typeLend)
-        .fold(0.0, (sum, entry) => sum + entry.amount);
+    return lends.fold(0.0, (sum, entry) => sum + entry.amount);
   }
 
   double getTotalBorrowed() {
-    return entries
-        .where((entry) => entry.type == typeBorrow)
-        .fold(0.0, (sum, entry) => sum + entry.amount);
+    return borrows.fold(0.0, (sum, entry) => sum + entry.amount);
   }
 }

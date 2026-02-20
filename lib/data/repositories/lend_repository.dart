@@ -3,67 +3,63 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/db/app_database.dart';
 
-class LendBorrowRepository {
+class LendRepository {
   final AppDatabase db;
   final _uuid = const Uuid();
 
-  LendBorrowRepository(this.db);
+  LendRepository(this.db);
 
-  Future<void> insertLendBorrow({
+  Future<void> insertLend({
     required String personName,
     required double amount,
-    required String type,
     String? note,
     required DateTime date,
   }) async {
     await db
-        .into(db.lendBorrows)
+        .into(db.lends)
         .insert(
-          LendBorrowsCompanion.insert(
+          LendsCompanion.insert(
             id: _uuid.v4(),
             personName: personName,
             amount: amount,
-            type: type,
             note: Value(note),
-            transactionDate: date,
+            lendDate: date,
           ),
         );
   }
 
-  Future<List<LendBorrow>> getAllEntries() {
-    return (db.select(db.lendBorrows)
+  Future<List<Lend>> getAllLends() {
+    return (db.select(db.lends)
           ..where((tbl) => tbl.isDeleted.equals(false))
-          ..orderBy([(t) => OrderingTerm.desc(t.transactionDate)]))
+          ..orderBy([(t) => OrderingTerm.desc(t.lendDate)]))
         .get();
   }
 
   Future<void> softDelete(String id) {
-    return (db.update(db.lendBorrows)..where((tbl) => tbl.id.equals(id))).write(
-      LendBorrowsCompanion(isDeleted: const Value(true)),
+    return (db.update(db.lends)..where((tbl) => tbl.id.equals(id))).write(
+      LendsCompanion(isDeleted: const Value(true)),
     );
   }
 
   Future<void> toggleSettled(String id, bool value) {
-    return (db.update(db.lendBorrows)..where((tbl) => tbl.id.equals(id))).write(
-      LendBorrowsCompanion(isSettled: Value(value)),
+    return (db.update(db.lends)..where((tbl) => tbl.id.equals(id))).write(
+      LendsCompanion(isSettled: Value(value)),
     );
   }
 
-  Future<void> updateLendBorrow({
+  Future<void> updateLend({
     required String id,
     required String personName,
     required double amount,
-    required String type,
     String? note,
     required DateTime date,
   }) async {
-    await (db.update(db.lendBorrows)..where((tbl) => tbl.id.equals(id))).write(
-      LendBorrowsCompanion(
+    await (db.update(db.lends)..where((tbl) => tbl.id.equals(id))).write(
+      LendsCompanion(
         personName: Value(personName),
         amount: Value(amount),
-        type: Value(type),
         note: Value(note),
-        transactionDate: Value(date),
+        lendDate: Value(date),
       ),
     );
   }

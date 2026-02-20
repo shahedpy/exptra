@@ -1229,12 +1229,11 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   }
 }
 
-class $LendBorrowsTable extends LendBorrows
-    with TableInfo<$LendBorrowsTable, LendBorrow> {
+class $LendsTable extends Lends with TableInfo<$LendsTable, Lend> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $LendBorrowsTable(this.attachedDatabase, [this._alias]);
+  $LendsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -1264,15 +1263,6 @@ class $LendBorrowsTable extends LendBorrows
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -1282,18 +1272,17 @@ class $LendBorrowsTable extends LendBorrows
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _transactionDateMeta = const VerificationMeta(
-    'transactionDate',
+  static const VerificationMeta _lendDateMeta = const VerificationMeta(
+    'lendDate',
   );
   @override
-  late final GeneratedColumn<DateTime> transactionDate =
-      GeneratedColumn<DateTime>(
-        'transaction_date',
-        aliasedName,
-        false,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: true,
-      );
+  late final GeneratedColumn<DateTime> lendDate = GeneratedColumn<DateTime>(
+    'lend_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _isSettledMeta = const VerificationMeta(
     'isSettled',
   );
@@ -1341,9 +1330,8 @@ class $LendBorrowsTable extends LendBorrows
     id,
     personName,
     amount,
-    type,
     note,
-    transactionDate,
+    lendDate,
     isSettled,
     isDeleted,
     createdAt,
@@ -1352,10 +1340,10 @@ class $LendBorrowsTable extends LendBorrows
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'lend_borrows';
+  static const String $name = 'lends';
   @override
   VerificationContext validateIntegrity(
-    Insertable<LendBorrow> instance, {
+    Insertable<Lend> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -1381,30 +1369,19 @@ class $LendBorrowsTable extends LendBorrows
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
     if (data.containsKey('note')) {
       context.handle(
         _noteMeta,
         note.isAcceptableOrUnknown(data['note']!, _noteMeta),
       );
     }
-    if (data.containsKey('transaction_date')) {
+    if (data.containsKey('lend_date')) {
       context.handle(
-        _transactionDateMeta,
-        transactionDate.isAcceptableOrUnknown(
-          data['transaction_date']!,
-          _transactionDateMeta,
-        ),
+        _lendDateMeta,
+        lendDate.isAcceptableOrUnknown(data['lend_date']!, _lendDateMeta),
       );
     } else if (isInserting) {
-      context.missing(_transactionDateMeta);
+      context.missing(_lendDateMeta);
     }
     if (data.containsKey('is_settled')) {
       context.handle(
@@ -1430,9 +1407,9 @@ class $LendBorrowsTable extends LendBorrows
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  LendBorrow map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Lend map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return LendBorrow(
+    return Lend(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -1445,17 +1422,13 @@ class $LendBorrowsTable extends LendBorrows
         DriftSqlType.double,
         data['${effectivePrefix}amount'],
       )!,
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}type'],
-      )!,
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}note'],
       ),
-      transactionDate: attachedDatabase.typeMapping.read(
+      lendDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}transaction_date'],
+        data['${effectivePrefix}lend_date'],
       )!,
       isSettled: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
@@ -1473,28 +1446,26 @@ class $LendBorrowsTable extends LendBorrows
   }
 
   @override
-  $LendBorrowsTable createAlias(String alias) {
-    return $LendBorrowsTable(attachedDatabase, alias);
+  $LendsTable createAlias(String alias) {
+    return $LendsTable(attachedDatabase, alias);
   }
 }
 
-class LendBorrow extends DataClass implements Insertable<LendBorrow> {
+class Lend extends DataClass implements Insertable<Lend> {
   final String id;
   final String personName;
   final double amount;
-  final String type;
   final String? note;
-  final DateTime transactionDate;
+  final DateTime lendDate;
   final bool isSettled;
   final bool isDeleted;
   final DateTime createdAt;
-  const LendBorrow({
+  const Lend({
     required this.id,
     required this.personName,
     required this.amount,
-    required this.type,
     this.note,
-    required this.transactionDate,
+    required this.lendDate,
     required this.isSettled,
     required this.isDeleted,
     required this.createdAt,
@@ -1505,43 +1476,40 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
     map['id'] = Variable<String>(id);
     map['person_name'] = Variable<String>(personName);
     map['amount'] = Variable<double>(amount);
-    map['type'] = Variable<String>(type);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
-    map['transaction_date'] = Variable<DateTime>(transactionDate);
+    map['lend_date'] = Variable<DateTime>(lendDate);
     map['is_settled'] = Variable<bool>(isSettled);
     map['is_deleted'] = Variable<bool>(isDeleted);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
 
-  LendBorrowsCompanion toCompanion(bool nullToAbsent) {
-    return LendBorrowsCompanion(
+  LendsCompanion toCompanion(bool nullToAbsent) {
+    return LendsCompanion(
       id: Value(id),
       personName: Value(personName),
       amount: Value(amount),
-      type: Value(type),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
-      transactionDate: Value(transactionDate),
+      lendDate: Value(lendDate),
       isSettled: Value(isSettled),
       isDeleted: Value(isDeleted),
       createdAt: Value(createdAt),
     );
   }
 
-  factory LendBorrow.fromJson(
+  factory Lend.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return LendBorrow(
+    return Lend(
       id: serializer.fromJson<String>(json['id']),
       personName: serializer.fromJson<String>(json['personName']),
       amount: serializer.fromJson<double>(json['amount']),
-      type: serializer.fromJson<String>(json['type']),
       note: serializer.fromJson<String?>(json['note']),
-      transactionDate: serializer.fromJson<DateTime>(json['transactionDate']),
+      lendDate: serializer.fromJson<DateTime>(json['lendDate']),
       isSettled: serializer.fromJson<bool>(json['isSettled']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -1554,48 +1522,42 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
       'id': serializer.toJson<String>(id),
       'personName': serializer.toJson<String>(personName),
       'amount': serializer.toJson<double>(amount),
-      'type': serializer.toJson<String>(type),
       'note': serializer.toJson<String?>(note),
-      'transactionDate': serializer.toJson<DateTime>(transactionDate),
+      'lendDate': serializer.toJson<DateTime>(lendDate),
       'isSettled': serializer.toJson<bool>(isSettled),
       'isDeleted': serializer.toJson<bool>(isDeleted),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
-  LendBorrow copyWith({
+  Lend copyWith({
     String? id,
     String? personName,
     double? amount,
-    String? type,
     Value<String?> note = const Value.absent(),
-    DateTime? transactionDate,
+    DateTime? lendDate,
     bool? isSettled,
     bool? isDeleted,
     DateTime? createdAt,
-  }) => LendBorrow(
+  }) => Lend(
     id: id ?? this.id,
     personName: personName ?? this.personName,
     amount: amount ?? this.amount,
-    type: type ?? this.type,
     note: note.present ? note.value : this.note,
-    transactionDate: transactionDate ?? this.transactionDate,
+    lendDate: lendDate ?? this.lendDate,
     isSettled: isSettled ?? this.isSettled,
     isDeleted: isDeleted ?? this.isDeleted,
     createdAt: createdAt ?? this.createdAt,
   );
-  LendBorrow copyWithCompanion(LendBorrowsCompanion data) {
-    return LendBorrow(
+  Lend copyWithCompanion(LendsCompanion data) {
+    return Lend(
       id: data.id.present ? data.id.value : this.id,
       personName: data.personName.present
           ? data.personName.value
           : this.personName,
       amount: data.amount.present ? data.amount.value : this.amount,
-      type: data.type.present ? data.type.value : this.type,
       note: data.note.present ? data.note.value : this.note,
-      transactionDate: data.transactionDate.present
-          ? data.transactionDate.value
-          : this.transactionDate,
+      lendDate: data.lendDate.present ? data.lendDate.value : this.lendDate,
       isSettled: data.isSettled.present ? data.isSettled.value : this.isSettled,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -1604,13 +1566,12 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
 
   @override
   String toString() {
-    return (StringBuffer('LendBorrow(')
+    return (StringBuffer('Lend(')
           ..write('id: $id, ')
           ..write('personName: $personName, ')
           ..write('amount: $amount, ')
-          ..write('type: $type, ')
           ..write('note: $note, ')
-          ..write('transactionDate: $transactionDate, ')
+          ..write('lendDate: $lendDate, ')
           ..write('isSettled: $isSettled, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('createdAt: $createdAt')
@@ -1623,9 +1584,8 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
     id,
     personName,
     amount,
-    type,
     note,
-    transactionDate,
+    lendDate,
     isSettled,
     isDeleted,
     createdAt,
@@ -1633,48 +1593,44 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is LendBorrow &&
+      (other is Lend &&
           other.id == this.id &&
           other.personName == this.personName &&
           other.amount == this.amount &&
-          other.type == this.type &&
           other.note == this.note &&
-          other.transactionDate == this.transactionDate &&
+          other.lendDate == this.lendDate &&
           other.isSettled == this.isSettled &&
           other.isDeleted == this.isDeleted &&
           other.createdAt == this.createdAt);
 }
 
-class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
+class LendsCompanion extends UpdateCompanion<Lend> {
   final Value<String> id;
   final Value<String> personName;
   final Value<double> amount;
-  final Value<String> type;
   final Value<String?> note;
-  final Value<DateTime> transactionDate;
+  final Value<DateTime> lendDate;
   final Value<bool> isSettled;
   final Value<bool> isDeleted;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
-  const LendBorrowsCompanion({
+  const LendsCompanion({
     this.id = const Value.absent(),
     this.personName = const Value.absent(),
     this.amount = const Value.absent(),
-    this.type = const Value.absent(),
     this.note = const Value.absent(),
-    this.transactionDate = const Value.absent(),
+    this.lendDate = const Value.absent(),
     this.isSettled = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  LendBorrowsCompanion.insert({
+  LendsCompanion.insert({
     required String id,
     required String personName,
     required double amount,
-    required String type,
     this.note = const Value.absent(),
-    required DateTime transactionDate,
+    required DateTime lendDate,
     this.isSettled = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1682,15 +1638,13 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
   }) : id = Value(id),
        personName = Value(personName),
        amount = Value(amount),
-       type = Value(type),
-       transactionDate = Value(transactionDate);
-  static Insertable<LendBorrow> custom({
+       lendDate = Value(lendDate);
+  static Insertable<Lend> custom({
     Expression<String>? id,
     Expression<String>? personName,
     Expression<double>? amount,
-    Expression<String>? type,
     Expression<String>? note,
-    Expression<DateTime>? transactionDate,
+    Expression<DateTime>? lendDate,
     Expression<bool>? isSettled,
     Expression<bool>? isDeleted,
     Expression<DateTime>? createdAt,
@@ -1700,9 +1654,8 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
       if (id != null) 'id': id,
       if (personName != null) 'person_name': personName,
       if (amount != null) 'amount': amount,
-      if (type != null) 'type': type,
       if (note != null) 'note': note,
-      if (transactionDate != null) 'transaction_date': transactionDate,
+      if (lendDate != null) 'lend_date': lendDate,
       if (isSettled != null) 'is_settled': isSettled,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (createdAt != null) 'created_at': createdAt,
@@ -1710,25 +1663,23 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
     });
   }
 
-  LendBorrowsCompanion copyWith({
+  LendsCompanion copyWith({
     Value<String>? id,
     Value<String>? personName,
     Value<double>? amount,
-    Value<String>? type,
     Value<String?>? note,
-    Value<DateTime>? transactionDate,
+    Value<DateTime>? lendDate,
     Value<bool>? isSettled,
     Value<bool>? isDeleted,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
-    return LendBorrowsCompanion(
+    return LendsCompanion(
       id: id ?? this.id,
       personName: personName ?? this.personName,
       amount: amount ?? this.amount,
-      type: type ?? this.type,
       note: note ?? this.note,
-      transactionDate: transactionDate ?? this.transactionDate,
+      lendDate: lendDate ?? this.lendDate,
       isSettled: isSettled ?? this.isSettled,
       isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
@@ -1748,14 +1699,11 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
     }
-    if (type.present) {
-      map['type'] = Variable<String>(type.value);
-    }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
-    if (transactionDate.present) {
-      map['transaction_date'] = Variable<DateTime>(transactionDate.value);
+    if (lendDate.present) {
+      map['lend_date'] = Variable<DateTime>(lendDate.value);
     }
     if (isSettled.present) {
       map['is_settled'] = Variable<bool>(isSettled.value);
@@ -1774,13 +1722,522 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
 
   @override
   String toString() {
-    return (StringBuffer('LendBorrowsCompanion(')
+    return (StringBuffer('LendsCompanion(')
           ..write('id: $id, ')
           ..write('personName: $personName, ')
           ..write('amount: $amount, ')
-          ..write('type: $type, ')
           ..write('note: $note, ')
-          ..write('transactionDate: $transactionDate, ')
+          ..write('lendDate: $lendDate, ')
+          ..write('isSettled: $isSettled, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BorrowsTable extends Borrows with TableInfo<$BorrowsTable, Borrow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BorrowsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _personNameMeta = const VerificationMeta(
+    'personName',
+  );
+  @override
+  late final GeneratedColumn<String> personName = GeneratedColumn<String>(
+    'person_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _borrowDateMeta = const VerificationMeta(
+    'borrowDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> borrowDate = GeneratedColumn<DateTime>(
+    'borrow_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isSettledMeta = const VerificationMeta(
+    'isSettled',
+  );
+  @override
+  late final GeneratedColumn<bool> isSettled = GeneratedColumn<bool>(
+    'is_settled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_settled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    personName,
+    amount,
+    note,
+    borrowDate,
+    isSettled,
+    isDeleted,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'borrows';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Borrow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('person_name')) {
+      context.handle(
+        _personNameMeta,
+        personName.isAcceptableOrUnknown(data['person_name']!, _personNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_personNameMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('borrow_date')) {
+      context.handle(
+        _borrowDateMeta,
+        borrowDate.isAcceptableOrUnknown(data['borrow_date']!, _borrowDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_borrowDateMeta);
+    }
+    if (data.containsKey('is_settled')) {
+      context.handle(
+        _isSettledMeta,
+        isSettled.isAcceptableOrUnknown(data['is_settled']!, _isSettledMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Borrow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Borrow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      personName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}person_name'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      borrowDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}borrow_date'],
+      )!,
+      isSettled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_settled'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BorrowsTable createAlias(String alias) {
+    return $BorrowsTable(attachedDatabase, alias);
+  }
+}
+
+class Borrow extends DataClass implements Insertable<Borrow> {
+  final String id;
+  final String personName;
+  final double amount;
+  final String? note;
+  final DateTime borrowDate;
+  final bool isSettled;
+  final bool isDeleted;
+  final DateTime createdAt;
+  const Borrow({
+    required this.id,
+    required this.personName,
+    required this.amount,
+    this.note,
+    required this.borrowDate,
+    required this.isSettled,
+    required this.isDeleted,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['person_name'] = Variable<String>(personName);
+    map['amount'] = Variable<double>(amount);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['borrow_date'] = Variable<DateTime>(borrowDate);
+    map['is_settled'] = Variable<bool>(isSettled);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  BorrowsCompanion toCompanion(bool nullToAbsent) {
+    return BorrowsCompanion(
+      id: Value(id),
+      personName: Value(personName),
+      amount: Value(amount),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      borrowDate: Value(borrowDate),
+      isSettled: Value(isSettled),
+      isDeleted: Value(isDeleted),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Borrow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Borrow(
+      id: serializer.fromJson<String>(json['id']),
+      personName: serializer.fromJson<String>(json['personName']),
+      amount: serializer.fromJson<double>(json['amount']),
+      note: serializer.fromJson<String?>(json['note']),
+      borrowDate: serializer.fromJson<DateTime>(json['borrowDate']),
+      isSettled: serializer.fromJson<bool>(json['isSettled']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'personName': serializer.toJson<String>(personName),
+      'amount': serializer.toJson<double>(amount),
+      'note': serializer.toJson<String?>(note),
+      'borrowDate': serializer.toJson<DateTime>(borrowDate),
+      'isSettled': serializer.toJson<bool>(isSettled),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Borrow copyWith({
+    String? id,
+    String? personName,
+    double? amount,
+    Value<String?> note = const Value.absent(),
+    DateTime? borrowDate,
+    bool? isSettled,
+    bool? isDeleted,
+    DateTime? createdAt,
+  }) => Borrow(
+    id: id ?? this.id,
+    personName: personName ?? this.personName,
+    amount: amount ?? this.amount,
+    note: note.present ? note.value : this.note,
+    borrowDate: borrowDate ?? this.borrowDate,
+    isSettled: isSettled ?? this.isSettled,
+    isDeleted: isDeleted ?? this.isDeleted,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  Borrow copyWithCompanion(BorrowsCompanion data) {
+    return Borrow(
+      id: data.id.present ? data.id.value : this.id,
+      personName: data.personName.present
+          ? data.personName.value
+          : this.personName,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      note: data.note.present ? data.note.value : this.note,
+      borrowDate: data.borrowDate.present
+          ? data.borrowDate.value
+          : this.borrowDate,
+      isSettled: data.isSettled.present ? data.isSettled.value : this.isSettled,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Borrow(')
+          ..write('id: $id, ')
+          ..write('personName: $personName, ')
+          ..write('amount: $amount, ')
+          ..write('note: $note, ')
+          ..write('borrowDate: $borrowDate, ')
+          ..write('isSettled: $isSettled, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    personName,
+    amount,
+    note,
+    borrowDate,
+    isSettled,
+    isDeleted,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Borrow &&
+          other.id == this.id &&
+          other.personName == this.personName &&
+          other.amount == this.amount &&
+          other.note == this.note &&
+          other.borrowDate == this.borrowDate &&
+          other.isSettled == this.isSettled &&
+          other.isDeleted == this.isDeleted &&
+          other.createdAt == this.createdAt);
+}
+
+class BorrowsCompanion extends UpdateCompanion<Borrow> {
+  final Value<String> id;
+  final Value<String> personName;
+  final Value<double> amount;
+  final Value<String?> note;
+  final Value<DateTime> borrowDate;
+  final Value<bool> isSettled;
+  final Value<bool> isDeleted;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const BorrowsCompanion({
+    this.id = const Value.absent(),
+    this.personName = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.note = const Value.absent(),
+    this.borrowDate = const Value.absent(),
+    this.isSettled = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BorrowsCompanion.insert({
+    required String id,
+    required String personName,
+    required double amount,
+    this.note = const Value.absent(),
+    required DateTime borrowDate,
+    this.isSettled = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       personName = Value(personName),
+       amount = Value(amount),
+       borrowDate = Value(borrowDate);
+  static Insertable<Borrow> custom({
+    Expression<String>? id,
+    Expression<String>? personName,
+    Expression<double>? amount,
+    Expression<String>? note,
+    Expression<DateTime>? borrowDate,
+    Expression<bool>? isSettled,
+    Expression<bool>? isDeleted,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (personName != null) 'person_name': personName,
+      if (amount != null) 'amount': amount,
+      if (note != null) 'note': note,
+      if (borrowDate != null) 'borrow_date': borrowDate,
+      if (isSettled != null) 'is_settled': isSettled,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BorrowsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? personName,
+    Value<double>? amount,
+    Value<String?>? note,
+    Value<DateTime>? borrowDate,
+    Value<bool>? isSettled,
+    Value<bool>? isDeleted,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return BorrowsCompanion(
+      id: id ?? this.id,
+      personName: personName ?? this.personName,
+      amount: amount ?? this.amount,
+      note: note ?? this.note,
+      borrowDate: borrowDate ?? this.borrowDate,
+      isSettled: isSettled ?? this.isSettled,
+      isDeleted: isDeleted ?? this.isDeleted,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (personName.present) {
+      map['person_name'] = Variable<String>(personName.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (borrowDate.present) {
+      map['borrow_date'] = Variable<DateTime>(borrowDate.value);
+    }
+    if (isSettled.present) {
+      map['is_settled'] = Variable<bool>(isSettled.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BorrowsCompanion(')
+          ..write('id: $id, ')
+          ..write('personName: $personName, ')
+          ..write('amount: $amount, ')
+          ..write('note: $note, ')
+          ..write('borrowDate: $borrowDate, ')
           ..write('isSettled: $isSettled, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('createdAt: $createdAt, ')
@@ -1796,7 +2253,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $IncomesTable incomes = $IncomesTable(this);
-  late final $LendBorrowsTable lendBorrows = $LendBorrowsTable(this);
+  late final $LendsTable lends = $LendsTable(this);
+  late final $BorrowsTable borrows = $BorrowsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1805,7 +2263,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     categories,
     expenses,
     incomes,
-    lendBorrows,
+    lends,
+    borrows,
   ];
 }
 
@@ -2685,36 +3144,33 @@ typedef $$IncomesTableProcessedTableManager =
       Income,
       PrefetchHooks Function()
     >;
-typedef $$LendBorrowsTableCreateCompanionBuilder =
-    LendBorrowsCompanion Function({
+typedef $$LendsTableCreateCompanionBuilder =
+    LendsCompanion Function({
       required String id,
       required String personName,
       required double amount,
-      required String type,
       Value<String?> note,
-      required DateTime transactionDate,
+      required DateTime lendDate,
       Value<bool> isSettled,
       Value<bool> isDeleted,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
-typedef $$LendBorrowsTableUpdateCompanionBuilder =
-    LendBorrowsCompanion Function({
+typedef $$LendsTableUpdateCompanionBuilder =
+    LendsCompanion Function({
       Value<String> id,
       Value<String> personName,
       Value<double> amount,
-      Value<String> type,
       Value<String?> note,
-      Value<DateTime> transactionDate,
+      Value<DateTime> lendDate,
       Value<bool> isSettled,
       Value<bool> isDeleted,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
 
-class $$LendBorrowsTableFilterComposer
-    extends Composer<_$AppDatabase, $LendBorrowsTable> {
-  $$LendBorrowsTableFilterComposer({
+class $$LendsTableFilterComposer extends Composer<_$AppDatabase, $LendsTable> {
+  $$LendsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2736,18 +3192,13 @@ class $$LendBorrowsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get transactionDate => $composableBuilder(
-    column: $table.transactionDate,
+  ColumnFilters<DateTime> get lendDate => $composableBuilder(
+    column: $table.lendDate,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2767,9 +3218,9 @@ class $$LendBorrowsTableFilterComposer
   );
 }
 
-class $$LendBorrowsTableOrderingComposer
-    extends Composer<_$AppDatabase, $LendBorrowsTable> {
-  $$LendBorrowsTableOrderingComposer({
+class $$LendsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LendsTable> {
+  $$LendsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2791,18 +3242,13 @@ class $$LendBorrowsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get transactionDate => $composableBuilder(
-    column: $table.transactionDate,
+  ColumnOrderings<DateTime> get lendDate => $composableBuilder(
+    column: $table.lendDate,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2822,9 +3268,9 @@ class $$LendBorrowsTableOrderingComposer
   );
 }
 
-class $$LendBorrowsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $LendBorrowsTable> {
-  $$LendBorrowsTableAnnotationComposer({
+class $$LendsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LendsTable> {
+  $$LendsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2842,16 +3288,11 @@ class $$LendBorrowsTableAnnotationComposer
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
-
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get transactionDate => $composableBuilder(
-    column: $table.transactionDate,
-    builder: (column) => column,
-  );
+  GeneratedColumn<DateTime> get lendDate =>
+      $composableBuilder(column: $table.lendDate, builder: (column) => column);
 
   GeneratedColumn<bool> get isSettled =>
       $composableBuilder(column: $table.isSettled, builder: (column) => column);
@@ -2863,54 +3304,49 @@ class $$LendBorrowsTableAnnotationComposer
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
-class $$LendBorrowsTableTableManager
+class $$LendsTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $LendBorrowsTable,
-          LendBorrow,
-          $$LendBorrowsTableFilterComposer,
-          $$LendBorrowsTableOrderingComposer,
-          $$LendBorrowsTableAnnotationComposer,
-          $$LendBorrowsTableCreateCompanionBuilder,
-          $$LendBorrowsTableUpdateCompanionBuilder,
-          (
-            LendBorrow,
-            BaseReferences<_$AppDatabase, $LendBorrowsTable, LendBorrow>,
-          ),
-          LendBorrow,
+          $LendsTable,
+          Lend,
+          $$LendsTableFilterComposer,
+          $$LendsTableOrderingComposer,
+          $$LendsTableAnnotationComposer,
+          $$LendsTableCreateCompanionBuilder,
+          $$LendsTableUpdateCompanionBuilder,
+          (Lend, BaseReferences<_$AppDatabase, $LendsTable, Lend>),
+          Lend,
           PrefetchHooks Function()
         > {
-  $$LendBorrowsTableTableManager(_$AppDatabase db, $LendBorrowsTable table)
+  $$LendsTableTableManager(_$AppDatabase db, $LendsTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$LendBorrowsTableFilterComposer($db: db, $table: table),
+              $$LendsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$LendBorrowsTableOrderingComposer($db: db, $table: table),
+              $$LendsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$LendBorrowsTableAnnotationComposer($db: db, $table: table),
+              $$LendsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> personName = const Value.absent(),
                 Value<double> amount = const Value.absent(),
-                Value<String> type = const Value.absent(),
                 Value<String?> note = const Value.absent(),
-                Value<DateTime> transactionDate = const Value.absent(),
+                Value<DateTime> lendDate = const Value.absent(),
                 Value<bool> isSettled = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => LendBorrowsCompanion(
+              }) => LendsCompanion(
                 id: id,
                 personName: personName,
                 amount: amount,
-                type: type,
                 note: note,
-                transactionDate: transactionDate,
+                lendDate: lendDate,
                 isSettled: isSettled,
                 isDeleted: isDeleted,
                 createdAt: createdAt,
@@ -2921,20 +3357,18 @@ class $$LendBorrowsTableTableManager
                 required String id,
                 required String personName,
                 required double amount,
-                required String type,
                 Value<String?> note = const Value.absent(),
-                required DateTime transactionDate,
+                required DateTime lendDate,
                 Value<bool> isSettled = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => LendBorrowsCompanion.insert(
+              }) => LendsCompanion.insert(
                 id: id,
                 personName: personName,
                 amount: amount,
-                type: type,
                 note: note,
-                transactionDate: transactionDate,
+                lendDate: lendDate,
                 isSettled: isSettled,
                 isDeleted: isDeleted,
                 createdAt: createdAt,
@@ -2948,21 +3382,273 @@ class $$LendBorrowsTableTableManager
       );
 }
 
-typedef $$LendBorrowsTableProcessedTableManager =
+typedef $$LendsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $LendBorrowsTable,
-      LendBorrow,
-      $$LendBorrowsTableFilterComposer,
-      $$LendBorrowsTableOrderingComposer,
-      $$LendBorrowsTableAnnotationComposer,
-      $$LendBorrowsTableCreateCompanionBuilder,
-      $$LendBorrowsTableUpdateCompanionBuilder,
-      (
-        LendBorrow,
-        BaseReferences<_$AppDatabase, $LendBorrowsTable, LendBorrow>,
-      ),
-      LendBorrow,
+      $LendsTable,
+      Lend,
+      $$LendsTableFilterComposer,
+      $$LendsTableOrderingComposer,
+      $$LendsTableAnnotationComposer,
+      $$LendsTableCreateCompanionBuilder,
+      $$LendsTableUpdateCompanionBuilder,
+      (Lend, BaseReferences<_$AppDatabase, $LendsTable, Lend>),
+      Lend,
+      PrefetchHooks Function()
+    >;
+typedef $$BorrowsTableCreateCompanionBuilder =
+    BorrowsCompanion Function({
+      required String id,
+      required String personName,
+      required double amount,
+      Value<String?> note,
+      required DateTime borrowDate,
+      Value<bool> isSettled,
+      Value<bool> isDeleted,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$BorrowsTableUpdateCompanionBuilder =
+    BorrowsCompanion Function({
+      Value<String> id,
+      Value<String> personName,
+      Value<double> amount,
+      Value<String?> note,
+      Value<DateTime> borrowDate,
+      Value<bool> isSettled,
+      Value<bool> isDeleted,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$BorrowsTableFilterComposer
+    extends Composer<_$AppDatabase, $BorrowsTable> {
+  $$BorrowsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get personName => $composableBuilder(
+    column: $table.personName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get borrowDate => $composableBuilder(
+    column: $table.borrowDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSettled => $composableBuilder(
+    column: $table.isSettled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BorrowsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BorrowsTable> {
+  $$BorrowsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get personName => $composableBuilder(
+    column: $table.personName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get borrowDate => $composableBuilder(
+    column: $table.borrowDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSettled => $composableBuilder(
+    column: $table.isSettled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BorrowsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BorrowsTable> {
+  $$BorrowsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get personName => $composableBuilder(
+    column: $table.personName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get borrowDate => $composableBuilder(
+    column: $table.borrowDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isSettled =>
+      $composableBuilder(column: $table.isSettled, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$BorrowsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BorrowsTable,
+          Borrow,
+          $$BorrowsTableFilterComposer,
+          $$BorrowsTableOrderingComposer,
+          $$BorrowsTableAnnotationComposer,
+          $$BorrowsTableCreateCompanionBuilder,
+          $$BorrowsTableUpdateCompanionBuilder,
+          (Borrow, BaseReferences<_$AppDatabase, $BorrowsTable, Borrow>),
+          Borrow,
+          PrefetchHooks Function()
+        > {
+  $$BorrowsTableTableManager(_$AppDatabase db, $BorrowsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BorrowsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BorrowsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BorrowsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> personName = const Value.absent(),
+                Value<double> amount = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime> borrowDate = const Value.absent(),
+                Value<bool> isSettled = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BorrowsCompanion(
+                id: id,
+                personName: personName,
+                amount: amount,
+                note: note,
+                borrowDate: borrowDate,
+                isSettled: isSettled,
+                isDeleted: isDeleted,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String personName,
+                required double amount,
+                Value<String?> note = const Value.absent(),
+                required DateTime borrowDate,
+                Value<bool> isSettled = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BorrowsCompanion.insert(
+                id: id,
+                personName: personName,
+                amount: amount,
+                note: note,
+                borrowDate: borrowDate,
+                isSettled: isSettled,
+                isDeleted: isDeleted,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BorrowsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BorrowsTable,
+      Borrow,
+      $$BorrowsTableFilterComposer,
+      $$BorrowsTableOrderingComposer,
+      $$BorrowsTableAnnotationComposer,
+      $$BorrowsTableCreateCompanionBuilder,
+      $$BorrowsTableUpdateCompanionBuilder,
+      (Borrow, BaseReferences<_$AppDatabase, $BorrowsTable, Borrow>),
+      Borrow,
       PrefetchHooks Function()
     >;
 
@@ -2975,6 +3661,8 @@ class $AppDatabaseManager {
       $$ExpensesTableTableManager(_db, _db.expenses);
   $$IncomesTableTableManager get incomes =>
       $$IncomesTableTableManager(_db, _db.incomes);
-  $$LendBorrowsTableTableManager get lendBorrows =>
-      $$LendBorrowsTableTableManager(_db, _db.lendBorrows);
+  $$LendsTableTableManager get lends =>
+      $$LendsTableTableManager(_db, _db.lends);
+  $$BorrowsTableTableManager get borrows =>
+      $$BorrowsTableTableManager(_db, _db.borrows);
 }

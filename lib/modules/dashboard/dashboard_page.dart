@@ -32,7 +32,8 @@ class DashboardPage extends StatelessWidget {
         () =>
             expenseController.expenses.isEmpty &&
                 incomeController.incomes.isEmpty &&
-                lendBorrowController.entries.isEmpty
+                lendBorrowController.lends.isEmpty &&
+                lendBorrowController.borrows.isEmpty
             ? _buildEmptyState()
             : SingleChildScrollView(
                 child: Column(
@@ -284,8 +285,11 @@ class DashboardPage extends StatelessWidget {
     if (selectedTab == DashboardTransactionTab.all ||
         selectedTab == DashboardTransactionTab.lendBorrow) {
       entries.addAll(
-        lendBorrowController.entries.map(
-          (entry) => _DashboardEntry.lendBorrow(entry),
+        lendBorrowController.lends.map((entry) => _DashboardEntry.lend(entry)),
+      );
+      entries.addAll(
+        lendBorrowController.borrows.map(
+          (entry) => _DashboardEntry.borrow(entry),
         ),
       );
     }
@@ -361,9 +365,14 @@ class DashboardPage extends StatelessWidget {
           );
         }
 
-        if (entry.isLendBorrow) {
-          final lendBorrow = entry.lendBorrow!;
-          final isLend = lendBorrow.type == LendBorrowController.typeLend;
+        if (entry.isLend || entry.isBorrow) {
+          final isLend = entry.isLend;
+          final personName = isLend
+              ? entry.lend!.personName
+              : entry.borrow!.personName;
+          final amount = isLend ? entry.lend!.amount : entry.borrow!.amount;
+          final note = isLend ? entry.lend!.note : entry.borrow!.note;
+          final date = isLend ? entry.lend!.lendDate : entry.borrow!.borrowDate;
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
@@ -381,7 +390,7 @@ class DashboardPage extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                title: Text(lendBorrow.personName),
+                title: Text(personName),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -389,15 +398,15 @@ class DashboardPage extends StatelessWidget {
                       isLend ? 'Lend' : 'Borrow',
                       style: const TextStyle(fontSize: 12),
                     ),
-                    if (lendBorrow.note != null && lendBorrow.note!.isNotEmpty)
+                    if (note != null && note.isNotEmpty)
                       Text(
-                        lendBorrow.note!,
+                        note,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 12),
                       ),
                     Text(
-                      DateHelper.formatDate(lendBorrow.transactionDate),
+                      DateHelper.formatDate(date),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -406,7 +415,7 @@ class DashboardPage extends StatelessWidget {
                   ],
                 ),
                 trailing: Text(
-                  CurrencyHelper.formatAmount(lendBorrow.amount),
+                  CurrencyHelper.formatAmount(amount),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -468,9 +477,10 @@ class DashboardPage extends StatelessWidget {
 class _DashboardEntry {
   final Income? income;
   final Expense? expense;
-  final LendBorrow? lendBorrow;
+  final Lend? lend;
+  final Borrow? borrow;
 
-  const _DashboardEntry._({this.income, this.expense, this.lendBorrow});
+  const _DashboardEntry._({this.income, this.expense, this.lend, this.borrow});
 
   factory _DashboardEntry.income(Income income) {
     return _DashboardEntry._(income: income);
@@ -480,21 +490,31 @@ class _DashboardEntry {
     return _DashboardEntry._(expense: expense);
   }
 
-  factory _DashboardEntry.lendBorrow(LendBorrow lendBorrow) {
-    return _DashboardEntry._(lendBorrow: lendBorrow);
+  factory _DashboardEntry.lend(Lend lend) {
+    return _DashboardEntry._(lend: lend);
+  }
+
+  factory _DashboardEntry.borrow(Borrow borrow) {
+    return _DashboardEntry._(borrow: borrow);
   }
 
   bool get isIncome => income != null;
 
-  bool get isLendBorrow => lendBorrow != null;
+  bool get isLend => lend != null;
+
+  bool get isBorrow => borrow != null;
 
   DateTime get date {
     if (isIncome) {
       return income!.incomeDate;
     }
 
-    if (isLendBorrow) {
-      return lendBorrow!.transactionDate;
+    if (isLend) {
+      return lend!.lendDate;
+    }
+
+    if (isBorrow) {
+      return borrow!.borrowDate;
     }
 
     return expense!.expenseDate;

@@ -62,9 +62,11 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
           // Content
           Expanded(
             child: Obx(() {
-              final entries = controller.entries;
+              final lends = controller.lends;
+              final borrows = controller.borrows;
+              final allEmpty = lends.isEmpty && borrows.isEmpty;
 
-              if (entries.isEmpty) {
+              if (allEmpty) {
                 return Center(
                   child: Text(
                     'No lend/borrow entries yet',
@@ -74,10 +76,17 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
               }
 
               if (_selectedIndex == 0) {
-                final all = [...entries]
-                  ..sort(
-                    (a, b) => b.transactionDate.compareTo(a.transactionDate),
-                  );
+                // All - combine both lists
+                final all = <dynamic>[...lends, ...borrows]
+                  ..sort((a, b) {
+                    final aDate = a is Lend
+                        ? a.lendDate
+                        : (a as Borrow).borrowDate;
+                    final bDate = b is Lend
+                        ? b.lendDate
+                        : (b as Borrow).borrowDate;
+                    return bDate.compareTo(aDate);
+                  });
                 return ListView.builder(
                   padding: const EdgeInsets.all(AppConstants.defaultPadding),
                   itemCount: all.length,
@@ -87,14 +96,8 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
               }
 
               if (_selectedIndex == 1) {
-                final lendList =
-                    entries
-                        .where((e) => e.type == LendBorrowController.typeLend)
-                        .toList()
-                      ..sort(
-                        (a, b) =>
-                            b.transactionDate.compareTo(a.transactionDate),
-                      );
+                final lendList = [...lends]
+                  ..sort((a, b) => b.lendDate.compareTo(a.lendDate));
 
                 if (lendList.isEmpty) {
                   return Center(
@@ -113,13 +116,8 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
                 );
               }
 
-              final borrowList =
-                  entries
-                      .where((e) => e.type == LendBorrowController.typeBorrow)
-                      .toList()
-                    ..sort(
-                      (a, b) => b.transactionDate.compareTo(a.transactionDate),
-                    );
+              final borrowList = [...borrows]
+                ..sort((a, b) => b.borrowDate.compareTo(a.borrowDate));
 
               if (borrowList.isEmpty) {
                 return Center(
@@ -147,13 +145,41 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
     );
   }
 
-  Widget _buildEntryTile(LendBorrowController controller, LendBorrow entry) {
-    final isLend = entry.type == LendBorrowController.typeLend;
-    final settled = entry.isSettled;
+  Widget _buildEntryTile(LendBorrowController controller, dynamic entry) {
+    final bool isLend;
+    final String id;
+    final String personName;
+    final double amount;
+    final String? note;
+    final DateTime date;
+    final bool settled;
+
+    if (entry is Lend) {
+      isLend = true;
+      id = entry.id;
+      personName = entry.personName;
+      amount = entry.amount;
+      note = entry.note;
+      date = entry.lendDate;
+      settled = entry.isSettled;
+    } else {
+      isLend = false;
+      final borrowEntry = entry as Borrow;
+      id = borrowEntry.id;
+      personName = borrowEntry.personName;
+      amount = borrowEntry.amount;
+      note = borrowEntry.note;
+      date = borrowEntry.borrowDate;
+      settled = borrowEntry.isSettled;
+    }
+
     final settledLabel = isLend ? 'Paid' : 'Returned';
     final avatarColor = settled
         ? Colors.grey.shade400
         : (isLend ? Colors.orange : Colors.blue);
+    final type = isLend
+        ? LendBorrowController.typeLend
+        : LendBorrowController.typeBorrow;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -173,7 +199,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    controller.deleteEntry(entry.id);
+                    controller.deleteEntry(id, type);
                     Get.back();
                   },
                   child: const Text(
@@ -195,7 +221,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
             ),
           ),
           title: Text(
-            entry.personName,
+            personName,
             style: TextStyle(
               decoration: settled
                   ? TextDecoration.lineThrough
@@ -210,15 +236,15 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
                 isLend ? 'Lend' : 'Borrow',
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
               ),
-              if (entry.note != null && entry.note!.isNotEmpty)
+              if (note != null && note.isNotEmpty)
                 Text(
-                  entry.note!,
+                  note,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 12),
                 ),
               Text(
-                DateHelper.formatDate(entry.transactionDate),
+                DateHelper.formatDate(date),
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
             ],
@@ -228,7 +254,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                CurrencyHelper.formatAmount(entry.amount),
+                CurrencyHelper.formatAmount(amount),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -240,8 +266,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
               ),
               const SizedBox(height: 4),
               GestureDetector(
-                onTap: () =>
-                    controller.toggleSettled(entry.id, entry.isSettled),
+                onTap: () => controller.toggleSettled(id, settled, type),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
