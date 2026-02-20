@@ -11,13 +11,14 @@ class DatabaseBackupService {
   Future<File> createBackupFile(AppDatabase database) async {
     final categories = await database.select(database.categories).get();
     final expenses = await database.select(database.expenses).get();
+    final incomes = await database.select(database.incomes).get();
 
     final tempDir = await getTemporaryDirectory();
     final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
     final backupPath = p.join(tempDir.path, 'exptra-backup-$timestamp.exptra');
 
     final backupPayload = {
-      'version': 1,
+      'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
       'categories': categories
           .map(
@@ -39,6 +40,19 @@ class DatabaseBackupService {
               'expenseDate': expense.expenseDate.toIso8601String(),
               'isDeleted': expense.isDeleted,
               'createdAt': expense.createdAt.toIso8601String(),
+            },
+          )
+          .toList(),
+      'incomes': incomes
+          .map(
+            (income) => {
+              'id': income.id,
+              'amount': income.amount,
+              'source': income.source,
+              'note': income.note,
+              'incomeDate': income.incomeDate.toIso8601String(),
+              'isDeleted': income.isDeleted,
+              'createdAt': income.createdAt.toIso8601String(),
             },
           )
           .toList(),
@@ -68,12 +82,16 @@ class DatabaseBackupService {
 
     final categoriesRaw = decoded['categories'];
     final expensesRaw = decoded['expenses'];
+    final incomesRaw = decoded['incomes'];
 
     if (categoriesRaw is! List || expensesRaw is! List) {
       throw Exception('Backup data is missing categories or expenses.');
     }
 
+    final parsedIncomes = incomesRaw is List ? incomesRaw : const [];
+
     await database.transaction(() async {
+      await database.delete(database.incomes).go();
       await database.delete(database.expenses).go();
       await database.delete(database.categories).go();
 
@@ -106,6 +124,28 @@ class DatabaseBackupService {
                 expenseDate: DateTime.parse(item['expenseDate'] as String),
                 isDeleted: Value(item['isDeleted'] as bool? ?? false),
                 createdAt: Value(DateTime.parse(item['createdAt'] as String)),
+              ),
+            );
+      }
+
+      for (final item in parsedIncomes) {
+        if (item is! Map<String, dynamic>) continue;
+
+        await database
+            .into(database.incomes)
+            .insert(
+              IncomesCompanion.insert(
+                id: item['id'] as String,
+                amount: (item['amount'] as num).toDouble(),
+                source: Value(item['source'] as String?),
+                note: Value(item['note'] as String?),
+                incomeDate: DateTime.parse(item['incomeDate'] as String),
+                isDeleted: Value(item['isDeleted'] as bool? ?? false),
+                createdAt: Value(
+                  item['createdAt'] != null
+                      ? DateTime.parse(item['createdAt'] as String)
+                      : DateTime.now(),
+                ),
               ),
             );
       }
