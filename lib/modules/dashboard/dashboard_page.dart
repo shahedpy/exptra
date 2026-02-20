@@ -182,12 +182,12 @@ class DashboardPage extends StatelessWidget {
             ),
             ButtonSegment<DashboardTransactionTab>(
               value: DashboardTransactionTab.incomeExpense,
-              label: Text('I/E'),
+              label: Text('Inc/Exp'),
               icon: Icon(Icons.trending_up_rounded),
             ),
             ButtonSegment<DashboardTransactionTab>(
               value: DashboardTransactionTab.lendBorrow,
-              label: Text('L/B'),
+              label: Text('Len/Bor'),
               icon: Icon(Icons.sync_alt_rounded),
             ),
           ],
