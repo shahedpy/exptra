@@ -115,10 +115,14 @@ class LendBorrowController extends GetxController {
   }
 
   double getTotalLent() {
-    return lends.fold(0.0, (sum, entry) => sum + entry.amount);
+    return lends
+        .where((entry) => !entry.isSettled)
+        .fold(0.0, (sum, entry) => sum + entry.amount);
   }
 
   double getTotalBorrowed() {
-    return borrows.fold(0.0, (sum, entry) => sum + entry.amount);
+    return borrows
+        .where((entry) => !entry.isSettled)
+        .fold(0.0, (sum, entry) => sum + entry.amount);
   }
 }

@@ -90,8 +90,9 @@ class ReportPage extends StatelessWidget {
   }
 
   Widget _buildTypeSelector(ReportController controller) {
-    final isExpense =
-        controller.selectedDataType.value == ReportDataType.expense;
+    final selectedDataType = controller.selectedDataType.value;
+    final isExpense = selectedDataType == ReportDataType.expense;
+    final isIncome = selectedDataType == ReportDataType.income;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -109,11 +110,19 @@ class ReportPage extends StatelessWidget {
                 ),
                 ButtonSegment<ReportType>(
                   value: ReportType.categoryWise,
-                  label: Text(isExpense ? 'Category' : 'Source'),
+                  label: Text(
+                    isExpense
+                        ? 'Category'
+                        : isIncome
+                        ? 'Source'
+                        : 'Person',
+                  ),
                   icon: Icon(
                     isExpense
                         ? Icons.category_rounded
-                        : Icons.account_balance_wallet_rounded,
+                        : isIncome
+                        ? Icons.account_balance_wallet_rounded
+                        : Icons.person_rounded,
                   ),
                 ),
                 ButtonSegment<ReportType>(
@@ -148,13 +157,23 @@ class ReportPage extends StatelessWidget {
         segments: const [
           ButtonSegment<ReportDataType>(
             value: ReportDataType.expense,
-            label: Text('Expense'),
+            label: Text('Exp'),
             icon: Icon(Icons.remove_circle_outline_rounded),
           ),
           ButtonSegment<ReportDataType>(
             value: ReportDataType.income,
-            label: Text('Income'),
+            label: Text('Inc'),
             icon: Icon(Icons.add_circle_outline_rounded),
+          ),
+          ButtonSegment<ReportDataType>(
+            value: ReportDataType.lend,
+            label: Text('Len'),
+            icon: Icon(Icons.call_made_rounded),
+          ),
+          ButtonSegment<ReportDataType>(
+            value: ReportDataType.borrow,
+            label: Text('Bor'),
+            icon: Icon(Icons.call_received_rounded),
           ),
         ],
         selected: {controller.selectedDataType.value},
@@ -270,7 +289,13 @@ class ReportPage extends StatelessWidget {
       case ReportType.monthWise:
         return 'Month';
       case ReportType.categoryWise:
-        return dataType == ReportDataType.expense ? 'Category' : 'Source';
+        if (dataType == ReportDataType.expense) {
+          return 'Category';
+        }
+        if (dataType == ReportDataType.income) {
+          return 'Source';
+        }
+        return 'Person';
       case ReportType.dailyWise:
         return 'Daily';
     }
