@@ -20,7 +20,13 @@ class DashboardPage extends StatelessWidget {
     final dashboardController = Get.put(DashboardController());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Exptra'), elevation: 0),
+      appBar: AppBar(
+        title: const Text(
+          'Exptra',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        elevation: 0,
+      ),
       body: Obx(
         () =>
             expenseController.expenses.isEmpty &&
