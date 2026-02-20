@@ -51,6 +51,15 @@ class LendBorrowController extends GetxController {
     }
   }
 
+  Future<void> toggleSettled(String id, bool currentValue) async {
+    try {
+      await repository.toggleSettled(id, !currentValue);
+      await loadEntries();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update entry: $e');
+    }
+  }
+
   double getTotalLent() {
     return entries
         .where((entry) => entry.type == typeLend)

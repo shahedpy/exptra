@@ -1294,6 +1294,21 @@ class $LendBorrowsTable extends LendBorrows
         type: DriftSqlType.dateTime,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _isSettledMeta = const VerificationMeta(
+    'isSettled',
+  );
+  @override
+  late final GeneratedColumn<bool> isSettled = GeneratedColumn<bool>(
+    'is_settled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_settled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _isDeletedMeta = const VerificationMeta(
     'isDeleted',
   );
@@ -1329,6 +1344,7 @@ class $LendBorrowsTable extends LendBorrows
     type,
     note,
     transactionDate,
+    isSettled,
     isDeleted,
     createdAt,
   ];
@@ -1390,6 +1406,12 @@ class $LendBorrowsTable extends LendBorrows
     } else if (isInserting) {
       context.missing(_transactionDateMeta);
     }
+    if (data.containsKey('is_settled')) {
+      context.handle(
+        _isSettledMeta,
+        isSettled.isAcceptableOrUnknown(data['is_settled']!, _isSettledMeta),
+      );
+    }
     if (data.containsKey('is_deleted')) {
       context.handle(
         _isDeletedMeta,
@@ -1435,6 +1457,10 @@ class $LendBorrowsTable extends LendBorrows
         DriftSqlType.dateTime,
         data['${effectivePrefix}transaction_date'],
       )!,
+      isSettled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_settled'],
+      )!,
       isDeleted: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
@@ -1459,6 +1485,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
   final String type;
   final String? note;
   final DateTime transactionDate;
+  final bool isSettled;
   final bool isDeleted;
   final DateTime createdAt;
   const LendBorrow({
@@ -1468,6 +1495,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
     required this.type,
     this.note,
     required this.transactionDate,
+    required this.isSettled,
     required this.isDeleted,
     required this.createdAt,
   });
@@ -1482,6 +1510,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
       map['note'] = Variable<String>(note);
     }
     map['transaction_date'] = Variable<DateTime>(transactionDate);
+    map['is_settled'] = Variable<bool>(isSettled);
     map['is_deleted'] = Variable<bool>(isDeleted);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
@@ -1495,6 +1524,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
       type: Value(type),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       transactionDate: Value(transactionDate),
+      isSettled: Value(isSettled),
       isDeleted: Value(isDeleted),
       createdAt: Value(createdAt),
     );
@@ -1512,6 +1542,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
       type: serializer.fromJson<String>(json['type']),
       note: serializer.fromJson<String?>(json['note']),
       transactionDate: serializer.fromJson<DateTime>(json['transactionDate']),
+      isSettled: serializer.fromJson<bool>(json['isSettled']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -1526,6 +1557,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
       'type': serializer.toJson<String>(type),
       'note': serializer.toJson<String?>(note),
       'transactionDate': serializer.toJson<DateTime>(transactionDate),
+      'isSettled': serializer.toJson<bool>(isSettled),
       'isDeleted': serializer.toJson<bool>(isDeleted),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -1538,6 +1570,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
     String? type,
     Value<String?> note = const Value.absent(),
     DateTime? transactionDate,
+    bool? isSettled,
     bool? isDeleted,
     DateTime? createdAt,
   }) => LendBorrow(
@@ -1547,6 +1580,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
     type: type ?? this.type,
     note: note.present ? note.value : this.note,
     transactionDate: transactionDate ?? this.transactionDate,
+    isSettled: isSettled ?? this.isSettled,
     isDeleted: isDeleted ?? this.isDeleted,
     createdAt: createdAt ?? this.createdAt,
   );
@@ -1562,6 +1596,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
       transactionDate: data.transactionDate.present
           ? data.transactionDate.value
           : this.transactionDate,
+      isSettled: data.isSettled.present ? data.isSettled.value : this.isSettled,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
@@ -1576,6 +1611,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
           ..write('type: $type, ')
           ..write('note: $note, ')
           ..write('transactionDate: $transactionDate, ')
+          ..write('isSettled: $isSettled, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -1590,6 +1626,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
     type,
     note,
     transactionDate,
+    isSettled,
     isDeleted,
     createdAt,
   );
@@ -1603,6 +1640,7 @@ class LendBorrow extends DataClass implements Insertable<LendBorrow> {
           other.type == this.type &&
           other.note == this.note &&
           other.transactionDate == this.transactionDate &&
+          other.isSettled == this.isSettled &&
           other.isDeleted == this.isDeleted &&
           other.createdAt == this.createdAt);
 }
@@ -1614,6 +1652,7 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
   final Value<String> type;
   final Value<String?> note;
   final Value<DateTime> transactionDate;
+  final Value<bool> isSettled;
   final Value<bool> isDeleted;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
@@ -1624,6 +1663,7 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
     this.type = const Value.absent(),
     this.note = const Value.absent(),
     this.transactionDate = const Value.absent(),
+    this.isSettled = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1635,6 +1675,7 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
     required String type,
     this.note = const Value.absent(),
     required DateTime transactionDate,
+    this.isSettled = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1650,6 +1691,7 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
     Expression<String>? type,
     Expression<String>? note,
     Expression<DateTime>? transactionDate,
+    Expression<bool>? isSettled,
     Expression<bool>? isDeleted,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
@@ -1661,6 +1703,7 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
       if (type != null) 'type': type,
       if (note != null) 'note': note,
       if (transactionDate != null) 'transaction_date': transactionDate,
+      if (isSettled != null) 'is_settled': isSettled,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
@@ -1674,6 +1717,7 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
     Value<String>? type,
     Value<String?>? note,
     Value<DateTime>? transactionDate,
+    Value<bool>? isSettled,
     Value<bool>? isDeleted,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
@@ -1685,6 +1729,7 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
       type: type ?? this.type,
       note: note ?? this.note,
       transactionDate: transactionDate ?? this.transactionDate,
+      isSettled: isSettled ?? this.isSettled,
       isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
@@ -1712,6 +1757,9 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
     if (transactionDate.present) {
       map['transaction_date'] = Variable<DateTime>(transactionDate.value);
     }
+    if (isSettled.present) {
+      map['is_settled'] = Variable<bool>(isSettled.value);
+    }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
@@ -1733,6 +1781,7 @@ class LendBorrowsCompanion extends UpdateCompanion<LendBorrow> {
           ..write('type: $type, ')
           ..write('note: $note, ')
           ..write('transactionDate: $transactionDate, ')
+          ..write('isSettled: $isSettled, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
@@ -2644,6 +2693,7 @@ typedef $$LendBorrowsTableCreateCompanionBuilder =
       required String type,
       Value<String?> note,
       required DateTime transactionDate,
+      Value<bool> isSettled,
       Value<bool> isDeleted,
       Value<DateTime> createdAt,
       Value<int> rowid,
@@ -2656,6 +2706,7 @@ typedef $$LendBorrowsTableUpdateCompanionBuilder =
       Value<String> type,
       Value<String?> note,
       Value<DateTime> transactionDate,
+      Value<bool> isSettled,
       Value<bool> isDeleted,
       Value<DateTime> createdAt,
       Value<int> rowid,
@@ -2697,6 +2748,11 @@ class $$LendBorrowsTableFilterComposer
 
   ColumnFilters<DateTime> get transactionDate => $composableBuilder(
     column: $table.transactionDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSettled => $composableBuilder(
+    column: $table.isSettled,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2750,6 +2806,11 @@ class $$LendBorrowsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isSettled => $composableBuilder(
+    column: $table.isSettled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
     builder: (column) => ColumnOrderings(column),
@@ -2791,6 +2852,9 @@ class $$LendBorrowsTableAnnotationComposer
     column: $table.transactionDate,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isSettled =>
+      $composableBuilder(column: $table.isSettled, builder: (column) => column);
 
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
@@ -2836,6 +2900,7 @@ class $$LendBorrowsTableTableManager
                 Value<String> type = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> transactionDate = const Value.absent(),
+                Value<bool> isSettled = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2846,6 +2911,7 @@ class $$LendBorrowsTableTableManager
                 type: type,
                 note: note,
                 transactionDate: transactionDate,
+                isSettled: isSettled,
                 isDeleted: isDeleted,
                 createdAt: createdAt,
                 rowid: rowid,
@@ -2858,6 +2924,7 @@ class $$LendBorrowsTableTableManager
                 required String type,
                 Value<String?> note = const Value.absent(),
                 required DateTime transactionDate,
+                Value<bool> isSettled = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2868,6 +2935,7 @@ class $$LendBorrowsTableTableManager
                 type: type,
                 note: note,
                 transactionDate: transactionDate,
+                isSettled: isSettled,
                 isDeleted: isDeleted,
                 createdAt: createdAt,
                 rowid: rowid,

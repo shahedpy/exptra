@@ -7,6 +7,7 @@ class LendBorrows extends Table {
   TextColumn get type => text()();
   TextColumn get note => text().nullable()();
   DateTimeColumn get transactionDate => dateTime()();
+  BoolColumn get isSettled => boolean().withDefault(const Constant(false))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 

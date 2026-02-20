@@ -31,6 +31,11 @@ class LendBorrowPage extends StatelessWidget {
           itemBuilder: (_, index) {
             final entry = controller.entries[index];
             final isLend = entry.type == LendBorrowController.typeLend;
+            final settled = entry.isSettled;
+            final settledLabel = isLend ? 'Paid' : 'Returned';
+            final avatarColor = settled
+                ? Colors.grey.shade400
+                : (isLend ? Colors.orange : Colors.blue);
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
@@ -66,7 +71,7 @@ class LendBorrowPage extends StatelessWidget {
                     AppConstants.defaultPadding,
                   ),
                   leading: CircleAvatar(
-                    backgroundColor: isLend ? Colors.orange : Colors.blue,
+                    backgroundColor: avatarColor,
                     child: Icon(
                       isLend
                           ? Icons.call_made_rounded
@@ -74,7 +79,15 @@ class LendBorrowPage extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
-                  title: Text(entry.personName),
+                  title: Text(
+                    entry.personName,
+                    style: TextStyle(
+                      decoration: settled
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                      color: settled ? Colors.grey : null,
+                    ),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -101,12 +114,69 @@ class LendBorrowPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  trailing: Text(
-                    CurrencyHelper.formatAmount(entry.amount),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        CurrencyHelper.formatAmount(entry.amount),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: settled ? Colors.grey : null,
+                          decoration: settled
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      GestureDetector(
+                        onTap: () =>
+                            controller.toggleSettled(entry.id, entry.isSettled),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: settled
+                                ? Colors.green.shade100
+                                : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: settled
+                                  ? Colors.green.shade400
+                                  : Colors.grey.shade400,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                settled
+                                    ? Icons.check_circle_rounded
+                                    : Icons.radio_button_unchecked_rounded,
+                                size: 12,
+                                color: settled
+                                    ? Colors.green.shade700
+                                    : Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                settledLabel,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: settled
+                                      ? Colors.green.shade700
+                                      : Colors.grey.shade600,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -42,4 +42,10 @@ class LendBorrowRepository {
       LendBorrowsCompanion(isDeleted: const Value(true)),
     );
   }
+
+  Future<void> toggleSettled(String id, bool value) {
+    return (db.update(db.lendBorrows)..where((tbl) => tbl.id.equals(id))).write(
+      LendBorrowsCompanion(isSettled: Value(value)),
+    );
+  }
 }
