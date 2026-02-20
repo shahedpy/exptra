@@ -72,7 +72,7 @@ class DashboardPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Add income, expense, or lend/borrow to get started',
+            'Add income, expense, lend, or borrow to get started',
             style: TextStyle(color: Colors.grey.shade500),
           ),
         ],
@@ -187,7 +187,7 @@ class DashboardPage extends StatelessWidget {
             ButtonSegment<DashboardTransactionTab>(
               value: DashboardTransactionTab.incomeExpense,
               label: Text('Inc/Exp'),
-              icon: Icon(Icons.trending_up_rounded),
+              icon: Icon(Icons.swap_vert_rounded),
             ),
             ButtonSegment<DashboardTransactionTab>(
               value: DashboardTransactionTab.lendBorrow,
@@ -227,11 +227,11 @@ class DashboardPage extends StatelessWidget {
       if (entries.isEmpty) {
         final message = switch (selectedTab) {
           DashboardTransactionTab.all =>
-            'No entries yet. Use + to add expense or income.',
+            'No entries yet.',
           DashboardTransactionTab.incomeExpense =>
-            'No income/expense entries yet. Use + to add one.',
+            'No income/expense entries yet.',
           DashboardTransactionTab.lendBorrow =>
-            'No lend/borrow entries yet. Use + to add one.',
+            'No lend/borrow entries yet.',
         };
 
         return Padding(

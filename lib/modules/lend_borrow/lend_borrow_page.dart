@@ -36,7 +36,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
                 ButtonSegment<int>(
                   value: 0,
                   label: Text('All'),
-                  icon: Icon(Icons.list_alt_rounded),
+                  icon: Icon(Icons.list_rounded),
                 ),
                 ButtonSegment<int>(
                   value: 1,

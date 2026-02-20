@@ -41,17 +41,17 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                 ButtonSegment<int>(
                   value: 0,
                   label: Text('All'),
-                  icon: Icon(Icons.list_alt_rounded),
+                  icon: Icon(Icons.list_rounded),
                 ),
                 ButtonSegment<int>(
                   value: 1,
                   label: Text('Income'),
-                  icon: Icon(Icons.trending_up_rounded),
+                  icon: Icon(Icons.add_circle_outline_rounded),
                 ),
                 ButtonSegment<int>(
                   value: 2,
                   label: Text('Expense'),
-                  icon: Icon(Icons.trending_down_rounded),
+                  icon: Icon(Icons.remove_circle_outline_rounded),
                 ),
               ],
               selected: {_selectedIndex},
@@ -501,7 +501,10 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                   title: const Text('Add Income'),
                   leading: const CircleAvatar(
                     backgroundColor: Colors.green,
-                    child: Icon(Icons.trending_up_rounded, color: Colors.white),
+                    child: Icon(
+                      Icons.add_circle_outline_rounded,
+                      color: Colors.white,
+                    ),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -513,7 +516,7 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                   leading: const CircleAvatar(
                     backgroundColor: Colors.red,
                     child: Icon(
-                      Icons.trending_down_rounded,
+                      Icons.remove_circle_outline_rounded,
                       color: Colors.white,
                     ),
                   ),
