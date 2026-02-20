@@ -16,7 +16,7 @@ EXPTRA is a Flutter app for tracking income, expenses, lend, and borrow activity
 - Add and delete income and expense entries
 - Add and delete lend and borrow entries by person
 - View chronological transaction history from the dashboard
-- Filter dashboard list by `All`, `Inc/Exp`, and `Len/Bor`
+- Filter dashboard list by `All`, `Income/Expense`, and `Lend/Borrow`
 
 ### Dashboard
 
