@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../category/category_page.dart';
 import '../dashboard/dashboard_page.dart';
 import '../lend_borrow/lend_borrow_page.dart';
 import '../reports/report_page.dart';
@@ -19,7 +18,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   static const List<Widget> _pages = [
     DashboardPage(),
     LendBorrowPage(),
-    CategoryPage(),
     ReportPage(),
     MorePage(),
   ];
@@ -27,7 +25,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   static const List<_NavItemData> _navItems = [
     _NavItemData(label: 'Dashboard', icon: Icons.dashboard_rounded),
     _NavItemData(label: 'Lend/Borrow', icon: Icons.sync_alt_rounded),
-    _NavItemData(label: 'Categories', icon: Icons.category_rounded),
     _NavItemData(label: 'Reports', icon: Icons.bar_chart_rounded),
     _NavItemData(label: 'More', icon: Icons.grid_view_rounded),
   ];

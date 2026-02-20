@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/db/app_database.dart';
 import '../../core/db/database_backup_service.dart';
+import '../../core/routes/app_routes.dart';
 import '../category/category_controller.dart';
 import '../expense/expense_controller.dart';
 import '../income/income_controller.dart';
@@ -18,6 +19,12 @@ class MorePage extends StatelessWidget {
       appBar: AppBar(title: const Text('More')),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.category_outlined),
+            title: const Text('Categories'),
+            subtitle: const Text('Manage income and expense categories'),
+            onTap: () => Get.toNamed(AppRoutes.categories),
+          ),
           ListTile(
             leading: const Icon(Icons.backup_outlined),
             title: const Text('Backup data'),
