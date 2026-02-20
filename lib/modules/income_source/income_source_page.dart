@@ -46,9 +46,6 @@ class _IncomeSourcePageState extends State<IncomeSourcePage> {
                   final source = controller.incomeSources[index];
                   return Card(
                     key: ValueKey(source.id),
-                    margin: const EdgeInsets.only(
-                      bottom: AppConstants.defaultPadding,
-                    ),
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: ColorHelper.getColorFromInt(

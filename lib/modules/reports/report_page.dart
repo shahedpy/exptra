@@ -51,16 +51,6 @@ class ReportPage extends StatelessWidget {
                 value: controller.totalTransactions.value.toString(),
               ),
             ),
-            Expanded(
-              child: _summaryItem(
-                title: 'Type',
-                value: _shortTypeLabel(
-                  controller.selectedType.value,
-                  controller.selectedDataType.value,
-                ),
-                alignEnd: true,
-              ),
-            ),
           ],
         ),
       ),
@@ -117,7 +107,7 @@ class ReportPage extends StatelessWidget {
                   value: ReportType.categoryWise,
                   label: Text(
                     isExpense
-                        ? 'Expense Category'
+                        ? 'Category'
                         : isIncome
                         ? 'Source'
                         : 'Person',
@@ -282,22 +272,5 @@ class ReportPage extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _shortTypeLabel(ReportType type, ReportDataType dataType) {
-    switch (type) {
-      case ReportType.monthWise:
-        return 'Month';
-      case ReportType.categoryWise:
-        if (dataType == ReportDataType.expense) {
-          return 'Expense Category';
-        }
-        if (dataType == ReportDataType.income) {
-          return 'Source';
-        }
-        return 'Person';
-      case ReportType.dailyWise:
-        return 'Daily';
-    }
   }
 }
