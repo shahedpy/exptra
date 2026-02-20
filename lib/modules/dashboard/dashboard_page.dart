@@ -316,78 +316,46 @@ class DashboardPage extends StatelessWidget {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
-            child: InkWell(
-              onLongPress: () {
-                Get.dialog(
-                  AlertDialog(
-                    title: const Text('Delete Income'),
-                    content: const Text(
-                      'Are you sure you want to delete this income?',
+
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
+              leading: const CircleAvatar(
+                backgroundColor: Colors.green,
+                child: Icon(Icons.add_card, color: Colors.white),
+              ),
+              title: Text(
+                income.source != null && income.source!.isNotEmpty
+                    ? income.source!
+                    : 'Income',
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (income.note != null && income.note!.isNotEmpty)
+                    Text(
+                      income.note!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Get.back(),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          incomeController.deleteIncome(income.id);
-                          Get.back();
-                        },
-                        child: const Text(
-                          'Delete',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    DateHelper.formatDate(income.incomeDate),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
-                );
-              },
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(
-                  AppConstants.defaultPadding,
-                ),
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.green,
-                  child: Icon(Icons.add_card, color: Colors.white),
-                ),
-                title: Text(
-                  income.source != null && income.source!.isNotEmpty
-                      ? income.source!
-                      : 'Income',
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (income.note != null && income.note!.isNotEmpty)
-                      Text(
-                        income.note!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    Text(
-                      DateHelper.formatDate(income.incomeDate),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
+                ],
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    CurrencyHelper.formatAmount(income.amount),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                  ],
-                ),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      CurrencyHelper.formatAmount(income.amount),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
@@ -400,32 +368,6 @@ class DashboardPage extends StatelessWidget {
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: InkWell(
-              onLongPress: () {
-                Get.dialog(
-                  AlertDialog(
-                    title: const Text('Delete Entry'),
-                    content: const Text(
-                      'Are you sure you want to delete this entry?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Get.back(),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          lendBorrowController.deleteEntry(lendBorrow.id);
-                          Get.back();
-                        },
-                        child: const Text(
-                          'Delete',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
               child: ListTile(
                 contentPadding: const EdgeInsets.all(
                   AppConstants.defaultPadding,
@@ -480,69 +422,41 @@ class DashboardPage extends StatelessWidget {
 
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onLongPress: () {
-              Get.dialog(
-                AlertDialog(
-                  title: const Text('Delete Expense'),
-                  content: const Text(
-                    'Are you sure you want to delete this expense?',
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
+            leading: CircleAvatar(
+              backgroundColor: ColorHelper.getColorFromInt(category?.color),
+              child: const Icon(Icons.category, color: Colors.white),
+            ),
+            title: Text(category?.name ?? 'Unknown'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (expense.note != null && expense.note!.isNotEmpty)
+                  Text(
+                    expense.note!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Get.back(),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        expenseController.deleteExpense(expense.id);
-                        Get.back();
-                      },
-                      child: const Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
+                Text(
+                  DateHelper.formatDate(expense.expenseDate),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
-              );
-            },
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
-              leading: CircleAvatar(
-                backgroundColor: ColorHelper.getColorFromInt(category?.color),
-                child: const Icon(Icons.category, color: Colors.white),
-              ),
-              title: Text(category?.name ?? 'Unknown'),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (expense.note != null && expense.note!.isNotEmpty)
-                    Text(
-                      expense.note!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  Text(
-                    DateHelper.formatDate(expense.expenseDate),
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ],
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  CurrencyHelper.formatAmount(expense.amount),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
-                ],
-              ),
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    CurrencyHelper.formatAmount(expense.amount),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
