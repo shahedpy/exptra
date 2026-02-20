@@ -15,7 +15,7 @@ class IncomeExpensePage extends StatefulWidget {
 }
 
 class _IncomeExpensePageState extends State<IncomeExpensePage> {
-  int _selectedIndex = 0; // 0 = Income, 1 = Expense
+  int _selectedIndex = 0; // 0 = All, 1 = Income, 2 = Expense
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +23,7 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
     final expenseController = Get.find<ExpenseController>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Income & Expense'),
-      ),
+      appBar: AppBar(title: const Text('Income & Expense')),
       body: Column(
         children: [
           // Button Segment
@@ -38,11 +36,16 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
               segments: const [
                 ButtonSegment<int>(
                   value: 0,
+                  label: Text('All'),
+                  icon: Icon(Icons.list_alt_rounded),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
                   label: Text('Income'),
                   icon: Icon(Icons.trending_up_rounded),
                 ),
                 ButtonSegment<int>(
-                  value: 1,
+                  value: 2,
                   label: Text('Expense'),
                   icon: Icon(Icons.trending_down_rounded),
                 ),
@@ -56,7 +59,9 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
               style: ButtonStyle(
                 iconColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
-                    return _selectedIndex == 0 ? Colors.green : Colors.red;
+                    if (_selectedIndex == 1) return Colors.green;
+                    if (_selectedIndex == 2) return Colors.red;
+                    return null;
                   }
                   return null;
                 }),
@@ -67,6 +72,146 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
           // Content
           Expanded(
             child: _selectedIndex == 0
+                ? Obx(() {
+                    // Build a unified list: tag each item with its type and date
+                    final allItems = [
+                      ...incomeController.incomes.map(
+                        (e) => _TransactionItem(
+                          isIncome: true,
+                          date: e.incomeDate,
+                          title: e.source ?? 'Income',
+                          note: e.note,
+                          amount: e.amount,
+                          id: e.id,
+                        ),
+                      ),
+                      ...expenseController.expenses.map(
+                        (e) => _TransactionItem(
+                          isIncome: false,
+                          date: e.expenseDate,
+                          title: e.categoryId,
+                          note: e.note,
+                          amount: e.amount,
+                          id: e.id,
+                        ),
+                      ),
+                    ]..sort((a, b) => b.date.compareTo(a.date));
+
+                    if (allItems.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No transactions yet',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(
+                        AppConstants.defaultPadding,
+                      ),
+                      itemCount: allItems.length,
+                      itemBuilder: (_, index) {
+                        final item = allItems[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: InkWell(
+                            onLongPress: () {
+                              Get.dialog(
+                                AlertDialog(
+                                  title: Text(
+                                    'Delete ${item.isIncome ? 'Income' : 'Expense'}',
+                                  ),
+                                  content: Text(
+                                    'Are you sure you want to delete this ${item.isIncome ? 'income' : 'expense'} entry?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Get.back(),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        if (item.isIncome) {
+                                          incomeController.deleteIncome(
+                                            item.id,
+                                          );
+                                        } else {
+                                          expenseController.deleteExpense(
+                                            item.id,
+                                          );
+                                        }
+                                        Get.back();
+                                      },
+                                      child: const Text(
+                                        'Delete',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(
+                                AppConstants.defaultPadding,
+                              ),
+                              leading: CircleAvatar(
+                                backgroundColor: item.isIncome
+                                    ? Colors.green
+                                    : Colors.red,
+                                child: Icon(
+                                  item.isIncome
+                                      ? Icons.add_circle_rounded
+                                      : Icons.remove_circle_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              title: Text(item.title),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.isIncome ? 'Income' : 'Expense',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                  if (item.note != null &&
+                                      item.note!.isNotEmpty)
+                                    Text(
+                                      item.note!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  Text(
+                                    DateHelper.formatDate(item.date),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              trailing: Text(
+                                CurrencyHelper.formatAmount(item.amount),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: item.isIncome
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  })
+                : _selectedIndex == 1
                 // Income List
                 ? Obx(() {
                     if (incomeController.incomes.isEmpty) {
@@ -79,7 +224,9 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                     }
 
                     return ListView.builder(
-                      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                      padding: const EdgeInsets.all(
+                        AppConstants.defaultPadding,
+                      ),
                       itemCount: incomeController.incomes.length,
                       itemBuilder: (_, index) {
                         final entry = incomeController.incomes[index];
@@ -135,7 +282,8 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                                       color: Colors.grey.shade700,
                                     ),
                                   ),
-                                  if (entry.note != null && entry.note!.isNotEmpty)
+                                  if (entry.note != null &&
+                                      entry.note!.isNotEmpty)
                                     Text(
                                       entry.note!,
                                       maxLines: 1,
@@ -165,7 +313,6 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                       },
                     );
                   })
-                // Expense List
                 : Obx(() {
                     if (expenseController.expenses.isEmpty) {
                       return Center(
@@ -177,7 +324,9 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                     }
 
                     return ListView.builder(
-                      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                      padding: const EdgeInsets.all(
+                        AppConstants.defaultPadding,
+                      ),
                       itemCount: expenseController.expenses.length,
                       itemBuilder: (_, index) {
                         final entry = expenseController.expenses[index];
@@ -199,7 +348,9 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        expenseController.deleteExpense(entry.id);
+                                        expenseController.deleteExpense(
+                                          entry.id,
+                                        );
                                         Get.back();
                                       },
                                       child: const Text(
@@ -233,7 +384,8 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                                       color: Colors.grey.shade700,
                                     ),
                                   ),
-                                  if (entry.note != null && entry.note!.isNotEmpty)
+                                  if (entry.note != null &&
+                                      entry.note!.isNotEmpty)
                                     Text(
                                       entry.note!,
                                       maxLines: 1,
@@ -305,10 +457,7 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                   title: const Text('Add Income'),
                   leading: const CircleAvatar(
                     backgroundColor: Colors.green,
-                    child: Icon(
-                      Icons.trending_up_rounded,
-                      color: Colors.white,
-                    ),
+                    child: Icon(Icons.trending_up_rounded, color: Colors.white),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -336,4 +485,22 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
       },
     );
   }
+}
+
+class _TransactionItem {
+  final bool isIncome;
+  final DateTime date;
+  final String title;
+  final String? note;
+  final double amount;
+  final String id;
+
+  _TransactionItem({
+    required this.isIncome,
+    required this.date,
+    required this.title,
+    required this.note,
+    required this.amount,
+    required this.id,
+  });
 }
