@@ -69,7 +69,7 @@ class _MorePageState extends State<MorePage> {
           const Divider(height: 1),
           const ListTile(
             leading: Icon(Icons.person_outline),
-            title: Text('Idea • Development • Structure Design'),
+            title: Text('Concept • Code • Design'),
             subtitle: Text('Shahed Mohammad Hridoy'),
           ),
           ListTile(
@@ -87,9 +87,7 @@ class _MorePageState extends State<MorePage> {
                 }
 
                 final packageInfo = snapshot.data!;
-                return Text(
-                  '${packageInfo.version}+${packageInfo.buildNumber}',
-                );
+                return Text(packageInfo.version);
               },
             ),
           ),
