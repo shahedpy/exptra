@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/db/app_database.dart';
@@ -11,9 +12,23 @@ import '../expense_category/expense_category_controller.dart';
 import '../income_source/income_source_controller.dart';
 import '../income_expense/expense_controller.dart';
 import '../income_expense/income_controller.dart';
+import '../lend_borrow/lend_borrow_controller.dart';
 
-class MorePage extends StatelessWidget {
+class MorePage extends StatefulWidget {
   const MorePage({super.key});
+
+  @override
+  State<MorePage> createState() => _MorePageState();
+}
+
+class _MorePageState extends State<MorePage> {
+  late final Future<PackageInfo> _packageInfoFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _packageInfoFuture = PackageInfo.fromPlatform();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +65,33 @@ class MorePage extends StatelessWidget {
             title: const Text('Restore data'),
             subtitle: const Text('Import data from a backup file'),
             onTap: _restoreData,
+          ),
+          const Divider(height: 1),
+          const ListTile(
+            leading: Icon(Icons.person_outline),
+            title: Text('Idea • Development • Structure Design'),
+            subtitle: Text('Shahed Mohammad Hridoy'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('App Version'),
+            subtitle: FutureBuilder<PackageInfo>(
+              future: _packageInfoFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Text('Loading...');
+                }
+
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return const Text('Unavailable');
+                }
+
+                final packageInfo = snapshot.data!;
+                return Text(
+                  '${packageInfo.version}+${packageInfo.buildNumber}',
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -121,11 +163,13 @@ class MorePage extends StatelessWidget {
       final incomeSourceController = _resolveIncomeSourceController();
       final expenseController = _resolveExpenseController();
       final incomeController = _resolveIncomeController();
+      final lendBorrowController = _resolveLendBorrowController();
 
       await categoryController.loadCategories();
       await incomeSourceController.loadIncomeSources();
       await expenseController.loadExpenses();
       await incomeController.loadIncomes();
+      await lendBorrowController.loadEntries();
 
       Get.snackbar('Restore Complete', 'Data restored from backup file.');
     } catch (e) {
@@ -159,5 +203,12 @@ class MorePage extends StatelessWidget {
       return Get.find<IncomeController>();
     }
     return Get.put(IncomeController());
+  }
+
+  LendBorrowController _resolveLendBorrowController() {
+    if (Get.isRegistered<LendBorrowController>()) {
+      return Get.find<LendBorrowController>();
+    }
+    return Get.put(LendBorrowController());
   }
 }
