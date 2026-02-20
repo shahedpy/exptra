@@ -32,7 +32,7 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Manage Categories'), elevation: 0),
+      appBar: AppBar(title: const Text('Categories'), elevation: 0),
       body: Obx(
         () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
