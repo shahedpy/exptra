@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../../modules/expense/add_expense_page.dart';
-import '../../modules/income/add_income_page.dart';
+import '../../modules/income_expense/add_expense_page.dart';
+import '../../modules/income_expense/add_income_page.dart';
 import '../../modules/category/category_page.dart';
 import '../../modules/lend_borrow/add_lend_borrow_page.dart';
 import '../../modules/lend_borrow/lend_borrow_page.dart';

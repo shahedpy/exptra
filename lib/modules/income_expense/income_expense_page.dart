@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/helpers.dart';
-import '../expense/expense_controller.dart';
+import 'expense_controller.dart';
 import 'income_controller.dart';
 
 class IncomeExpensePage extends StatefulWidget {

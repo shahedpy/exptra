@@ -7,8 +7,8 @@ import '../../core/db/app_database.dart';
 import '../../core/db/database_backup_service.dart';
 import '../../core/routes/app_routes.dart';
 import '../category/category_controller.dart';
-import '../expense/expense_controller.dart';
-import '../income/income_controller.dart';
+import '../income_expense/expense_controller.dart';
+import '../income_expense/income_controller.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});

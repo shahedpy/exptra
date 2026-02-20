@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'core/db/app_database.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_routes.dart';
-import 'modules/expense/expense_controller.dart';
-import 'modules/income/income_controller.dart';
+import 'modules/income_expense/expense_controller.dart';
+import 'modules/income_expense/income_controller.dart';
 import 'modules/category/category_controller.dart';
 import 'modules/lend_borrow/lend_borrow_controller.dart';
 

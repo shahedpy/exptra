@@ -26,10 +26,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
-    _selectedCategoryId =
-        categoryController.categories.isNotEmpty
-            ? categoryController.categories.first.id
-            : null;
+    _selectedCategoryId = categoryController.categories.isNotEmpty
+        ? categoryController.categories.first.id
+        : null;
   }
 
   @override
@@ -42,10 +41,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Expense'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Add Expense'), elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Form(
@@ -78,57 +74,56 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 8),
-              Obx(
-                () {
-                  final categories = categoryController.categories;
-                  if (categories.isEmpty) {
-                    return Center(
-                      child: Column(
+              Obx(() {
+                final categories = categoryController.categories;
+                if (categories.isEmpty) {
+                  return Center(
+                    child: Column(
+                      children: [
+                        const Text('No categories found'),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () => Get.toNamed('/categories'),
+                          child: const Text('Add Category'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return DropdownButtonFormField<String>(
+                  initialValue: _selectedCategoryId,
+                  items: categories.map((cat) {
+                    return DropdownMenuItem(
+                      value: cat.id,
+                      child: Row(
                         children: [
-                          const Text('No categories found'),
-                          const SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: () => Get.toNamed('/categories'),
-                            child: const Text('Add Category'),
+                          CircleAvatar(
+                            backgroundColor: ColorHelper.getColorFromInt(
+                              cat.color,
+                            ),
+                            radius: 16,
                           ),
+                          const SizedBox(width: 12),
+                          Text(cat.name),
                         ],
                       ),
                     );
-                  }
-
-                  return DropdownButtonFormField<String>(
-                    initialValue: _selectedCategoryId,
-                    items: categories.map((cat) {
-                      return DropdownMenuItem(
-                        value: cat.id,
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor:
-                                  ColorHelper.getColorFromInt(cat.color),
-                              radius: 16,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(cat.name),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategoryId = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.defaultBorderRadius,
-                        ),
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategoryId = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.defaultBorderRadius,
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              }),
               const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(
                 'Date',
@@ -198,8 +193,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
       return;
     }
 
-    final amount =
-        double.parse(_amountController.text.replaceAll(AppConstants.currencySymbol, ''));
+    final amount = double.parse(
+      _amountController.text.replaceAll(AppConstants.currencySymbol, ''),
+    );
 
     expenseController.addExpense(
       categoryId: _selectedCategoryId!,
@@ -212,5 +208,3 @@ class _AddExpensePageState extends State<AddExpensePage> {
     Get.snackbar('Success', 'Expense added successfully');
   }
 }
-
-

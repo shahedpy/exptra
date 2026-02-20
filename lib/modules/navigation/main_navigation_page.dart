@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../dashboard/dashboard_page.dart';
-import '../income/income_expense_page.dart';
+import '../income_expense/income_expense_page.dart';
 import '../lend_borrow/lend_borrow_page.dart';
 import '../reports/report_page.dart';
 import '../settings/more_page.dart';

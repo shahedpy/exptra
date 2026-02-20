@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../expense/expense_controller.dart';
-import '../income/income_controller.dart';
+import '../income_expense/expense_controller.dart';
+import '../income_expense/income_controller.dart';
 import '../lend_borrow/lend_borrow_controller.dart';
 import '../../core/utils/helpers.dart';
 
