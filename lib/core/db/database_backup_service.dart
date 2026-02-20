@@ -21,7 +21,7 @@ class DatabaseBackupService {
     final backupPath = p.join(tempDir.path, 'exptra-backup-$timestamp.exptra');
 
     final backupPayload = {
-      'version': 2,
+      'version': 1,
       'exportedAt': DateTime.now().toIso8601String(),
       'categories': categories
           .map(
@@ -29,6 +29,7 @@ class DatabaseBackupService {
               'id': category.id,
               'name': category.name,
               'color': category.color,
+              'sortOrder': category.sortOrder,
               'isDeleted': category.isDeleted,
             },
           )
@@ -39,6 +40,7 @@ class DatabaseBackupService {
               'id': source.id,
               'name': source.name,
               'color': source.color,
+              'sortOrder': source.sortOrder,
               'isDeleted': source.isDeleted,
             },
           )
@@ -158,6 +160,7 @@ class DatabaseBackupService {
                 id: item['id'] as String,
                 name: item['name'] as String,
                 color: Value(item['color'] as int?),
+                sortOrder: Value(item['sortOrder'] as int? ?? 0),
                 isDeleted: Value(item['isDeleted'] as bool? ?? false),
               ),
             );
@@ -176,7 +179,11 @@ class DatabaseBackupService {
                 note: Value(item['note'] as String?),
                 expenseDate: DateTime.parse(item['expenseDate'] as String),
                 isDeleted: Value(item['isDeleted'] as bool? ?? false),
-                createdAt: Value(DateTime.parse(item['createdAt'] as String)),
+                createdAt: Value(
+                  item['createdAt'] != null
+                      ? DateTime.parse(item['createdAt'] as String)
+                      : DateTime.now(),
+                ),
               ),
             );
       }
@@ -191,6 +198,7 @@ class DatabaseBackupService {
                 id: item['id'] as String,
                 name: item['name'] as String,
                 color: Value(item['color'] as int?),
+                sortOrder: Value(item['sortOrder'] as int? ?? 0),
                 isDeleted: Value(item['isDeleted'] as bool? ?? false),
               ),
             );
