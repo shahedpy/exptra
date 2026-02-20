@@ -4,7 +4,7 @@ import '../income/income_controller.dart';
 import '../lend_borrow/lend_borrow_controller.dart';
 import '../../core/utils/helpers.dart';
 
-enum DashboardTransactionTab { all, income, expense, lendBorrow }
+enum DashboardTransactionTab { all, incomeExpense, lendBorrow }
 
 class DashboardController extends GetxController {
   late final ExpenseController expenseController;

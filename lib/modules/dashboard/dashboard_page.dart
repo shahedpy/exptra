@@ -181,14 +181,9 @@ class DashboardPage extends StatelessWidget {
               icon: Icon(Icons.list_rounded),
             ),
             ButtonSegment<DashboardTransactionTab>(
-              value: DashboardTransactionTab.income,
-              label: Text('Income'),
-              icon: Icon(Icons.add_circle_outline_rounded),
-            ),
-            ButtonSegment<DashboardTransactionTab>(
-              value: DashboardTransactionTab.expense,
-              label: Text('Expense'),
-              icon: Icon(Icons.remove_circle_outline_rounded),
+              value: DashboardTransactionTab.incomeExpense,
+              label: Text('I/E'),
+              icon: Icon(Icons.trending_up_rounded),
             ),
             ButtonSegment<DashboardTransactionTab>(
               value: DashboardTransactionTab.lendBorrow,
@@ -228,10 +223,8 @@ class DashboardPage extends StatelessWidget {
         final message = switch (selectedTab) {
           DashboardTransactionTab.all =>
             'No entries yet. Use + to add expense or income.',
-          DashboardTransactionTab.income =>
-            'No incomes yet. Use + to add income.',
-          DashboardTransactionTab.expense =>
-            'No expenses yet. Use + to add expense.',
+          DashboardTransactionTab.incomeExpense =>
+            'No income/expense entries yet. Use + to add one.',
           DashboardTransactionTab.lendBorrow =>
             'No lend/borrow entries yet. Use + to add one.',
         };
@@ -271,7 +264,7 @@ class DashboardPage extends StatelessWidget {
     final entries = <_DashboardEntry>[];
 
     if (selectedTab == DashboardTransactionTab.all ||
-        selectedTab == DashboardTransactionTab.income) {
+        selectedTab == DashboardTransactionTab.incomeExpense) {
       entries.addAll(
         incomeController.incomes.map(
           (income) => _DashboardEntry.income(income),
@@ -280,7 +273,7 @@ class DashboardPage extends StatelessWidget {
     }
 
     if (selectedTab == DashboardTransactionTab.all ||
-        selectedTab == DashboardTransactionTab.expense) {
+        selectedTab == DashboardTransactionTab.incomeExpense) {
       entries.addAll(
         expenseController.expenses.map(
           (expense) => _DashboardEntry.expense(expense),
