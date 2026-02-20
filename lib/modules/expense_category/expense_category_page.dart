@@ -85,7 +85,7 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
     _showCategoryDialog('Add Expense Category', isEdit: false);
   }
 
-  void _editCategory(Category category) {
+  void _editCategory(ExpenseCategory category) {
     _nameController.text = category.name;
     _selectedColor = ColorHelper.getColorFromInt(category.color);
     _showCategoryDialog(
@@ -98,7 +98,7 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
   void _showCategoryDialog(
     String title, {
     required bool isEdit,
-    Category? category,
+    ExpenseCategory? category,
   }) {
     showDialog(
       context: context,

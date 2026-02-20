@@ -13,9 +13,9 @@ class ExpenseCategoryRepository {
     required int color,
   }) async {
     await db
-        .into(db.categories)
+        .into(db.expenseCategories)
         .insert(
-          CategoriesCompanion.insert(
+          ExpenseCategoriesCompanion.insert(
             id: _uuid.v4(),
             name: name,
             color: Value(color),
@@ -23,15 +23,15 @@ class ExpenseCategoryRepository {
         );
   }
 
-  Future<List<Category>> getAllCategories() {
-    return (db.select(db.categories)
+  Future<List<ExpenseCategory>> getAllCategories() {
+    return (db.select(db.expenseCategories)
           ..where((tbl) => tbl.isDeleted.equals(false))
           ..orderBy([(t) => OrderingTerm.asc(t.name)]))
         .get();
   }
 
-  Future<Category?> getCategoryById(String id) {
-    return (db.select(db.categories)
+  Future<ExpenseCategory?> getCategoryById(String id) {
+    return (db.select(db.expenseCategories)
           ..where((tbl) => tbl.id.equals(id) & tbl.isDeleted.equals(false)))
         .getSingleOrNull();
   }
@@ -41,15 +41,16 @@ class ExpenseCategoryRepository {
     required String name,
     required int color,
   }) {
-    return (db.update(db.categories)..where((tbl) => tbl.id.equals(id))).write(
-      CategoriesCompanion(name: Value(name), color: Value(color)),
+    return (db.update(
+      db.expenseCategories,
+    )..where((tbl) => tbl.id.equals(id))).write(
+      ExpenseCategoriesCompanion(name: Value(name), color: Value(color)),
     );
   }
 
   Future<void> softDelete(String id) {
-    return (db.update(db.categories)..where((tbl) => tbl.id.equals(id))).write(
-      const CategoriesCompanion(isDeleted: Value(true)),
-    );
+    return (db.update(db.expenseCategories)..where((tbl) => tbl.id.equals(id)))
+        .write(const ExpenseCategoriesCompanion(isDeleted: Value(true)));
   }
 
   Future<int> getExpenseCountByCategory(String categoryId) {

@@ -5,7 +5,7 @@ import '../../../core/constants/app_constants.dart';
 
 class ExpenseCategoryController extends GetxController {
   late final ExpenseCategoryRepository repository;
-  final categories = <Category>[].obs;
+  final categories = <ExpenseCategory>[].obs;
   final isLoading = false.obs;
 
   @override
@@ -83,7 +83,7 @@ class ExpenseCategoryController extends GetxController {
     }
   }
 
-  Category? getCategoryById(String id) {
+  ExpenseCategory? getCategoryById(String id) {
     try {
       return categories.firstWhere((cat) => cat.id == id);
     } catch (e) {

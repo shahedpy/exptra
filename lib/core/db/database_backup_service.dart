@@ -9,7 +9,7 @@ import 'app_database.dart';
 
 class DatabaseBackupService {
   Future<File> createBackupFile(AppDatabase database) async {
-    final categories = await database.select(database.categories).get();
+    final categories = await database.select(database.expenseCategories).get();
     final incomeSources = await database.select(database.incomeSources).get();
     final expenses = await database.select(database.expenses).get();
     final incomes = await database.select(database.incomes).get();
@@ -146,15 +146,15 @@ class DatabaseBackupService {
       await database.delete(database.incomes).go();
       await database.delete(database.incomeSources).go();
       await database.delete(database.expenses).go();
-      await database.delete(database.categories).go();
+      await database.delete(database.expenseCategories).go();
 
       for (final item in categoriesRaw) {
         if (item is! Map<String, dynamic>) continue;
 
         await database
-            .into(database.categories)
+            .into(database.expenseCategories)
             .insert(
-              CategoriesCompanion.insert(
+              ExpenseCategoriesCompanion.insert(
                 id: item['id'] as String,
                 name: item['name'] as String,
                 color: Value(item['color'] as int?),

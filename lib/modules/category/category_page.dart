@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'category_controller.dart';
+import '../expense_category/expense_category_controller.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
@@ -13,7 +13,7 @@ class CategoryPage extends StatefulWidget {
 }
 
 class _CategoryPageState extends State<CategoryPage> {
-  final controller = Get.put(CategoryController());
+  final controller = Get.put(ExpenseCategoryController());
   final _nameController = TextEditingController();
   late Color _selectedColor;
 
@@ -85,7 +85,7 @@ class _CategoryPageState extends State<CategoryPage> {
     _showCategoryDialog('Add Expense Category', isEdit: false);
   }
 
-  void _editCategory(Category category) {
+  void _editCategory(ExpenseCategory category) {
     _nameController.text = category.name;
     _selectedColor = ColorHelper.getColorFromInt(category.color);
     _showCategoryDialog(
@@ -98,7 +98,7 @@ class _CategoryPageState extends State<CategoryPage> {
   void _showCategoryDialog(
     String title, {
     required bool isEdit,
-    Category? category,
+    ExpenseCategory? category,
   }) {
     showDialog(
       context: context,
