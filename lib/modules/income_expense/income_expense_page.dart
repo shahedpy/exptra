@@ -6,6 +6,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/utils/helpers.dart';
 import 'expense_controller.dart';
 import 'income_controller.dart';
+import '../category/category_controller.dart';
 
 class IncomeExpensePage extends StatefulWidget {
   const IncomeExpensePage({super.key});
@@ -21,6 +22,7 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
   Widget build(BuildContext context) {
     final incomeController = Get.find<IncomeController>();
     final expenseController = Get.find<ExpenseController>();
+    final categoryController = Get.find<CategoryController>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Income & Expense')),
@@ -76,16 +78,19 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                           id: e.id,
                         ),
                       ),
-                      ...expenseController.expenses.map(
-                        (e) => _TransactionItem(
+                      ...expenseController.expenses.map((e) {
+                        final cat = categoryController.getCategoryById(
+                          e.categoryId,
+                        );
+                        return _TransactionItem(
                           isIncome: false,
                           date: e.expenseDate,
-                          title: e.categoryId,
+                          title: cat?.name ?? 'Expense',
                           note: e.note,
                           amount: e.amount,
                           id: e.id,
-                        ),
-                      ),
+                        );
+                      }),
                     ]..sort((a, b) => b.date.compareTo(a.date));
 
                     if (allItems.isEmpty) {
@@ -392,7 +397,12 @@ class _IncomeExpensePageState extends State<IncomeExpensePage> {
                                   color: Colors.white,
                                 ),
                               ),
-                              title: Text(entry.categoryId),
+                              title: Text(
+                                categoryController
+                                        .getCategoryById(entry.categoryId)
+                                        ?.name ??
+                                    'Expense',
+                              ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
