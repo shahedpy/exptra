@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/images/exptra_logo.png" width="220" alt="EXPTRA Logo"/>
+<img src="./assets/images/exptra_logo.png" width="220" alt="EXPTRA Logo"/><br/>
 
 Modern Expense Tracker Application
 
