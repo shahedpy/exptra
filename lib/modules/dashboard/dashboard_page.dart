@@ -122,31 +122,29 @@ class DashboardPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStatItem(
-                  'Income',
-                  dashboardController.getFormattedIncome(),
-                  alignment: CrossAxisAlignment.start,
+                Column(
+                  children: [
+                    _buildStatItem(
+                      'Income',
+                      dashboardController.getFormattedIncome(),
+                    ),
+                    _buildStatItem(
+                      'Borrowed',
+                      dashboardController.getFormattedBorrowed(),
+                    ),
+                  ],
                 ),
-                _buildStatItem(
-                  'Expense',
-                  dashboardController.getFormattedExpense(),
-                  alignment: CrossAxisAlignment.start,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildStatItem(
-                  'Borrowed',
-                  dashboardController.getFormattedBorrowed(),
-                  alignment: CrossAxisAlignment.start,
-                ),
-                _buildStatItem(
-                  'Lent',
-                  dashboardController.getFormattedLent(),
-                  alignment: CrossAxisAlignment.start,
+                Column(
+                  children: [
+                    _buildStatItem(
+                      'Expense',
+                      dashboardController.getFormattedExpense(),
+                    ),
+                    _buildStatItem(
+                      'Lent',
+                      dashboardController.getFormattedLent(),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -156,13 +154,9 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(
-    String label,
-    String value, {
-    CrossAxisAlignment alignment = CrossAxisAlignment.center,
-  }) {
+  Widget _buildStatItem(String label, String value) {
     return Column(
-      crossAxisAlignment: alignment,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
