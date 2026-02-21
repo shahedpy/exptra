@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/shahedpy/exptra/main/exptra_logo.png" width="220" alt="EXPTRA Logo"/>
 
-Modern Expense Tracker Application for Android
+Modern Expense Tracker Application
 
 EXPTRA is a lightweight, local-first expense tracking app designed to manage income, expenses, lend, and borrow activity with clarity and simplicity.
 
