@@ -81,8 +81,4 @@ Your financial data stays on your device.
 - Android (APK distribution)
 - Offline-first architecture
 
----
-
-## 🔄 Versioning
-
-EXPTRA follows semantic versioning:
+<p align="center">Built with ❤️ by <b>shahedpy</b></p>
