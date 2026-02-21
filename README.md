@@ -1,9 +1,10 @@
+<div align="center">
 # EXPTRA
 
 Modern Expense Tracker Application for Android
 
 EXPTRA is a lightweight, local-first expense tracking app designed to manage income, expenses, lend, and borrow activity with clarity and simplicity.
-
+</div>
 ---
 
 ## 📥 Download
