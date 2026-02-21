@@ -1,5 +1,5 @@
 <div align="center">
-# EXPTRA
+<h1>EXPTRA</h1>
 
 Modern Expense Tracker Application for Android
 
