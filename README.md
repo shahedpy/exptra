@@ -8,6 +8,7 @@ EXPTRA is a lightweight, local-first expense tracking app designed to manage inc
 
 </div>
 
+---
 
 ## 📥 Download
 
@@ -16,6 +17,21 @@ EXPTRA is a lightweight, local-first expense tracking app designed to manage inc
 Or download a specific version from the [Releases page](https://github.com/shahedpy/exptra/releases).
 
 ---
+
+## 📸 Screenshots
+
+<div align="center">
+
+<img src="assets/screenshots/01.dashboard.png" width="250"/>
+<img src="assets/screenshots/02.income_expense.png" width="250"/>
+<img src="assets/screenshots/03.lend_borrow.png" width="250"/>
+<img src="assets/screenshots/04.report_daily.png" width="250"/>
+<img src="assets/screenshots/05.report_monthly.png" width="250"/>
+<img src="assets/screenshots/06.report_source_wise.png" width="250"/>
+<img src="assets/screenshots/07.expense_categories.png" width="250"/>
+<img src="assets/screenshots/08.income_sources.png" width="250"/>
+
+</div>
 
 ## ✨ Features
 
