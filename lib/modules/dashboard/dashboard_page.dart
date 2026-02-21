@@ -123,6 +123,7 @@ class DashboardPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildStatItem(
                       'Income',
@@ -135,6 +136,7 @@ class DashboardPage extends StatelessWidget {
                   ],
                 ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildStatItem(
                       'Expense',
