@@ -30,6 +30,25 @@ class _IncomeSourcePageState extends State<IncomeSourcePage> {
     super.dispose();
   }
 
+  void _confirmDeleteSource(IncomeSource source) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Delete Income Source'),
+        content: Text('Are you sure you want to delete "${source.name}"?'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              controller.deleteIncomeSource(source.id);
+              Get.back();
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,8 +73,7 @@ class _IncomeSourcePageState extends State<IncomeSourcePage> {
                       ),
                       title: Text(source.name),
                       onTap: () => _editSource(source),
-                      onLongPress: () =>
-                          controller.deleteIncomeSource(source.id),
+                      onLongPress: () => _confirmDeleteSource(source),
                       trailing: ReorderableDragStartListener(
                         index: index,
                         child: const Padding(

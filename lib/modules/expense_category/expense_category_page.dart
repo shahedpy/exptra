@@ -29,6 +29,25 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
     super.dispose();
   }
 
+  void _confirmDeleteCategory(ExpenseCategory category) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Delete Category'),
+        content: Text('Are you sure you want to delete "${category.name}"?'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              controller.deleteCategory(category.id);
+              Get.back();
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +72,7 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
                       ),
                       title: Text(category.name),
                       onTap: () => _editCategory(category),
-                      onLongPress: () => controller.deleteCategory(category.id),
+                      onLongPress: () => _confirmDeleteCategory(category),
                       trailing: ReorderableDragStartListener(
                         index: index,
                         child: Icon(Icons.drag_handle),
