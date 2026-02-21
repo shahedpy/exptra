@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/shahedpy/exptra/main/exptra_logo.png" width="220" alt="EXPTRA Logo"/>
+<img src="./assets/images/exptra_logo.png" width="220" alt="EXPTRA Logo"/>
 
 Modern Expense Tracker Application
 
