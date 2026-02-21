@@ -335,9 +335,16 @@ class DashboardPage extends StatelessWidget {
 
             child: ListTile(
               contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
-              leading: const CircleAvatar(
-                backgroundColor: Colors.green,
-                child: Icon(Icons.add_card, color: Colors.white),
+              leading: CircleAvatar(
+                backgroundColor: ColorHelper.getColorFromInt(
+                  incomeSourceController
+                      .getIncomeSourceById(income.sourceId ?? '')
+                      ?.color,
+                ),
+                child: const Icon(
+                  Icons.add_circle_outline_rounded,
+                  color: Colors.white,
+                ),
               ),
               title: Text(
                 incomeSourceController
@@ -515,7 +522,10 @@ class DashboardPage extends StatelessWidget {
             contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
             leading: CircleAvatar(
               backgroundColor: ColorHelper.getColorFromInt(category?.color),
-              child: const Icon(Icons.category, color: Colors.white),
+              child: const Icon(
+                Icons.remove_circle_outline_rounded,
+                color: Colors.white,
+              ),
             ),
             title: Text(category?.name ?? 'Unknown'),
             subtitle: Column(
