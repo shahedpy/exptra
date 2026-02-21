@@ -125,10 +125,12 @@ class DashboardPage extends StatelessWidget {
                 _buildStatItem(
                   'Income',
                   dashboardController.getFormattedIncome(),
+                  alignment: CrossAxisAlignment.start,
                 ),
                 _buildStatItem(
                   'Expense',
                   dashboardController.getFormattedExpense(),
+                  alignment: CrossAxisAlignment.start,
                 ),
               ],
             ),
@@ -139,8 +141,13 @@ class DashboardPage extends StatelessWidget {
                 _buildStatItem(
                   'Borrowed',
                   dashboardController.getFormattedBorrowed(),
+                  alignment: CrossAxisAlignment.start,
                 ),
-                _buildStatItem('Lent', dashboardController.getFormattedLent()),
+                _buildStatItem(
+                  'Lent',
+                  dashboardController.getFormattedLent(),
+                  alignment: CrossAxisAlignment.start,
+                ),
               ],
             ),
           ],
@@ -149,8 +156,13 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
+  Widget _buildStatItem(
+    String label,
+    String value, {
+    CrossAxisAlignment alignment = CrossAxisAlignment.center,
+  }) {
     return Column(
+      crossAxisAlignment: alignment,
       children: [
         Text(
           label,
