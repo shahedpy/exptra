@@ -31,7 +31,7 @@ class AppConstants {
 
   // Validation
   static const double minExpenseAmount = 0.01;
-  static const double maxExpenseAmount = 999999.99;
+  static const double maxExpenseAmount = 9999999999.99;
   static const int maxNoteLength = 500;
 
   // UI
