@@ -114,7 +114,12 @@ class ValidationHelper {
       return 'Amount is required';
     }
 
-    final amount = double.tryParse(value);
+    final normalized = value
+        .replaceAll(AppConstants.currencySymbol, '')
+        .replaceAll(',', '')
+        .trim();
+
+    final amount = double.tryParse(normalized);
     if (amount == null) {
       return 'Invalid amount';
     }
