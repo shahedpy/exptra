@@ -1,6 +1,6 @@
-<div align="center">
-
 # Exptra
+
+<div align="center">
 
 <img src="./assets/images/exptra_logo.png" width="220" alt="EXPTRA Logo"/><br/>
 
