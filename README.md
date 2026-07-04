@@ -4,7 +4,7 @@
 
 <img src="./docs/images/exptra_logo.png" width="220" alt="EXPTRA logo"/><br/>
 
-**Modern Expense Tracker Application**
+**Offline First Modern Expense Tracker Application**
 
 EXPTRA is a lightweight, local-first Flutter app for tracking income, expenses, lend, and borrow activity with clarity and simplicity.
 
