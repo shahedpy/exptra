@@ -6,6 +6,8 @@ import '../lend_borrow/lend_borrow_controller.dart';
 import '../expense_category/expense_category_controller.dart';
 import '../income_source/income_source_controller.dart';
 import 'dashboard_controller.dart';
+import '../accounts/account_controller.dart';
+import '../../data/services/financial_calculator.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/constants/app_constants.dart';
@@ -35,11 +37,13 @@ class DashboardPage extends StatelessWidget {
             expenseController.expenses.isEmpty &&
                 incomeController.incomes.isEmpty &&
                 lendBorrowController.lends.isEmpty &&
-                lendBorrowController.borrows.isEmpty
+                lendBorrowController.borrows.isEmpty &&
+                Get.find<AccountController>().accounts.isEmpty
             ? _buildEmptyState()
             : SingleChildScrollView(
                 child: Column(
                   children: [
+                    _buildFinancialCard(),
                     _buildSummaryCard(dashboardController),
                     const SizedBox(height: AppConstants.defaultPadding),
                     _buildTransactionTypeSelector(dashboardController),
@@ -57,6 +61,64 @@ class DashboardPage extends StatelessWidget {
               ),
       ),
     );
+  }
+
+  Widget _buildFinancialCard() {
+    return Obx(() {
+      final calc = Get.find<AccountController>().calculator.value;
+      if (calc == null) return const SizedBox.shrink();
+      final position = calc.position();
+      final now = DateTime.now();
+      final start = DateTime(
+        now.year,
+        now.month,
+        1,
+      ).subtract(const Duration(days: 1));
+      final month = calc.compare(start, now);
+      return Card(
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Net Worth',
+                style: Theme.of(Get.context!).textTheme.titleMedium,
+              ),
+              Text(
+                CurrencyHelper.formatAmount(Money.bdt(position.netWorth)),
+                style: Theme.of(Get.context!).textTheme.headlineMedium,
+              ),
+              const Divider(),
+              Wrap(
+                spacing: 16,
+                runSpacing: 8,
+                children: [
+                  Text(
+                    'Available: ${CurrencyHelper.formatAmount(Money.bdt(position.bankAndCash))}',
+                  ),
+                  Text(
+                    'Investments: ${CurrencyHelper.formatAmount(Money.bdt(position.investments))}',
+                  ),
+                  Text(
+                    'To receive: ${CurrencyHelper.formatAmount(Money.bdt(position.receivables))}',
+                  ),
+                  Text(
+                    'To pay: ${CurrencyHelper.formatAmount(Money.bdt(position.liabilities))}',
+                  ),
+                ],
+              ),
+              const Divider(),
+              Text(
+                'This month  •  Income ${CurrencyHelper.formatAmount(Money.bdt(month.income))}  '
+                'Expense ${CurrencyHelper.formatAmount(Money.bdt(month.expense))}',
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildEmptyState() {
@@ -104,7 +166,7 @@ class DashboardPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Current Balance',
+              'Income less Expense',
               style: Theme.of(
                 Get.context!,
               ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
@@ -395,9 +457,12 @@ class DashboardPage extends StatelessWidget {
           final amount = isLend ? entry.lend!.amount : entry.borrow!.amount;
           final note = isLend ? entry.lend!.note : entry.borrow!.note;
           final date = isLend ? entry.lend!.lendDate : entry.borrow!.borrowDate;
-          final settled = isLend
-              ? entry.lend!.isSettled
-              : entry.borrow!.isSettled;
+          final outstanding = isLend
+              ? lendBorrowController.outstandingLends[entry.lend!.id] ??
+                    Money.cents(amount)
+              : lendBorrowController.outstandingBorrows[entry.borrow!.id] ??
+                    Money.cents(amount);
+          final settled = outstanding == 0;
           final settledLabel = isLend ? 'Paid' : 'Returned';
           final avatarColor = settled
               ? Colors.grey.shade400
@@ -453,7 +518,7 @@ class DashboardPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    CurrencyHelper.formatAmount(amount),
+                    CurrencyHelper.formatAmount(Money.bdt(outstanding)),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

@@ -6,6 +6,8 @@ import '../../core/routes/app_routes.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/db/app_database.dart';
 import 'lend_borrow_controller.dart';
+import '../accounts/account_selector.dart';
+import '../../data/services/financial_calculator.dart';
 
 class LendBorrowPage extends StatefulWidget {
   const LendBorrowPage({super.key});
@@ -212,7 +214,6 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
     final double amount;
     final String? note;
     final DateTime date;
-    final bool settled;
 
     if (entry is Lend) {
       isLend = true;
@@ -221,7 +222,6 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
       amount = entry.amount;
       note = entry.note;
       date = entry.lendDate;
-      settled = entry.isSettled;
     } else {
       isLend = false;
       final borrowEntry = entry as Borrow;
@@ -230,11 +230,16 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
       amount = borrowEntry.amount;
       note = borrowEntry.note;
       date = borrowEntry.borrowDate;
-      settled = borrowEntry.isSettled;
     }
 
-    final settledLabel = isLend ? 'Paid' : 'Returned';
-    final avatarColor = settled
+    final outstanding = isLend
+        ? controller.outstandingLends[id] ?? Money.cents(amount)
+        : controller.outstandingBorrows[id] ?? Money.cents(amount);
+    final settledLabel = outstanding == 0
+        ? (isLend ? 'Paid' : 'Returned')
+        : 'Repay';
+    final isPaid = outstanding == 0;
+    final avatarColor = isPaid
         ? Colors.grey.shade400
         : (isLend ? Colors.orange : Colors.blue);
     final type = isLend
@@ -286,10 +291,10 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
           title: Text(
             personName,
             style: TextStyle(
-              decoration: settled
+              decoration: isPaid
                   ? TextDecoration.lineThrough
                   : TextDecoration.none,
-              color: settled ? Colors.grey : null,
+              color: isPaid ? Colors.grey : null,
             ),
           ),
           subtitle: Column(
@@ -317,31 +322,39 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                CurrencyHelper.formatAmount(amount),
+                CurrencyHelper.formatAmount(Money.bdt(outstanding)),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: settled ? Colors.grey : null,
-                  decoration: settled
+                  color: isPaid ? Colors.grey : null,
+                  decoration: isPaid
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
                 ),
               ),
               const SizedBox(height: 4),
               GestureDetector(
-                onTap: () => controller.toggleSettled(id, settled, type),
+                onTap: outstanding > 0
+                    ? () => _showRepayment(
+                        controller,
+                        id: id,
+                        type: type,
+                        outstanding: outstanding,
+                        originalDate: date,
+                      )
+                    : null,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: settled
+                    color: isPaid
                         ? Colors.green.shade100
                         : Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: settled
+                      color: isPaid
                           ? Colors.green.shade400
                           : Colors.grey.shade400,
                     ),
@@ -350,11 +363,11 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        settled
+                        isPaid
                             ? Icons.check_circle_rounded
                             : Icons.radio_button_unchecked_rounded,
                         size: 12,
-                        color: settled
+                        color: isPaid
                             ? Colors.green.shade700
                             : Colors.grey.shade600,
                       ),
@@ -363,7 +376,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
                         settledLabel,
                         style: TextStyle(
                           fontSize: 11,
-                          color: settled
+                          color: isPaid
                               ? Colors.green.shade700
                               : Colors.grey.shade600,
                           fontWeight: FontWeight.w600,
@@ -378,5 +391,121 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _showRepayment(
+    LendBorrowController controller, {
+    required String id,
+    required String type,
+    required int outstanding,
+    required DateTime originalDate,
+  }) async {
+    final amount = TextEditingController(
+      text: Money.bdt(outstanding).toStringAsFixed(2),
+    );
+    String? accountId;
+    DateTime date = DateTime.now();
+    final formKey = GlobalKey<FormState>();
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(
+            type == LendBorrowController.typeLend
+                ? 'Receive repayment'
+                : 'Repay borrowing',
+          ),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Outstanding: ${CurrencyHelper.formatAmount(Money.bdt(outstanding))}',
+                ),
+                const SizedBox(height: 12),
+                AccountSelector(
+                  value: accountId,
+                  label: type == LendBorrowController.typeLend
+                      ? 'Receive into account'
+                      : 'Pay from account',
+                  onChanged: (v) => setDialogState(() => accountId = v),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: amount,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Amount',
+                    prefixText: '৳ ',
+                  ),
+                  validator: (v) {
+                    final parsed = double.tryParse(v ?? '');
+                    if (parsed == null ||
+                        Money.cents(parsed) <= 0 ||
+                        Money.cents(parsed) > outstanding) {
+                      return 'Enter an amount up to the outstanding balance';
+                    }
+                    return null;
+                  },
+                ),
+                ListTile(
+                  title: Text(DateHelper.formatDate(date)),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: date,
+                      firstDate: originalDate,
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setDialogState(() => date = picked);
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState!.validate() && accountId != null) {
+                  Navigator.pop(context, true);
+                }
+              },
+              child: const Text('Record'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (saved == true && accountId != null) {
+      try {
+        await controller.repay(
+          id: id,
+          type: type,
+          accountId: accountId!,
+          amount: double.parse(amount.text),
+          date: date,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Repayment recorded')));
+        }
+      } catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('$error')));
+        }
+      }
+    }
+    amount.dispose();
   }
 }

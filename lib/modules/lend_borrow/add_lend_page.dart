@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../accounts/account_selector.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/db/app_database.dart';
@@ -24,6 +25,7 @@ class _AddLendPageState extends State<AddLendPage> {
   late DateTime _selectedDate;
   bool _isEdit = false;
   String? _editingId;
+  String? _accountId;
 
   @override
   void initState() {
@@ -34,6 +36,7 @@ class _AddLendPageState extends State<AddLendPage> {
     if (args != null && args is Lend) {
       _isEdit = true;
       _editingId = args.id;
+      _accountId = args.accountId;
       _selectedDate = args.lendDate;
       _nameController.text = args.personName;
       _amountController.text = args.amount.toString();
@@ -106,6 +109,12 @@ class _AddLendPageState extends State<AddLendPage> {
                 },
               ),
               const SizedBox(height: AppConstants.defaultPadding * 1.5),
+              AccountSelector(
+                value: _accountId,
+                label: 'From account',
+                onChanged: (value) => setState(() => _accountId = value),
+              ),
+              const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(
                 'Date',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -170,15 +179,14 @@ class _AddLendPageState extends State<AddLendPage> {
   void _submitForm() {
     if (!_formKey.currentState!.validate()) return;
 
-    final amount = double.parse(
-      _amountController.text.replaceAll(AppConstants.currencySymbol, ''),
-    );
+    final amount = CurrencyHelper.parseAmount(_amountController.text);
 
     if (_isEdit && _editingId != null) {
       controller.updateEntry(
         id: _editingId!,
         personName: _nameController.text.trim(),
         amount: amount,
+        accountId: _accountId,
         type: LendBorrowController.typeLend,
         note: _noteController.text.trim(),
         date: _selectedDate,
@@ -191,6 +199,7 @@ class _AddLendPageState extends State<AddLendPage> {
     controller.addEntry(
       personName: _nameController.text.trim(),
       amount: amount,
+      accountId: _accountId,
       type: LendBorrowController.typeLend,
       note: _noteController.text.trim(),
       date: _selectedDate,

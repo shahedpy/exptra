@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../accounts/account_selector.dart';
 import 'expense_controller.dart';
 import '../expense_category/expense_category_controller.dart';
 import '../../core/db/app_database.dart';
@@ -25,6 +26,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
   late DateTime _selectedDate;
   bool _isEdit = false;
   String? _editingId;
+  String? _accountId;
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     if (args != null && args is Expense) {
       _isEdit = true;
       _editingId = args.id;
+      _accountId = args.accountId;
       _selectedDate = args.expenseDate;
       _selectedCategoryId = args.categoryId;
       _amountController.text = args.amount.toString();
@@ -142,6 +145,12 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 );
               }),
               const SizedBox(height: AppConstants.defaultPadding * 1.5),
+              AccountSelector(
+                value: _accountId,
+                label: 'From account',
+                onChanged: (value) => setState(() => _accountId = value),
+              ),
+              const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(
                 'Date',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -210,15 +219,14 @@ class _AddExpensePageState extends State<AddExpensePage> {
       return;
     }
 
-    final amount = double.parse(
-      _amountController.text.replaceAll(AppConstants.currencySymbol, ''),
-    );
+    final amount = CurrencyHelper.parseAmount(_amountController.text);
 
     if (_isEdit && _editingId != null) {
       expenseController.updateExpense(
         id: _editingId!,
         categoryId: _selectedCategoryId!,
         amount: amount,
+        accountId: _accountId,
         note: _noteController.text.trim(),
         date: _selectedDate,
       );
@@ -230,6 +238,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     expenseController.addExpense(
       categoryId: _selectedCategoryId!,
       amount: amount,
+      accountId: _accountId,
       note: _noteController.text.trim(),
       date: _selectedDate,
     );

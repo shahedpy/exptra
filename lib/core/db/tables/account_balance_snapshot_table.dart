@@ -1,14 +1,14 @@
-import 'account_table.dart';
 import 'package:drift/drift.dart';
+import 'account_table.dart';
 
-class Incomes extends Table {
+class AccountBalanceSnapshots extends Table {
   TextColumn get id => text()();
-  RealColumn get amount => real()();
-  TextColumn get sourceId => text().nullable()();
-  TextColumn get source => text().nullable()();
+  TextColumn get accountId => text().references(Accounts, #id)();
+  DateTimeColumn get date => dateTime()();
+  RealColumn get actualBalance => real()();
+  RealColumn get calculatedBalance => real()();
+  RealColumn get difference => real()();
   TextColumn get note => text().nullable()();
-  DateTimeColumn get incomeDate => dateTime()();
-  TextColumn get accountId => text().nullable().references(Accounts, #id)();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 

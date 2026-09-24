@@ -8,21 +8,43 @@ import 'package:path_provider/path_provider.dart';
 import 'app_database.dart';
 
 class DatabaseBackupService {
-  Future<File> createBackupFile(AppDatabase database) async {
+  Future<File> createBackupFile(
+    AppDatabase database, {
+    String? outputPath,
+  }) async {
     final categories = await database.select(database.expenseCategories).get();
     final incomeSources = await database.select(database.incomeSources).get();
     final expenses = await database.select(database.expenses).get();
     final incomes = await database.select(database.incomes).get();
     final lends = await database.select(database.lends).get();
     final borrows = await database.select(database.borrows).get();
+    final accounts = await database.select(database.accounts).get();
+    final transfers = await database.select(database.accountTransfers).get();
+    final snapshots = await database
+        .select(database.accountBalanceSnapshots)
+        .get();
+    final adjustments = await database
+        .select(database.balanceAdjustments)
+        .get();
+    final lendRepayments = await database.select(database.lendRepayments).get();
+    final borrowRepayments = await database
+        .select(database.borrowRepayments)
+        .get();
 
-    final tempDir = await getTemporaryDirectory();
+    final tempDir = outputPath == null ? await getTemporaryDirectory() : null;
     final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final backupPath = p.join(tempDir.path, 'exptra-backup-$timestamp.exptra');
+    final backupPath =
+        outputPath ?? p.join(tempDir!.path, 'exptra-backup-$timestamp.exptra');
 
     final backupPayload = {
-      'version': 1,
+      'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
+      'accounts': accounts.map((e) => e.toJson()).toList(),
+      'transfers': transfers.map((e) => e.toJson()).toList(),
+      'snapshots': snapshots.map((e) => e.toJson()).toList(),
+      'adjustments': adjustments.map((e) => e.toJson()).toList(),
+      'lendRepayments': lendRepayments.map((e) => e.toJson()).toList(),
+      'borrowRepayments': borrowRepayments.map((e) => e.toJson()).toList(),
       'categories': categories
           .map(
             (category) => {
@@ -49,6 +71,7 @@ class DatabaseBackupService {
           .map(
             (expense) => {
               'id': expense.id,
+              'accountId': expense.accountId,
               'categoryId': expense.categoryId,
               'amount': expense.amount,
               'note': expense.note,
@@ -62,6 +85,7 @@ class DatabaseBackupService {
           .map(
             (income) => {
               'id': income.id,
+              'accountId': income.accountId,
               'amount': income.amount,
               'sourceId': income.sourceId,
               'source': income.source,
@@ -76,6 +100,7 @@ class DatabaseBackupService {
           .map(
             (lend) => {
               'id': lend.id,
+              'accountId': lend.accountId,
               'personName': lend.personName,
               'amount': lend.amount,
               'note': lend.note,
@@ -90,6 +115,7 @@ class DatabaseBackupService {
           .map(
             (borrow) => {
               'id': borrow.id,
+              'accountId': borrow.accountId,
               'personName': borrow.personName,
               'amount': borrow.amount,
               'note': borrow.note,
@@ -124,6 +150,10 @@ class DatabaseBackupService {
       throw Exception('Invalid backup format.');
     }
 
+    final version = decoded['version'];
+    if (version != null && version != 1 && version != 2) {
+      throw Exception('Unsupported backup version.');
+    }
     final categoriesRaw = decoded['categories'];
     final incomeSourcesRaw = decoded['incomeSources'];
     final expensesRaw = decoded['expenses'];
@@ -143,12 +173,32 @@ class DatabaseBackupService {
     final parsedBorrows = borrowsRaw is List ? borrowsRaw : const [];
 
     await database.transaction(() async {
+      await database.delete(database.borrowRepayments).go();
+      await database.delete(database.lendRepayments).go();
+      await database.delete(database.balanceAdjustments).go();
+      await database.delete(database.accountBalanceSnapshots).go();
+      await database.delete(database.accountTransfers).go();
       await database.delete(database.borrows).go();
       await database.delete(database.lends).go();
       await database.delete(database.incomes).go();
       await database.delete(database.incomeSources).go();
       await database.delete(database.expenses).go();
       await database.delete(database.expenseCategories).go();
+      await database.delete(database.accounts).go();
+
+      for (final item
+          in (decoded['accounts'] is List
+              ? decoded['accounts'] as List
+              : const [])) {
+        if (item is! Map) continue;
+        await database
+            .into(database.accounts)
+            .insert(
+              Account.fromJson(
+                Map<String, dynamic>.from(item),
+              ).toCompanion(true),
+            );
+      }
 
       for (final item in categoriesRaw) {
         if (item is! Map<String, dynamic>) continue;
@@ -176,6 +226,7 @@ class DatabaseBackupService {
                 id: item['id'] as String,
                 categoryId: item['categoryId'] as String,
                 amount: (item['amount'] as num).toDouble(),
+                accountId: Value(item['accountId'] as String?),
                 note: Value(item['note'] as String?),
                 expenseDate: DateTime.parse(item['expenseDate'] as String),
                 isDeleted: Value(item['isDeleted'] as bool? ?? false),
@@ -241,6 +292,7 @@ class DatabaseBackupService {
               IncomesCompanion.insert(
                 id: item['id'] as String,
                 amount: (item['amount'] as num).toDouble(),
+                accountId: Value(item['accountId'] as String?),
                 sourceId: Value(sourceId),
                 source: Value(item['source'] as String?),
                 note: Value(item['note'] as String?),
@@ -265,6 +317,7 @@ class DatabaseBackupService {
                 id: item['id'] as String,
                 personName: item['personName'] as String,
                 amount: (item['amount'] as num).toDouble(),
+                accountId: Value(item['accountId'] as String?),
                 note: Value(item['note'] as String?),
                 lendDate: DateTime.parse(item['lendDate'] as String),
                 isSettled: Value(item['isSettled'] as bool? ?? false),
@@ -288,6 +341,7 @@ class DatabaseBackupService {
                 id: item['id'] as String,
                 personName: item['personName'] as String,
                 amount: (item['amount'] as num).toDouble(),
+                accountId: Value(item['accountId'] as String?),
                 note: Value(item['note'] as String?),
                 borrowDate: DateTime.parse(item['borrowDate'] as String),
                 isSettled: Value(item['isSettled'] as bool? ?? false),
@@ -298,6 +352,71 @@ class DatabaseBackupService {
                       : DateTime.now(),
                 ),
               ),
+            );
+      }
+      for (final item
+          in (decoded['transfers'] is List
+              ? decoded['transfers'] as List
+              : const [])) {
+        if (item is! Map) continue;
+        await database
+            .into(database.accountTransfers)
+            .insert(
+              AccountTransfer.fromJson(
+                Map<String, dynamic>.from(item),
+              ).toCompanion(true),
+            );
+      }
+      for (final item
+          in (decoded['snapshots'] is List
+              ? decoded['snapshots'] as List
+              : const [])) {
+        if (item is! Map) continue;
+        await database
+            .into(database.accountBalanceSnapshots)
+            .insert(
+              AccountBalanceSnapshot.fromJson(
+                Map<String, dynamic>.from(item),
+              ).toCompanion(true),
+            );
+      }
+      for (final item
+          in (decoded['adjustments'] is List
+              ? decoded['adjustments'] as List
+              : const [])) {
+        if (item is! Map) continue;
+        await database
+            .into(database.balanceAdjustments)
+            .insert(
+              BalanceAdjustment.fromJson(
+                Map<String, dynamic>.from(item),
+              ).toCompanion(true),
+            );
+      }
+      for (final item
+          in (decoded['lendRepayments'] is List
+              ? decoded['lendRepayments'] as List
+              : const [])) {
+        if (item is! Map) continue;
+        await database
+            .into(database.lendRepayments)
+            .insert(
+              LendRepayment.fromJson(
+                Map<String, dynamic>.from(item),
+              ).toCompanion(true),
+            );
+      }
+      for (final item
+          in (decoded['borrowRepayments'] is List
+              ? decoded['borrowRepayments'] as List
+              : const [])) {
+        if (item is! Map) continue;
+        await database
+            .into(database.borrowRepayments)
+            .insert(
+              BorrowRepayment.fromJson(
+                Map<String, dynamic>.from(item),
+              ).toCompanion(true),
             );
       }
     });

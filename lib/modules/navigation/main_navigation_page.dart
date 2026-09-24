@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../dashboard/dashboard_page.dart';
+import '../accounts/accounts_page.dart';
 import '../income_expense/income_expense_page.dart';
 import '../lend_borrow/lend_borrow_page.dart';
 import '../settings/more_page.dart';
@@ -18,6 +19,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   static const List<Widget> _pages = [
     DashboardPage(),
     IncomeExpensePage(),
+    AccountsPage(),
     LendBorrowPage(),
     MorePage(),
   ];
@@ -25,6 +27,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   static const List<_NavItemData> _navItems = [
     _NavItemData(label: 'Dashboard', icon: Icons.dashboard_rounded),
     _NavItemData(label: 'Inc/Exp', icon: Icons.swap_vert_rounded),
+    _NavItemData(
+      label: 'Accounts',
+      icon: Icons.account_balance_wallet_outlined,
+    ),
     _NavItemData(label: 'Len/Bor', icon: Icons.sync_alt_rounded),
     _NavItemData(label: 'More', icon: Icons.grid_view_rounded),
   ];

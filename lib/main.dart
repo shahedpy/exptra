@@ -8,6 +8,7 @@ import 'modules/income_expense/income_controller.dart';
 import 'modules/expense_category/expense_category_controller.dart';
 import 'modules/income_source/income_source_controller.dart';
 import 'modules/lend_borrow/lend_borrow_controller.dart';
+import 'modules/accounts/account_controller.dart';
 
 void main() {
   final db = AppDatabase();
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Initialize controllers
+    Get.put(AccountController());
     Get.put(ExpenseController());
     Get.put(IncomeController());
     Get.put(ExpenseCategoryController());
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Expense Tracker',
+      title: 'EXPTRA Hisab',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       getPages: AppRoutes.routes,

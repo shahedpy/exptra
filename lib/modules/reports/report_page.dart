@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/helpers.dart';
 import 'report_controller.dart';
+import '../accounts/financial_reports_page.dart';
 
 class ReportPage extends StatelessWidget {
   const ReportPage({super.key});
@@ -14,10 +15,26 @@ class ReportPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
+      appBar: AppBar(
+        title: const Text('Reports'),
+        actions: [
+          IconButton(
+            tooltip: 'Financial reports',
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            onPressed: () => Get.to(() => const FinancialReportsPage()),
+          ),
+        ],
+      ),
       body: Obx(
         () => Column(
           children: [
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.account_balance_wallet_outlined),
+              title: const Text('Financial reports & account history'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.to(() => const FinancialReportsPage()),
+            ),
             _buildSummaryCard(theme, controller),
             _buildDataTypeSelector(controller),
             _buildTypeSelector(controller),

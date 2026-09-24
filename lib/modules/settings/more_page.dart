@@ -1,3 +1,4 @@
+import '../accounts/account_controller.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -168,6 +169,9 @@ class _MorePageState extends State<MorePage> {
       await expenseController.loadExpenses();
       await incomeController.loadIncomes();
       await lendBorrowController.loadEntries();
+      if (Get.isRegistered<AccountController>()) {
+        await Get.find<AccountController>().reload();
+      }
 
       Get.snackbar('Restore Complete', 'Data restored from backup file.');
     } catch (e) {

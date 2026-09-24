@@ -1,4 +1,7 @@
 import 'package:get/get.dart';
+import '../accounts/account_controller.dart';
+import '../../data/repositories/accounting_repository.dart';
+import '../../data/services/financial_calculator.dart';
 
 import '../../core/db/app_database.dart';
 import '../../data/repositories/lend_repository.dart';
@@ -12,10 +15,14 @@ class LendBorrowController extends GetxController {
   late final BorrowRepository borrowRepository;
   final lends = <Lend>[].obs;
   final borrows = <Borrow>[].obs;
+  late final AccountingRepository accountingRepository;
+  final outstandingLends = <String, int>{}.obs;
+  final outstandingBorrows = <String, int>{}.obs;
 
   @override
   void onInit() {
     final db = Get.find<AppDatabase>();
+    accountingRepository = AccountingRepository(db);
     lendRepository = LendRepository(db);
     borrowRepository = BorrowRepository(db);
     loadEntries();
@@ -25,11 +32,22 @@ class LendBorrowController extends GetxController {
   Future<void> loadEntries() async {
     lends.value = await lendRepository.getAllLends();
     borrows.value = await borrowRepository.getAllBorrows();
+    final calculator = await accountingRepository.calculator();
+    outstandingLends.value = {
+      for (final row in lends) row.id: calculator.outstandingLend(row),
+    };
+    outstandingBorrows.value = {
+      for (final row in borrows) row.id: calculator.outstandingBorrow(row),
+    };
+    if (Get.isRegistered<AccountController>()) {
+      await Get.find<AccountController>().reload();
+    }
   }
 
   Future<void> addEntry({
     required String personName,
     required double amount,
+    String? accountId,
     required String type,
     String? note,
     required DateTime date,
@@ -39,6 +57,7 @@ class LendBorrowController extends GetxController {
         await lendRepository.insertLend(
           personName: personName,
           amount: amount,
+          accountId: accountId,
           note: note,
           date: date,
         );
@@ -46,6 +65,7 @@ class LendBorrowController extends GetxController {
         await borrowRepository.insertBorrow(
           personName: personName,
           amount: amount,
+          accountId: accountId,
           note: note,
           date: date,
         );
@@ -69,23 +89,11 @@ class LendBorrowController extends GetxController {
     }
   }
 
-  Future<void> toggleSettled(String id, bool currentValue, String type) async {
-    try {
-      if (type == typeLend) {
-        await lendRepository.toggleSettled(id, !currentValue);
-      } else if (type == typeBorrow) {
-        await borrowRepository.toggleSettled(id, !currentValue);
-      }
-      await loadEntries();
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to update entry: $e');
-    }
-  }
-
   Future<void> updateEntry({
     required String id,
     required String personName,
     required double amount,
+    String? accountId,
     required String type,
     String? note,
     required DateTime date,
@@ -96,6 +104,7 @@ class LendBorrowController extends GetxController {
           id: id,
           personName: personName,
           amount: amount,
+          accountId: accountId,
           note: note,
           date: date,
         );
@@ -104,6 +113,7 @@ class LendBorrowController extends GetxController {
           id: id,
           personName: personName,
           amount: amount,
+          accountId: accountId,
           note: note,
           date: date,
         );
@@ -114,15 +124,33 @@ class LendBorrowController extends GetxController {
     }
   }
 
-  double getTotalLent() {
-    return lends
-        .where((entry) => !entry.isSettled)
-        .fold(0.0, (sum, entry) => sum + entry.amount);
+  Future<void> repay({
+    required String id,
+    required String type,
+    required String accountId,
+    required double amount,
+    required DateTime date,
+  }) async {
+    if (type == typeLend) {
+      await accountingRepository.repayLend(
+        lendId: id,
+        accountId: accountId,
+        amount: amount,
+        date: date,
+      );
+    } else {
+      await accountingRepository.repayBorrow(
+        borrowId: id,
+        accountId: accountId,
+        amount: amount,
+        date: date,
+      );
+    }
+    await loadEntries();
   }
 
-  double getTotalBorrowed() {
-    return borrows
-        .where((entry) => !entry.isSettled)
-        .fold(0.0, (sum, entry) => sum + entry.amount);
-  }
+  double getTotalLent() =>
+      Money.bdt(outstandingLends.values.fold<int>(0, (s, v) => s + v));
+  double getTotalBorrowed() =>
+      Money.bdt(outstandingBorrows.values.fold<int>(0, (s, v) => s + v));
 }

@@ -1,3 +1,4 @@
+import 'account_table.dart';
 import 'package:drift/drift.dart';
 
 class Lends extends Table {
@@ -7,6 +8,7 @@ class Lends extends Table {
   TextColumn get note => text().nullable()();
   DateTimeColumn get lendDate => dateTime()();
   BoolColumn get isSettled => boolean().withDefault(const Constant(false))();
+  TextColumn get accountId => text().nullable().references(Accounts, #id)();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 

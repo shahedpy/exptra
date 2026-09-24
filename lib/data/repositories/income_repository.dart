@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
+import '../services/financial_calculator.dart';
 
 import '../../core/db/app_database.dart';
 
@@ -11,6 +12,7 @@ class IncomeRepository {
 
   Future<void> insertIncome({
     required double amount,
+    String? accountId,
     String? sourceId,
     String? source,
     String? note,
@@ -21,7 +23,8 @@ class IncomeRepository {
         .insert(
           IncomesCompanion.insert(
             id: _uuid.v4(),
-            amount: amount,
+            amount: Money.normalize(amount),
+            accountId: Value(accountId),
             sourceId: Value(sourceId),
             source: Value(source),
             note: Value(note),
@@ -46,6 +49,7 @@ class IncomeRepository {
   Future<void> updateIncome({
     required String id,
     required double amount,
+    String? accountId,
     String? sourceId,
     String? source,
     String? note,
@@ -53,7 +57,8 @@ class IncomeRepository {
   }) async {
     await (db.update(db.incomes)..where((tbl) => tbl.id.equals(id))).write(
       IncomesCompanion(
-        amount: Value(amount),
+        amount: Value(Money.normalize(amount)),
+        accountId: Value(accountId),
         sourceId: Value(sourceId),
         source: Value(source),
         note: Value(note),

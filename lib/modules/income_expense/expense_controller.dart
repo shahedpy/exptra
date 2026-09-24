@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../accounts/account_controller.dart';
 import '../../../data/repositories/expense_repository.dart';
 import '../../../core/db/app_database.dart';
 
@@ -20,6 +21,7 @@ class ExpenseController extends GetxController {
   Future<void> addExpense({
     required String categoryId,
     required double amount,
+    String? accountId,
     String? note,
     required DateTime date,
   }) async {
@@ -27,10 +29,14 @@ class ExpenseController extends GetxController {
       await repository.insertExpense(
         categoryId: categoryId,
         amount: amount,
+        accountId: accountId,
         note: note,
         date: date,
       );
       await loadExpenses();
+      if (Get.isRegistered<AccountController>()) {
+        await Get.find<AccountController>().reload();
+      }
     } catch (e) {
       Get.snackbar('Error', 'Failed to add expense: $e');
     }
@@ -40,6 +46,9 @@ class ExpenseController extends GetxController {
     try {
       await repository.softDelete(id);
       await loadExpenses();
+      if (Get.isRegistered<AccountController>()) {
+        await Get.find<AccountController>().reload();
+      }
     } catch (e) {
       Get.snackbar('Error', 'Failed to delete expense: $e');
     }
@@ -49,6 +58,7 @@ class ExpenseController extends GetxController {
     required String id,
     required String categoryId,
     required double amount,
+    String? accountId,
     String? note,
     required DateTime date,
   }) async {
@@ -57,10 +67,14 @@ class ExpenseController extends GetxController {
         id: id,
         categoryId: categoryId,
         amount: amount,
+        accountId: accountId,
         note: note,
         date: date,
       );
       await loadExpenses();
+      if (Get.isRegistered<AccountController>()) {
+        await Get.find<AccountController>().reload();
+      }
     } catch (e) {
       Get.snackbar('Error', 'Failed to update expense: $e');
     }

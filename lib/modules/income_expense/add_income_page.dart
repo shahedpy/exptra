@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../accounts/account_selector.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/helpers.dart';
@@ -26,6 +27,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
   late DateTime _selectedDate;
   bool _isEdit = false;
   String? _editingId;
+  String? _accountId;
 
   @override
   void initState() {
@@ -38,6 +40,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
     if (args != null && args is Income) {
       _isEdit = true;
       _editingId = args.id;
+      _accountId = args.accountId;
       _selectedDate = args.incomeDate;
       _selectedSourceId = args.sourceId;
       _amountController.text = args.amount.toString();
@@ -146,6 +149,12 @@ class _AddIncomePageState extends State<AddIncomePage> {
                 );
               }),
               const SizedBox(height: AppConstants.defaultPadding * 1.5),
+              AccountSelector(
+                value: _accountId,
+                label: 'To account',
+                onChanged: (value) => setState(() => _accountId = value),
+              ),
+              const SizedBox(height: AppConstants.defaultPadding * 1.5),
               const Text(
                 'Date',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -214,9 +223,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
       return;
     }
 
-    final amount = double.parse(
-      _amountController.text.replaceAll(AppConstants.currencySymbol, ''),
-    );
+    final amount = CurrencyHelper.parseAmount(_amountController.text);
 
     final sourceName = incomeSourceController
         .getIncomeSourceById(_selectedSourceId!)
@@ -226,6 +233,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
       incomeController.updateIncome(
         id: _editingId!,
         amount: amount,
+        accountId: _accountId,
         sourceId: _selectedSourceId,
         source: sourceName,
         note: _noteController.text.trim(),
@@ -238,6 +246,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
 
     incomeController.addIncome(
       amount: amount,
+      accountId: _accountId,
       sourceId: _selectedSourceId,
       source: sourceName,
       note: _noteController.text.trim(),

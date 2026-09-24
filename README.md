@@ -157,3 +157,15 @@ dart run build_runner build --delete-conflicting-outputs
 ## License
 
 A personal project by shahedpy.
+
+## Personal Hisab
+
+The **Accounts** tab tracks bank, cash, mobile wallet, FDR, DPS, and other assets. Add an account with its opening balance and the date that balance was true. Income and expense forms now select a receiving or paying account. Transfers move value between accounts without appearing as income or expense. Lend and borrow forms record the cash account; their list supports partial repayments into or out of a selected account.
+
+An account statement shows dated activity and a running balance. **Record actual balance** saves a balance check; it never changes the ledger. The separate **Create Balance Adjustment** action records the difference with a link to that check. The **Hisab Comparison** screen explains the change in net worth between two dates. Existing daily, monthly, source, category, and person reports remain available; the Reports screen also links to financial reports and a searchable account history.
+
+### Existing data and money precision
+
+Schema version 2 adds the accounting tables and nullable account references. Version 1 transactions remain **unassigned** after migration or backup restore; EXPTRA does not guess their accounts. Open an old transaction to assign one. Legacy lend or borrow records previously marked settled remain settled, but their old settlement dates and cash accounts cannot be reconstructed. Date comparisons involving those records may show an unexplained difference.
+
+Existing monetary columns remain SQLite `REAL` for compatibility. The shared `Money` helper converts each stored value to integer poisha before summing and normalizes new values to two decimal places before writing. The `.exptra` backup format is version 2 and includes every new accounting table; version 1 backups still restore.

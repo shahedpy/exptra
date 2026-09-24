@@ -29,10 +29,7 @@ class DashboardController extends GetxController {
   }
 
   double getBalance() {
-    return getTotalIncome() +
-        getTotalBorrowed() -
-        getTotalExpenses() -
-        getTotalLent();
+    return getTotalIncome() - getTotalExpenses();
   }
 
   double getTotalLent() {
