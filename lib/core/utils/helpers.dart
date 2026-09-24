@@ -58,6 +58,18 @@ class CurrencyHelper {
     return '${AppConstants.currencySymbol}${_bdNumberFormat.format(amount)}';
   }
 
+  static String formatSignedAmount(
+    double amount, {
+    bool showPositiveSign = true,
+  }) {
+    final sign = amount < 0
+        ? '−'
+        : amount > 0 && showPositiveSign
+        ? '+'
+        : '';
+    return '$sign${formatAmount(amount.abs())}';
+  }
+
   static String formatAmountCompact(double amount) {
     if (amount >= 1000000) {
       return '${AppConstants.currencySymbol}${(amount / 1000000).toStringAsFixed(1)}M';

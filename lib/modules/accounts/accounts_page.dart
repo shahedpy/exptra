@@ -9,14 +9,21 @@ import 'account_detail_page.dart';
 import 'comparison_page.dart';
 import 'transfer_page.dart';
 
+enum AccountTypeFilter { all, liquid, investment }
+
 class AccountsPage extends StatelessWidget {
-  const AccountsPage({super.key});
+  final AccountTypeFilter accountFilter;
+  const AccountsPage({super.key, this.accountFilter = AccountTypeFilter.all});
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AccountController>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hisab'),
+        title: Text(switch (accountFilter) {
+          AccountTypeFilter.all => 'Accounts',
+          AccountTypeFilter.liquid => 'Available Accounts',
+          AccountTypeFilter.investment => 'Investments',
+        }),
         actions: [
           IconButton(
             tooltip: 'Compare dates',
@@ -37,7 +44,18 @@ class AccountsPage extends StatelessWidget {
         }
         final position = calculator.position();
         final groups = <String, List<Account>>{};
-        for (final account in controller.activeAccounts) {
+        for (final account in controller.activeAccounts.where((account) {
+          final isInvestment = const {
+            'FDR',
+            'DPS',
+            'Investment',
+          }.contains(account.type);
+          return accountFilter == AccountTypeFilter.all ||
+              (account.includeInNetWorth &&
+                  (accountFilter == AccountTypeFilter.investment
+                      ? isInvestment
+                      : !isInvestment));
+        })) {
           groups
               .putIfAbsent(
                 account.institutionName.isEmpty
@@ -50,34 +68,37 @@ class AccountsPage extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Financial Position',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 12),
-                    _row('Net Worth', position.netWorth, bold: true),
-                    const Divider(),
-                    _row('Bank & Cash', position.bankAndCash),
-                    _row('Investments', position.investments),
-                    _row('Money to Receive', position.receivables),
-                    _row('Money to Pay', -position.liabilities),
-                    if (position.excludedAssets != 0)
-                      _row('Excluded accounts', position.excludedAssets),
-                  ],
+            if (accountFilter == AccountTypeFilter.all)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Financial Position',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 12),
+                      _row('Net Worth', position.netWorth, bold: true),
+                      const Divider(),
+                      _row('Bank & Cash', position.bankAndCash),
+                      _row('Investments', position.investments),
+                      _row('Money to Receive', position.receivables),
+                      _row('Money to Pay', -position.liabilities),
+                      if (position.excludedAssets != 0)
+                        _row('Excluded accounts', position.excludedAssets),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (controller.activeAccounts.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(24),
+            if (groups.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(24),
                 child: Text(
-                  'Add your first account to start tracking balances. Old transactions remain unassigned.',
+                  accountFilter == AccountTypeFilter.all
+                      ? 'Add your first account to start tracking balances. Old transactions remain unassigned.'
+                      : 'No accounts in this view yet.',
                 ),
               ),
             ...groups.entries.map(
@@ -89,7 +110,8 @@ class AccountsPage extends StatelessWidget {
                 group.value,
               ),
             ),
-            if (controller.accounts.any((a) => a.isArchived))
+            if (accountFilter == AccountTypeFilter.all &&
+                controller.accounts.any((a) => a.isArchived))
               ExpansionTile(
                 title: const Text('Archived accounts'),
                 children: [
@@ -140,7 +162,6 @@ class AccountsPage extends StatelessWidget {
     String name,
     List<Account> accounts,
   ) {
-    final total = accounts.fold<int>(0, (s, a) => s + calculator.balanceOf(a));
     return Card(
       child: Column(
         children: [
@@ -149,7 +170,6 @@ class AccountsPage extends StatelessWidget {
               name,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            trailing: Text(CurrencyHelper.formatAmount(Money.bdt(total))),
           ),
           for (final a in accounts)
             ListTile(
@@ -163,11 +183,16 @@ class AccountsPage extends StatelessWidget {
                       !calculator.adjustments.any(
                         (x) => !x.isDeleted && x.snapshotId == snapshot.id,
                       );
-                  return Text(
-                    snapshot == null
-                        ? a.type
-                        : '${a.type} • Last checked ${DateHelper.formatDate(snapshot.date)}${unresolved ? ' • Difference to review' : ''}',
-                  );
+                  final details = <String>[];
+                  if (snapshot != null) {
+                    details.add(
+                      'Last checked ${DateHelper.formatDate(snapshot.date)}',
+                    );
+                    if (unresolved) details.add('Difference to review');
+                  }
+                  return details.isEmpty
+                      ? const SizedBox.shrink()
+                      : Text(details.join(' • '));
                 },
               ),
               trailing: Row(

@@ -10,14 +10,26 @@ import '../accounts/account_selector.dart';
 import '../../data/services/financial_calculator.dart';
 
 class LendBorrowPage extends StatefulWidget {
-  const LendBorrowPage({super.key});
+  final int initialIndex;
+  final bool outstandingOnly;
+  const LendBorrowPage({
+    super.key,
+    this.initialIndex = 0,
+    this.outstandingOnly = false,
+  });
 
   @override
   State<LendBorrowPage> createState() => _LendBorrowPageState();
 }
 
 class _LendBorrowPageState extends State<LendBorrowPage> {
-  int _selectedIndex = 0; // 0 = All, 1 = Lend, 2 = Borrow
+  late int _selectedIndex; // 0 = All, 1 = Lend, 2 = Borrow
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,14 +76,32 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
           // Content
           Expanded(
             child: Obx(() {
-              final lends = controller.lends;
-              final borrows = controller.borrows;
+              final lends = controller.lends
+                  .where(
+                    (entry) =>
+                        !widget.outstandingOnly ||
+                        (controller.outstandingLends[entry.id] ??
+                                Money.cents(entry.amount)) >
+                            0,
+                  )
+                  .toList();
+              final borrows = controller.borrows
+                  .where(
+                    (entry) =>
+                        !widget.outstandingOnly ||
+                        (controller.outstandingBorrows[entry.id] ??
+                                Money.cents(entry.amount)) >
+                            0,
+                  )
+                  .toList();
               final allEmpty = lends.isEmpty && borrows.isEmpty;
 
               if (allEmpty) {
                 return Center(
                   child: Text(
-                    'No lend/borrow entries yet',
+                    widget.outstandingOnly
+                        ? 'No outstanding lends or borrows'
+                        : 'No lend/borrow entries yet',
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
                 );

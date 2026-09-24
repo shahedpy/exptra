@@ -1,70 +1,107 @@
 import 'package:get/get.dart';
+
+import '../../data/services/financial_calculator.dart';
+import '../accounts/account_controller.dart';
 import '../income_expense/expense_controller.dart';
 import '../income_expense/income_controller.dart';
 import '../lend_borrow/lend_borrow_controller.dart';
-import '../../core/utils/helpers.dart';
 
-enum DashboardTransactionTab { all, incomeExpense, lendBorrow }
+enum DashboardTransactionTab { all, income, expense, transfer, lendBorrow }
+
+enum DashboardEntryType { income, expense, transfer, lend, borrow }
+
+class DashboardEntry {
+  final DashboardEntryType type;
+  final Object record;
+  final DateTime date;
+
+  const DashboardEntry(this.type, this.record, this.date);
+}
 
 class DashboardController extends GetxController {
-  late final ExpenseController expenseController;
-  late final IncomeController incomeController;
-  late final LendBorrowController lendBorrowController;
   final selectedTransactionTab = DashboardTransactionTab.all.obs;
+  final monthOnly = false.obs;
+  final showAll = false.obs;
 
-  @override
-  void onInit() {
-    expenseController = Get.find<ExpenseController>();
-    incomeController = Get.find<IncomeController>();
-    lendBorrowController = Get.find<LendBorrowController>();
-    super.onInit();
+  FinancialCalculator? get calculator =>
+      Get.find<AccountController>().calculator.value;
+
+  PeriodComparison? currentMonth(DateTime now) {
+    final calc = calculator;
+    if (calc == null) return null;
+    final firstDay = DateTime(now.year, now.month, 1);
+    return calc.compare(firstDay.subtract(const Duration(days: 1)), now);
   }
 
-  double getTotalExpenses() {
-    return expenseController.getTotalExpenses();
+  List<DashboardEntry> entries() {
+    final tab = selectedTransactionTab.value;
+    final calc = calculator;
+    final entries = <DashboardEntry>[];
+    if (tab == DashboardTransactionTab.all ||
+        tab == DashboardTransactionTab.income) {
+      entries.addAll(
+        Get.find<IncomeController>().incomes.map(
+          (item) =>
+              DashboardEntry(DashboardEntryType.income, item, item.incomeDate),
+        ),
+      );
+    }
+    if (tab == DashboardTransactionTab.all ||
+        tab == DashboardTransactionTab.expense) {
+      entries.addAll(
+        Get.find<ExpenseController>().expenses.map(
+          (item) => DashboardEntry(
+            DashboardEntryType.expense,
+            item,
+            item.expenseDate,
+          ),
+        ),
+      );
+    }
+    if (calc != null &&
+        (tab == DashboardTransactionTab.all ||
+            tab == DashboardTransactionTab.transfer)) {
+      entries.addAll(
+        calc.transfers
+            .where((item) => !item.isDeleted)
+            .map(
+              (item) => DashboardEntry(
+                DashboardEntryType.transfer,
+                item,
+                item.transferDate,
+              ),
+            ),
+      );
+    }
+    if (tab == DashboardTransactionTab.all ||
+        tab == DashboardTransactionTab.lendBorrow) {
+      final controller = Get.find<LendBorrowController>();
+      entries.addAll(
+        controller.lends.map(
+          (item) =>
+              DashboardEntry(DashboardEntryType.lend, item, item.lendDate),
+        ),
+      );
+      entries.addAll(
+        controller.borrows.map(
+          (item) =>
+              DashboardEntry(DashboardEntryType.borrow, item, item.borrowDate),
+        ),
+      );
+    }
+    if (monthOnly.value) {
+      final now = DateTime.now();
+      entries.removeWhere(
+        (item) => item.date.year != now.year || item.date.month != now.month,
+      );
+    }
+    entries.sort((a, b) => b.date.compareTo(a.date));
+    return entries;
   }
 
-  double getTotalIncome() {
-    return incomeController.getTotalIncome();
-  }
-
-  double getBalance() {
-    return getTotalIncome() - getTotalExpenses();
-  }
-
-  double getTotalLent() {
-    return lendBorrowController.getTotalLent();
-  }
-
-  double getTotalBorrowed() {
-    return lendBorrowController.getTotalBorrowed();
-  }
-
-  String getFormattedIncome() {
-    return CurrencyHelper.formatAmount(getTotalIncome());
-  }
-
-  String getFormattedExpense() {
-    return CurrencyHelper.formatAmount(getTotalExpenses());
-  }
-
-  String getFormattedBalance() {
-    return CurrencyHelper.formatAmount(getBalance());
-  }
-
-  String getFormattedLent() {
-    return CurrencyHelper.formatAmount(getTotalLent());
-  }
-
-  String getFormattedBorrowed() {
-    return CurrencyHelper.formatAmount(getTotalBorrowed());
-  }
-
-  int getExpenseCount() {
-    return expenseController.expenses.length;
-  }
-
-  void changeTransactionTab(DashboardTransactionTab tab) {
+  void selectTab(DashboardTransactionTab tab, {bool currentMonthOnly = false}) {
     selectedTransactionTab.value = tab;
+    monthOnly.value = currentMonthOnly;
+    showAll.value = false;
   }
 }
