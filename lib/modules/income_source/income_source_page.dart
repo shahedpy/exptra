@@ -60,7 +60,7 @@ class _IncomeSourcePageState extends State<IncomeSourcePage> {
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
                 buildDefaultDragHandles: false,
                 itemCount: controller.incomeSources.length,
-                onReorder: controller.reorderIncomeSources,
+                onReorderItem: controller.reorderIncomeSources,
                 itemBuilder: (_, index) {
                   final source = controller.incomeSources[index];
                   return Card(

@@ -87,10 +87,6 @@ class ExpenseCategoryController extends GetxController {
     if (oldIndex < 0 || oldIndex >= categories.length) return;
     if (newIndex < 0 || newIndex > categories.length) return;
 
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
-
     final updated = List<ExpenseCategory>.from(categories);
     final moved = updated.removeAt(oldIndex);
     updated.insert(newIndex, moved);
