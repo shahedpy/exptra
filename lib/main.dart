@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'EXPTRA Hisab',
+      title: 'EXPTRA',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       getPages: AppRoutes.routes,

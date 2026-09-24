@@ -15,7 +15,7 @@ class _ComparisonPageState extends State<ComparisonPage> {
   DateTime to = DateTime.now();
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Hisab Comparison')),
+    appBar: AppBar(title: const Text('Balance Comparison')),
     body: Obx(() {
       final calc = Get.find<AccountController>().calculator.value;
       if (calc == null) return const Center(child: CircularProgressIndicator());
