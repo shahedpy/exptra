@@ -119,7 +119,7 @@ class _FinancialHistoryPageState extends State<FinancialHistoryPage> {
                 (v) => setState(() => accountId = v),
               ),
               _dropdown(
-                'Institution',
+                'Bank',
                 institution,
                 institutions.map((s) => (s, s)).toList(),
                 (v) => setState(() => institution = v),

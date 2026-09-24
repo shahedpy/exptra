@@ -1,4 +1,5 @@
 import '../accounts/account_controller.dart';
+import '../bank/bank_controller.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -54,6 +55,12 @@ class _MorePageState extends State<MorePage> {
             title: const Text('Income Sources'),
             subtitle: const Text('Manage income source list'),
             onTap: () => Get.toNamed(AppRoutes.incomeSources),
+          ),
+          ListTile(
+            leading: const Icon(Icons.account_balance_outlined),
+            title: const Text('Banks'),
+            subtitle: const Text('Manage banks used by accounts'),
+            onTap: () => Get.toNamed(AppRoutes.banks),
           ),
           ListTile(
             leading: const Icon(Icons.backup_outlined),
@@ -171,6 +178,9 @@ class _MorePageState extends State<MorePage> {
       await lendBorrowController.loadEntries();
       if (Get.isRegistered<AccountController>()) {
         await Get.find<AccountController>().reload();
+      }
+      if (Get.isRegistered<BankController>()) {
+        await Get.find<BankController>().loadBanks();
       }
 
       Get.snackbar('Restore Complete', 'Data restored from backup file.');

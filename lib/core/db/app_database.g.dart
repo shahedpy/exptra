@@ -6363,6 +6363,308 @@ class BorrowRepaymentsCompanion extends UpdateCompanion<BorrowRepayment> {
   }
 }
 
+class $BanksTable extends Banks with TableInfo<$BanksTable, Bank> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BanksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, sortOrder, isDeleted];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'banks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Bank> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Bank map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Bank(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+    );
+  }
+
+  @override
+  $BanksTable createAlias(String alias) {
+    return $BanksTable(attachedDatabase, alias);
+  }
+}
+
+class Bank extends DataClass implements Insertable<Bank> {
+  final String id;
+  final String name;
+  final int sortOrder;
+  final bool isDeleted;
+  const Bank({
+    required this.id,
+    required this.name,
+    required this.sortOrder,
+    required this.isDeleted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    return map;
+  }
+
+  BanksCompanion toCompanion(bool nullToAbsent) {
+    return BanksCompanion(
+      id: Value(id),
+      name: Value(name),
+      sortOrder: Value(sortOrder),
+      isDeleted: Value(isDeleted),
+    );
+  }
+
+  factory Bank.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Bank(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+    };
+  }
+
+  Bank copyWith({String? id, String? name, int? sortOrder, bool? isDeleted}) =>
+      Bank(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        sortOrder: sortOrder ?? this.sortOrder,
+        isDeleted: isDeleted ?? this.isDeleted,
+      );
+  Bank copyWithCompanion(BanksCompanion data) {
+    return Bank(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Bank(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isDeleted: $isDeleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, sortOrder, isDeleted);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Bank &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.sortOrder == this.sortOrder &&
+          other.isDeleted == this.isDeleted);
+}
+
+class BanksCompanion extends UpdateCompanion<Bank> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<int> sortOrder;
+  final Value<bool> isDeleted;
+  final Value<int> rowid;
+  const BanksCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BanksCompanion.insert({
+    required String id,
+    required String name,
+    this.sortOrder = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name);
+  static Insertable<Bank> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<int>? sortOrder,
+    Expression<bool>? isDeleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BanksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<int>? sortOrder,
+    Value<bool>? isDeleted,
+    Value<int>? rowid,
+  }) {
+    return BanksCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isDeleted: isDeleted ?? this.isDeleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BanksCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6385,6 +6687,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BorrowRepaymentsTable borrowRepayments = $BorrowRepaymentsTable(
     this,
   );
+  late final $BanksTable banks = $BanksTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6402,6 +6705,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     balanceAdjustments,
     lendRepayments,
     borrowRepayments,
+    banks,
   ];
 }
 
@@ -12380,6 +12684,180 @@ typedef $$BorrowRepaymentsTableProcessedTableManager =
       BorrowRepayment,
       PrefetchHooks Function({bool borrowId, bool accountId})
     >;
+typedef $$BanksTableCreateCompanionBuilder =
+    BanksCompanion Function({
+      required String id,
+      required String name,
+      Value<int> sortOrder,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+typedef $$BanksTableUpdateCompanionBuilder =
+    BanksCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<int> sortOrder,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+
+class $$BanksTableFilterComposer extends Composer<_$AppDatabase, $BanksTable> {
+  $$BanksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BanksTableOrderingComposer
+    extends Composer<_$AppDatabase, $BanksTable> {
+  $$BanksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BanksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BanksTable> {
+  $$BanksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+}
+
+class $$BanksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BanksTable,
+          Bank,
+          $$BanksTableFilterComposer,
+          $$BanksTableOrderingComposer,
+          $$BanksTableAnnotationComposer,
+          $$BanksTableCreateCompanionBuilder,
+          $$BanksTableUpdateCompanionBuilder,
+          (Bank, BaseReferences<_$AppDatabase, $BanksTable, Bank>),
+          Bank,
+          PrefetchHooks Function()
+        > {
+  $$BanksTableTableManager(_$AppDatabase db, $BanksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BanksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BanksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BanksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BanksCompanion(
+                id: id,
+                name: name,
+                sortOrder: sortOrder,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BanksCompanion.insert(
+                id: id,
+                name: name,
+                sortOrder: sortOrder,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BanksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BanksTable,
+      Bank,
+      $$BanksTableFilterComposer,
+      $$BanksTableOrderingComposer,
+      $$BanksTableAnnotationComposer,
+      $$BanksTableCreateCompanionBuilder,
+      $$BanksTableUpdateCompanionBuilder,
+      (Bank, BaseReferences<_$AppDatabase, $BanksTable, Bank>),
+      Bank,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12411,4 +12889,6 @@ class $AppDatabaseManager {
       $$LendRepaymentsTableTableManager(_db, _db.lendRepayments);
   $$BorrowRepaymentsTableTableManager get borrowRepayments =>
       $$BorrowRepaymentsTableTableManager(_db, _db.borrowRepayments);
+  $$BanksTableTableManager get banks =>
+      $$BanksTableTableManager(_db, _db.banks);
 }

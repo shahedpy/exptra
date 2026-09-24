@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
+import '../bank/bank_controller.dart';
 import 'account_controller.dart';
 
 class AccountFormPage extends StatefulWidget {
@@ -23,11 +24,10 @@ class _AccountFormPageState extends State<AccountFormPage> {
     'Other',
   ];
   final key = GlobalKey<FormState>();
-  final institution = TextEditingController();
-  final name = TextEditingController();
   final opening = TextEditingController(text: '0');
   final note = TextEditingController();
   String type = 'Savings';
+  String? selectedBank;
   DateTime date = DateTime.now();
   bool include = true, archived = false, saving = false;
 
@@ -36,8 +36,7 @@ class _AccountFormPageState extends State<AccountFormPage> {
     super.initState();
     final a = widget.account;
     if (a != null) {
-      institution.text = a.institutionName;
-      name.text = a.name;
+      selectedBank = a.institutionName.isEmpty ? null : a.institutionName;
       opening.text = a.openingBalance.toStringAsFixed(2);
       note.text = a.note ?? '';
       type = a.type;
@@ -49,8 +48,6 @@ class _AccountFormPageState extends State<AccountFormPage> {
 
   @override
   void dispose() {
-    institution.dispose();
-    name.dispose();
     opening.dispose();
     note.dispose();
     super.dispose();
@@ -63,8 +60,8 @@ class _AccountFormPageState extends State<AccountFormPage> {
       final controller = Get.find<AccountController>();
       await controller.repository.saveAccount(
         id: widget.account?.id,
-        institutionName: institution.text.trim(),
-        name: name.text.trim(),
+        institutionName: selectedBank ?? '',
+        name: widget.account?.name ?? type,
         type: type,
         currency: widget.account?.currency ?? 'BDT',
         openingBalance: CurrencyHelper.parseAmount(opening.text),
@@ -97,25 +94,42 @@ class _AccountFormPageState extends State<AccountFormPage> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TextFormField(
-            controller: institution,
-            decoration: const InputDecoration(
-              labelText: 'Institution (optional)',
-              hintText: 'UCB, FSIB, City Bank',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: name,
-            decoration: const InputDecoration(
-              labelText: 'Account name',
-              hintText: 'Savings, FDR, bKash',
-              border: OutlineInputBorder(),
-            ),
-            validator: (v) =>
-                v == null || v.trim().isEmpty ? 'Enter a name' : null,
-          ),
+          Obx(() {
+            final bankController = Get.find<BankController>();
+            final bankNames = bankController.banks
+                .map((bank) => bank.name)
+                .toList();
+            if (selectedBank != null &&
+                selectedBank!.isNotEmpty &&
+                !bankNames.contains(selectedBank)) {
+              bankNames.insert(0, selectedBank!);
+            }
+            return DropdownButtonFormField<String>(
+              initialValue: selectedBank,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: 'Bank',
+                helperText: bankNames.isEmpty ? 'Add banks from More' : null,
+                border: const OutlineInputBorder(),
+              ),
+              items: bankNames
+                  .map(
+                    (bank) => DropdownMenuItem<String>(
+                      value: bank,
+                      child: Text(bank),
+                    ),
+                  )
+                  .toList(),
+              onChanged: bankNames.isEmpty
+                  ? null
+                  : (value) => setState(() => selectedBank = value),
+              validator: (value) => value == null
+                  ? bankNames.isEmpty
+                        ? 'Add a bank from More first'
+                        : 'Select a bank'
+                  : null,
+            );
+          }),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: type,

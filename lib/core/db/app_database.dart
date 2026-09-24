@@ -15,6 +15,7 @@ import 'tables/account_balance_snapshot_table.dart';
 import 'tables/balance_adjustment_table.dart';
 import 'tables/lend_repayment_table.dart';
 import 'tables/borrow_repayment_table.dart';
+import 'tables/bank_table.dart';
 
 part 'app_database.g.dart';
 
@@ -32,6 +33,7 @@ part 'app_database.g.dart';
     BalanceAdjustments,
     LendRepayments,
     BorrowRepayments,
+    Banks,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -42,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -63,6 +65,16 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(lendRepayments);
         await m.createTable(borrowRepayments);
         await _createIndexes();
+      }
+      if (from < 3) {
+        await m.createTable(banks);
+        await customStatement('''
+          INSERT INTO banks (id, name, sort_order, is_deleted)
+          SELECT 'legacy-bank-' || MIN(rowid), institution_name, 0, 0
+          FROM accounts
+          WHERE trim(institution_name) <> ''
+          GROUP BY institution_name
+        ''');
       }
     },
   );

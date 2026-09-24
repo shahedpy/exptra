@@ -58,7 +58,7 @@ class FinancialReportsPage extends StatelessWidget {
               trailing: _money(calc.balanceOf(a)),
               onTap: () => Get.to(() => AccountDetailPage(accountId: a.id)),
             ),
-          _title(context, 'Institution balances'),
+          _title(context, 'Bank balances'),
           for (final entry in institutions.entries)
             ListTile(title: Text(entry.key), trailing: _money(entry.value)),
           _title(context, 'Asset allocation'),

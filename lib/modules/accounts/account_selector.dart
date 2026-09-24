@@ -30,7 +30,7 @@ class AccountSelector extends StatelessWidget {
           labelText: label,
           border: const OutlineInputBorder(),
           helperText: accounts.isEmpty
-              ? 'Add an account in Hisab first'
+              ? 'Add an account first'
               : value == null
               ? 'Unassigned records do not affect account balances'
               : null,

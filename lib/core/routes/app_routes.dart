@@ -7,6 +7,7 @@ import '../../modules/lend_borrow/add_borrow_page.dart';
 import '../../modules/lend_borrow/add_lend_page.dart';
 import '../../modules/lend_borrow/lend_borrow_page.dart';
 import '../../modules/navigation/main_navigation_page.dart';
+import '../../modules/bank/bank_page.dart';
 
 class AppRoutes {
   static const String dashboard = '/';
@@ -17,6 +18,7 @@ class AppRoutes {
   static const String addBorrow = '/add-borrow';
   static const String expenseCategories = '/categories';
   static const String incomeSources = '/income-sources';
+  static const String banks = '/banks';
 
   static final routes = [
     GetPage(name: dashboard, page: () => const MainNavigationPage()),
@@ -27,5 +29,6 @@ class AppRoutes {
     GetPage(name: addBorrow, page: () => const AddBorrowPage()),
     GetPage(name: expenseCategories, page: () => const ExpenseCategoryPage()),
     GetPage(name: incomeSources, page: () => const IncomeSourcePage()),
+    GetPage(name: banks, page: () => const BankPage()),
   ];
 }

@@ -19,6 +19,7 @@ class DatabaseBackupService {
     final lends = await database.select(database.lends).get();
     final borrows = await database.select(database.borrows).get();
     final accounts = await database.select(database.accounts).get();
+    final banks = await database.select(database.banks).get();
     final transfers = await database.select(database.accountTransfers).get();
     final snapshots = await database
         .select(database.accountBalanceSnapshots)
@@ -37,8 +38,18 @@ class DatabaseBackupService {
         outputPath ?? p.join(tempDir!.path, 'exptra-backup-$timestamp.exptra');
 
     final backupPayload = {
-      'version': 2,
+      'version': 3,
       'exportedAt': DateTime.now().toIso8601String(),
+      'banks': banks
+          .map(
+            (bank) => {
+              'id': bank.id,
+              'name': bank.name,
+              'sortOrder': bank.sortOrder,
+              'isDeleted': bank.isDeleted,
+            },
+          )
+          .toList(),
       'accounts': accounts.map((e) => e.toJson()).toList(),
       'transfers': transfers.map((e) => e.toJson()).toList(),
       'snapshots': snapshots.map((e) => e.toJson()).toList(),
@@ -151,7 +162,7 @@ class DatabaseBackupService {
     }
 
     final version = decoded['version'];
-    if (version != null && version != 1 && version != 2) {
+    if (version != null && version != 1 && version != 2 && version != 3) {
       throw Exception('Unsupported backup version.');
     }
     final categoriesRaw = decoded['categories'];
@@ -185,6 +196,22 @@ class DatabaseBackupService {
       await database.delete(database.expenses).go();
       await database.delete(database.expenseCategories).go();
       await database.delete(database.accounts).go();
+      await database.delete(database.banks).go();
+
+      for (final item
+          in (decoded['banks'] is List ? decoded['banks'] as List : const [])) {
+        if (item is! Map<String, dynamic>) continue;
+        await database
+            .into(database.banks)
+            .insert(
+              BanksCompanion.insert(
+                id: item['id'] as String,
+                name: item['name'] as String,
+                sortOrder: Value(item['sortOrder'] as int? ?? 0),
+                isDeleted: Value(item['isDeleted'] as bool? ?? false),
+              ),
+            );
+      }
 
       for (final item
           in (decoded['accounts'] is List
@@ -199,6 +226,7 @@ class DatabaseBackupService {
               ).toCompanion(true),
             );
       }
+      await _restoreLegacyBanks(database);
 
       for (final item in categoriesRaw) {
         if (item is! Map<String, dynamic>) continue;
@@ -420,5 +448,26 @@ class DatabaseBackupService {
             );
       }
     });
+  }
+
+  Future<void> _restoreLegacyBanks(AppDatabase database) async {
+    final existingNames = {
+      for (final bank in await database.select(database.banks).get()) bank.name,
+    };
+    final accounts = await database.select(database.accounts).get();
+    var sortOrder = existingNames.length;
+    for (final account in accounts) {
+      final name = account.institutionName.trim();
+      if (name.isEmpty || !existingNames.add(name)) continue;
+      await database
+          .into(database.banks)
+          .insert(
+            BanksCompanion.insert(
+              id: 'legacy-bank-${account.id}',
+              name: name,
+              sortOrder: Value(sortOrder++),
+            ),
+          );
+    }
   }
 }
