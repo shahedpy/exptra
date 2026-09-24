@@ -59,7 +59,7 @@ class _ExpenseCategoryPageState extends State<ExpenseCategoryPage> {
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
                 buildDefaultDragHandles: false,
                 itemCount: controller.categories.length,
-                onReorder: controller.reorderCategories,
+                onReorderItem: controller.reorderCategories,
                 itemBuilder: (_, index) {
                   final category = controller.categories[index];
                   return Card(

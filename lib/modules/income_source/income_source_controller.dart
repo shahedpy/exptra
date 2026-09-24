@@ -89,10 +89,6 @@ class IncomeSourceController extends GetxController {
     if (oldIndex < 0 || oldIndex >= incomeSources.length) return;
     if (newIndex < 0 || newIndex > incomeSources.length) return;
 
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
-
     final updated = List<IncomeSource>.from(incomeSources);
     final moved = updated.removeAt(oldIndex);
     updated.insert(newIndex, moved);
