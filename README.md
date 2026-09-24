@@ -2,88 +2,93 @@
 
 <div align="center">
 
-<img src="./docs/images/exptra_logo.png" width="220" alt="EXPTRA logo"/><br/>
+<img src="docs/images/exptra_logo.png" width="220" alt="EXPTRA logo">
 
-**Offline First Modern Expense Tracker Application**
+**Offline-First Personal Finance Manager**
 
-EXPTRA is a lightweight, local-first Flutter app for tracking income, expenses, lend, and borrow activity with clarity and simplicity.
+EXPTRA is a local-first Flutter app for everyday হিসাব: accounts, income, expenses, transfers, lending, borrowing, balances, and reports. Financial data is stored on your device.
 
 [![Download Latest APK](https://img.shields.io/badge/Download-Latest_APK-blue?style=for-the-badge)](https://github.com/shahedpy/exptra/releases/latest)
 
 </div>
 
-## Download
-
-Download the latest Android APK from the [latest release](https://github.com/shahedpy/exptra/releases/latest), or browse all available versions on the [Releases page](https://github.com/shahedpy/exptra/releases).
-
-## Screenshots
-
-<div align="center">
-
-<img src="docs/screenshots/01.dashboard.png" width="250" alt="Dashboard screen"/>
-<img src="docs/screenshots/02.income_expense.png" width="250" alt="Income and expense screen"/>
-<img src="docs/screenshots/03.lend_borrow.png" width="250" alt="Lend and borrow screen"/>
-<img src="docs/screenshots/04.report_daily.png" width="250" alt="Daily report screen"/>
-<img src="docs/screenshots/05.report_monthly.png" width="250" alt="Monthly report screen"/>
-<img src="docs/screenshots/06.report_source_wise.png" width="250" alt="Source-wise report screen"/>
-<img src="docs/screenshots/07.expense_categories.png" width="250" alt="Expense categories screen"/>
-<img src="docs/screenshots/08.income_sources.png" width="250" alt="Income sources screen"/>
-
-</div>
+Download the Android APK from the [latest release](https://github.com/shahedpy/exptra/releases/latest), or browse [all releases](https://github.com/shahedpy/exptra/releases).
 
 ## Features
 
-### Transactions
-
-- Add and delete income and expense entries
-- Add and delete lend and borrow entries by person
-- View chronological transaction history from the dashboard
-- Filter dashboard activity by `All`, `Income/Expense`, and `Lend/Borrow`
-
 ### Dashboard
 
-- Current balance summary
-- Totals for income, expense, borrowed, and lent
-- Clean empty state when no entries exist
+- See net worth, available account balance, investments, money to receive, and money to pay.
+- Compare this month's income, expenses, and net cash flow without confusing cash flow with net worth.
+- Use quick actions for income, expense, transfer, lend, and borrow; filter recent activity by transaction type.
 
-### Categories and Sources
+### Accounts
 
-- Manage expense categories with add, update, delete, and reorder actions
-- Manage income sources with add, update, delete, and reorder actions
-- Auto-seed default categories and sources on first launch
+- Track Savings, Current, Cash, Mobile Wallet, FDR, DPS, Investment, and Other accounts with an opening balance and date.
+- Group accounts by bank, see calculated balances, and archive accounts. The bank list can be managed separately.
+- Open an account statement for dated entries, running balances, search, and filters. Accounts can be excluded from net worth.
+
+### Income & Expenses
+
+- Add, edit, and delete income and expense entries, optionally linked to an account.
+- Manage income sources and expense categories, including their order. Default choices are added on first launch.
+
+### Transfers
+
+- Move money between your own accounts, with an optional fee and note. The transfer itself is neither income nor expense; a fee is counted as an expense.
+
+### Lend & Borrow
+
+- Record money lent to or borrowed from a person, optionally linked to an account.
+- Track outstanding receivables and liabilities and record partial or full repayments through an account.
+
+### Balance Checks & Reconciliation
+
+- Record an actual account balance and compare it with the calculated balance in a dated snapshot.
+- A balance check leaves the ledger unchanged. If needed, create an explicit balance adjustment linked to that snapshot.
 
 ### Reports
 
-- View `Daily`, `Month`, and `Category/Source/Person` reports
-- Switch between `Income`, `Expense`, `Lend`, and `Borrow` scopes
-- Navigate month-by-month for report views
-- See total amount and transaction count summaries
+- Explore daily and monthly summaries, plus expense category, income source, and lend/borrow person views.
+- See account and bank balances, asset allocation, receivables, liabilities, six months of cash flow and net worth, and net-worth change between two dates.
+- Search financial history by account, bank, transaction type, category, source, person, amount, or date range.
 
-### Backup and Restore
+### Backup & Restore
 
-- Export local data to a portable `.exptra` backup file
-- Share backup files through the system share sheet
-- Restore data from a selected backup file
+- Export a `.exptra` file and share it using your device's share sheet. Restore from a selected file after confirming replacement of current local data.
+- Current backup format **version 3** includes accounts, banks, transfers, balance snapshots, adjustments, repayments, and the original transaction data. Version 1 and 2 backups can still be restored.
 
-## App Philosophy
+## Screenshots
 
-- Local-first data storage
-- No account required
-- No cloud dependency
-- Fast, minimal user experience
+The available captures show earlier layouts of these supported workflows. Updated Dashboard and Accounts captures are not yet in the repository.
 
-Your financial data stays on your device.
+| Income & expenses | Lend & borrow |
+|:---:|:---:|
+| <img src="docs/screenshots/02.income_expense.png" width="230" alt="Income and expense screen"> | <img src="docs/screenshots/03.lend_borrow.png" width="230" alt="Lend and borrow screen"> |
+| Daily report | Monthly report |
+| <img src="docs/screenshots/04.report_daily.png" width="230" alt="Daily report screen"> | <img src="docs/screenshots/05.report_monthly.png" width="230" alt="Monthly report screen"> |
+
+## How EXPTRA Treats Money
+
+When entries are linked to accounts included in net worth, EXPTRA treats them as follows:
+
+- **Income** adds to an account and net worth; **expense** reduces both.
+- **Transfer** moves money between your accounts without counting as income or expense. Move funds into an FDR or DPS account this way rather than recording a new expense.
+- **Lend** converts cash into money to receive; repayment converts that receivable back into cash. Neither step is income or expense.
+- **Borrow** adds cash and an equal liability, so borrowing alone does not raise net worth. Repayment reduces both cash and the liability.
+
+Net worth is included account balances **plus outstanding receivables minus outstanding liabilities**. Monthly net cash flow is **income minus expense**.
+
+## Privacy & Philosophy
+
+EXPTRA is designed to be lightweight and understandable. No EXPTRA account or cloud service is required for its core features. Financial records stay in local storage unless you choose to export or share a backup file; you control where that file goes.
 
 ## Tech Stack
 
-- Flutter / Dart (`sdk: ^3.10.3`)
-- GetX (`^4.7.3`)
-- Drift + SQLite (`drift`, `drift_flutter`, `sqlite3_flutter_libs`)
-- `fl_chart`
-- `intl`
-- `file_picker`
-- `share_plus`
-- `package_info_plus`
+- Flutter and Dart (`sdk: ^3.10.3`)
+- GetX for app state and navigation
+- Drift and SQLite for local storage
+- `intl` for dates and BDT formatting; `file_picker` and `share_plus` for backup workflows
 
 ## Project Structure
 
@@ -93,13 +98,17 @@ lib/
 ├── core/
 │   ├── constants/
 │   ├── db/
+│   │   └── tables/
 │   ├── routes/
 │   ├── theme/
 │   └── utils/
 ├── data/
 │   ├── models/
-│   └── repositories/
+│   ├── repositories/
+│   └── services/
 └── modules/
+    ├── accounts/
+    ├── bank/
     ├── category/
     ├── dashboard/
     ├── expense_category/
@@ -113,13 +122,7 @@ lib/
 
 ## Getting Started
 
-### Prerequisites
-
-- Flutter SDK compatible with Dart `^3.10.3`
-- Android SDK for APK builds
-- Xcode for iOS builds, if targeting iOS
-
-### Setup
+Install a Flutter SDK compatible with Dart `^3.10.3`. Android builds require the Android SDK; iOS builds require Xcode.
 
 ```bash
 flutter pub get
@@ -130,42 +133,25 @@ flutter run
 ## Development
 
 ```bash
-# Analyze code
 flutter analyze
-
-# Run tests
 flutter test
-
-# Regenerate Drift/build_runner files
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-## Data Notes
+## Data & Migration Notes
 
-- Currency defaults to BDT (`৳`) in app constants
-- Data is stored locally with Drift and SQLite
-- Records use soft-delete flags
-- Category/source deletion is blocked when entries still reference them
-- Backup and restore use `.exptra` files
+- Drift stores data locally in SQLite. Records have soft-delete flags, and account links on older income, expense, lend, and borrow entries are nullable.
+- BDT (৳) is the default currency. Existing monetary columns remain SQLite `REAL` for compatibility; the `Money` helper rounds values to integer poisha for calculations and normalizes new writes to two decimals.
+- Database **schema version 3** migrates older installations: version 2 added accounts and accounting records; version 3 added the bank list. The `.exptra` backup format is also version 3 and accepts version 1 and 2 files.
+
+### Upgrading Existing Data
+
+Existing transactions are preserved. Entries created before account support remain unassigned because EXPTRA cannot know which account they belonged to; you can open them and assign an account later. Legacy lend or borrow entries marked settled may lack a historical settlement date or cash account, so older balance comparisons can show an unexplained difference.
 
 ## Platform
 
-- Android APK distribution
-- iOS project included
-- Offline-first architecture
+EXPTRA has Android and iOS Flutter projects. Android APKs are available from [GitHub Releases](https://github.com/shahedpy/exptra/releases).
 
 ## License
 
-A personal project by shahedpy.
-
-## Personal Hisab
-
-The **Accounts** tab tracks bank, cash, mobile wallet, FDR, DPS, and other assets. Add an account with its opening balance and the date that balance was true. Income and expense forms now select a receiving or paying account. Transfers move value between accounts without appearing as income or expense. Lend and borrow forms record the cash account; their list supports partial repayments into or out of a selected account.
-
-An account statement shows dated activity and a running balance. **Record actual balance** saves a balance check; it never changes the ledger. The separate **Create Balance Adjustment** action records the difference with a link to that check. The **Hisab Comparison** screen explains the change in net worth between two dates. Existing daily, monthly, source, category, and person reports remain available; the Reports screen also links to financial reports and a searchable account history.
-
-### Existing data and money precision
-
-Schema version 2 adds the accounting tables and nullable account references. Version 1 transactions remain **unassigned** after migration or backup restore; EXPTRA does not guess their accounts. Open an old transaction to assign one. Legacy lend or borrow records previously marked settled remain settled, but their old settlement dates and cash accounts cannot be reconstructed. Date comparisons involving those records may show an unexplained difference.
-
-Existing monetary columns remain SQLite `REAL` for compatibility. The shared `Money` helper converts each stored value to integer poisha before summing and normalizes new values to two decimal places before writing. The `.exptra` backup format is version 2 and includes every new accounting table; version 1 backups still restore.
+No license file is currently included in this repository.
