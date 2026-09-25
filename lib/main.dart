@@ -10,6 +10,7 @@ import 'modules/income_source/income_source_controller.dart';
 import 'modules/lend_borrow/lend_borrow_controller.dart';
 import 'modules/accounts/account_controller.dart';
 import 'modules/bank/bank_controller.dart';
+import 'modules/account_type/account_type_controller.dart';
 
 void main() {
   final db = AppDatabase();
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
     // Initialize controllers
     Get.put(AccountController());
     Get.put(BankController());
+    Get.put(AccountTypeController());
     Get.put(ExpenseController());
     Get.put(IncomeController());
     Get.put(ExpenseCategoryController());

@@ -1,4 +1,5 @@
 import '../../core/db/app_database.dart';
+import '../models/account_type_defaults.dart';
 
 /// Existing Drift REAL values remain on disk for backwards compatibility.
 /// Every amount enters calculations as rounded integer poisha; totals are
@@ -38,6 +39,7 @@ class LedgerEntry {
 class FinancialPosition {
   final int bankAndCash;
   final int investments;
+  final int otherAssets;
   final int receivables;
   final int liabilities;
   final int excludedAssets;
@@ -45,11 +47,13 @@ class FinancialPosition {
   const FinancialPosition(
     this.bankAndCash,
     this.investments,
+    this.otherAssets,
     this.receivables,
     this.liabilities,
     this.excludedAssets,
   );
-  int get netWorth => bankAndCash + investments + receivables - liabilities;
+  int get netWorth =>
+      bankAndCash + investments + otherAssets + receivables - liabilities;
 }
 
 class PeriodComparison {
@@ -83,6 +87,7 @@ class PeriodComparison {
 
 class FinancialCalculator {
   final List<Account> accounts;
+  final List<AccountType> accountTypes;
   final List<Income> incomes;
   final List<ExpenseCategory> categories;
   final List<IncomeSource> sources;
@@ -96,6 +101,7 @@ class FinancialCalculator {
 
   const FinancialCalculator({
     required this.accounts,
+    required this.accountTypes,
     required this.incomes,
     required this.categories,
     required this.sources,
@@ -107,6 +113,20 @@ class FinancialCalculator {
     required this.borrowRepayments,
     required this.adjustments,
   });
+
+  String classificationOf(Account account) {
+    for (final type in accountTypes) {
+      if (type.id == account.accountTypeId) return type.classification;
+    }
+    return AccountTypeClass.other;
+  }
+
+  String typeNameOf(Account account) {
+    for (final type in accountTypes) {
+      if (type.id == account.accountTypeId) return type.name;
+    }
+    return account.type;
+  }
 
   static bool _through(DateTime date, DateTime? end) =>
       end == null ||
@@ -333,22 +353,26 @@ class FinancialCalculator {
   }
 
   FinancialPosition position({DateTime? through}) {
-    var cash = 0, investment = 0, excluded = 0;
+    var cash = 0, investment = 0, other = 0, excluded = 0;
     for (final account in accounts.where((a) => !a.isDeleted)) {
       final value = balanceOf(account, through: through);
       if (!account.includeInNetWorth) {
         excluded += value;
         continue;
       }
-      if (const {'FDR', 'DPS', 'Investment'}.contains(account.type)) {
-        investment += value;
-      } else {
-        cash += value;
+      switch (classificationOf(account)) {
+        case AccountTypeClass.liquid:
+          cash += value;
+        case AccountTypeClass.investment:
+          investment += value;
+        default:
+          other += value;
       }
     }
     return FinancialPosition(
       cash,
       investment,
+      other,
       lends.fold<int>(0, (s, l) => s + outstandingLend(l, through: through)),
       borrows.fold<int>(
         0,

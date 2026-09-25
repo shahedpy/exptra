@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/db/app_database.dart';
 import '../services/financial_calculator.dart';
+import 'account_type_repository.dart';
 
 class AccountingRepository {
   final AppDatabase db;
@@ -10,6 +11,7 @@ class AccountingRepository {
 
   Future<FinancialCalculator> calculator() async => FinancialCalculator(
     accounts: await db.select(db.accounts).get(),
+    accountTypes: await db.select(db.accountTypes).get(),
     incomes: await db.select(db.incomes).get(),
     categories: await db.select(db.expenseCategories).get(),
     sources: await db.select(db.incomeSources).get(),
@@ -39,6 +41,7 @@ class AccountingRepository {
     required String institutionName,
     required String name,
     required String type,
+    String? accountTypeId,
     String currency = 'BDT',
     required double openingBalance,
     required DateTime openingBalanceDate,
@@ -47,6 +50,13 @@ class AccountingRepository {
     bool includeInNetWorth = true,
     bool isArchived = false,
   }) async {
+    final typeRepository = AccountTypeRepository(db);
+    final accountType = accountTypeId == null
+        ? await typeRepository.resolveLegacy(type)
+        : await (db.select(db.accountTypes)..where(
+                (t) => t.id.equals(accountTypeId) & t.isDeleted.equals(false),
+              ))
+              .getSingle();
     final existing = id == null
         ? null
         : await (db.select(
@@ -57,7 +67,8 @@ class AccountingRepository {
         AccountsCompanion(
           institutionName: Value(institutionName),
           name: Value(name),
-          type: Value(type),
+          type: Value(accountType.name),
+          accountTypeId: Value(accountType.id),
           currency: Value(currency),
           openingBalance: Value(Money.normalize(openingBalance)),
           openingBalanceDate: Value(openingBalanceDate),
@@ -75,7 +86,8 @@ class AccountingRepository {
               id: id ?? _uuid.v4(),
               institutionName: Value(institutionName),
               name: name,
-              type: type,
+              type: accountType.name,
+              accountTypeId: Value(accountType.id),
               currency: Value(currency),
               openingBalance: Value(Money.normalize(openingBalance)),
               openingBalanceDate: openingBalanceDate,

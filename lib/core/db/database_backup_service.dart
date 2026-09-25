@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'app_database.dart';
+import '../../data/repositories/account_type_repository.dart';
 
 class DatabaseBackupService {
   Future<File> createBackupFile(
@@ -19,6 +20,7 @@ class DatabaseBackupService {
     final lends = await database.select(database.lends).get();
     final borrows = await database.select(database.borrows).get();
     final accounts = await database.select(database.accounts).get();
+    final accountTypes = await database.select(database.accountTypes).get();
     final banks = await database.select(database.banks).get();
     final transfers = await database.select(database.accountTransfers).get();
     final snapshots = await database
@@ -38,7 +40,7 @@ class DatabaseBackupService {
         outputPath ?? p.join(tempDir!.path, 'exptra-backup-$timestamp.exptra');
 
     final backupPayload = {
-      'version': 3,
+      'version': 4,
       'exportedAt': DateTime.now().toIso8601String(),
       'banks': banks
           .map(
@@ -51,6 +53,7 @@ class DatabaseBackupService {
           )
           .toList(),
       'accounts': accounts.map((e) => e.toJson()).toList(),
+      'accountTypes': accountTypes.map((e) => e.toJson()).toList(),
       'transfers': transfers.map((e) => e.toJson()).toList(),
       'snapshots': snapshots.map((e) => e.toJson()).toList(),
       'adjustments': adjustments.map((e) => e.toJson()).toList(),
@@ -162,7 +165,11 @@ class DatabaseBackupService {
     }
 
     final version = decoded['version'];
-    if (version != null && version != 1 && version != 2 && version != 3) {
+    if (version != null &&
+        version != 1 &&
+        version != 2 &&
+        version != 3 &&
+        version != 4) {
       throw Exception('Unsupported backup version.');
     }
     final categoriesRaw = decoded['categories'];
@@ -196,7 +203,21 @@ class DatabaseBackupService {
       await database.delete(database.expenses).go();
       await database.delete(database.expenseCategories).go();
       await database.delete(database.accounts).go();
+      await database.delete(database.accountTypes).go();
       await database.delete(database.banks).go();
+
+      final typesRaw = decoded['accountTypes'];
+      if (typesRaw is List) {
+        for (final item in typesRaw) {
+          if (item is! Map) continue;
+          final data = Map<String, dynamic>.from(item);
+          await database
+              .into(database.accountTypes)
+              .insert(AccountType.fromJson(data).toCompanion(true));
+        }
+      }
+      final typeRepository = AccountTypeRepository(database);
+      await typeRepository.seedDefaultsIfEmpty();
 
       for (final item
           in (decoded['banks'] is List ? decoded['banks'] as List : const [])) {
@@ -218,13 +239,23 @@ class DatabaseBackupService {
               ? decoded['accounts'] as List
               : const [])) {
         if (item is! Map) continue;
+        final data = Map<String, dynamic>.from(item);
+        final savedId = data['accountTypeId'] as String?;
+        final savedType = savedId == null
+            ? null
+            : await (database.select(
+                database.accountTypes,
+              )..where((t) => t.id.equals(savedId))).getSingleOrNull();
+        final type =
+            savedType ??
+            await typeRepository.resolveLegacy(
+              data['type'] as String? ?? 'Other',
+            );
+        data['accountTypeId'] = type.id;
+        data['type'] = type.name;
         await database
             .into(database.accounts)
-            .insert(
-              Account.fromJson(
-                Map<String, dynamic>.from(item),
-              ).toCompanion(true),
-            );
+            .insert(Account.fromJson(data).toCompanion(true));
       }
       await _restoreLegacyBanks(database);
 

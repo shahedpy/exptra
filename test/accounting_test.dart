@@ -144,7 +144,7 @@ void main() {
   });
 
   test(
-    'v2 backup restores accounts and transfer; v1 stays unassigned',
+    'current backup restores accounts and transfer; v1 stays unassigned',
     () async {
       final a = await account('A', 10000);
       final b = await account('B', 0);
@@ -163,7 +163,7 @@ void main() {
         );
         final payload =
             jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-        expect(payload['version'], 2);
+        expect(payload['version'], 4);
         await service.restoreBackupFromPath(
           backupPath: file.path,
           database: db,

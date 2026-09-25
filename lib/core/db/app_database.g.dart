@@ -355,6 +355,527 @@ class ExpenseCategoriesCompanion extends UpdateCompanion<ExpenseCategory> {
   }
 }
 
+class $AccountTypesTable extends AccountTypes
+    with TableInfo<$AccountTypesTable, AccountType> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountTypesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _classificationMeta = const VerificationMeta(
+    'classification',
+  );
+  @override
+  late final GeneratedColumn<String> classification = GeneratedColumn<String>(
+    'classification',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _requiresInstitutionMeta =
+      const VerificationMeta('requiresInstitution');
+  @override
+  late final GeneratedColumn<bool> requiresInstitution = GeneratedColumn<bool>(
+    'requires_institution',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("requires_institution" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isSystemMeta = const VerificationMeta(
+    'isSystem',
+  );
+  @override
+  late final GeneratedColumn<bool> isSystem = GeneratedColumn<bool>(
+    'is_system',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_system" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    classification,
+    requiresInstitution,
+    sortOrder,
+    isSystem,
+    isDeleted,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'account_types';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AccountType> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('classification')) {
+      context.handle(
+        _classificationMeta,
+        classification.isAcceptableOrUnknown(
+          data['classification']!,
+          _classificationMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_classificationMeta);
+    }
+    if (data.containsKey('requires_institution')) {
+      context.handle(
+        _requiresInstitutionMeta,
+        requiresInstitution.isAcceptableOrUnknown(
+          data['requires_institution']!,
+          _requiresInstitutionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('is_system')) {
+      context.handle(
+        _isSystemMeta,
+        isSystem.isAcceptableOrUnknown(data['is_system']!, _isSystemMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AccountType map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AccountType(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      classification: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}classification'],
+      )!,
+      requiresInstitution: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}requires_institution'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      isSystem: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_system'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AccountTypesTable createAlias(String alias) {
+    return $AccountTypesTable(attachedDatabase, alias);
+  }
+}
+
+class AccountType extends DataClass implements Insertable<AccountType> {
+  final String id;
+  final String name;
+  final String classification;
+  final bool requiresInstitution;
+  final int sortOrder;
+  final bool isSystem;
+  final bool isDeleted;
+  final DateTime createdAt;
+  const AccountType({
+    required this.id,
+    required this.name,
+    required this.classification,
+    required this.requiresInstitution,
+    required this.sortOrder,
+    required this.isSystem,
+    required this.isDeleted,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['classification'] = Variable<String>(classification);
+    map['requires_institution'] = Variable<bool>(requiresInstitution);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['is_system'] = Variable<bool>(isSystem);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  AccountTypesCompanion toCompanion(bool nullToAbsent) {
+    return AccountTypesCompanion(
+      id: Value(id),
+      name: Value(name),
+      classification: Value(classification),
+      requiresInstitution: Value(requiresInstitution),
+      sortOrder: Value(sortOrder),
+      isSystem: Value(isSystem),
+      isDeleted: Value(isDeleted),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory AccountType.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AccountType(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      classification: serializer.fromJson<String>(json['classification']),
+      requiresInstitution: serializer.fromJson<bool>(
+        json['requiresInstitution'],
+      ),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isSystem: serializer.fromJson<bool>(json['isSystem']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'classification': serializer.toJson<String>(classification),
+      'requiresInstitution': serializer.toJson<bool>(requiresInstitution),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isSystem': serializer.toJson<bool>(isSystem),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  AccountType copyWith({
+    String? id,
+    String? name,
+    String? classification,
+    bool? requiresInstitution,
+    int? sortOrder,
+    bool? isSystem,
+    bool? isDeleted,
+    DateTime? createdAt,
+  }) => AccountType(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    classification: classification ?? this.classification,
+    requiresInstitution: requiresInstitution ?? this.requiresInstitution,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isSystem: isSystem ?? this.isSystem,
+    isDeleted: isDeleted ?? this.isDeleted,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  AccountType copyWithCompanion(AccountTypesCompanion data) {
+    return AccountType(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      classification: data.classification.present
+          ? data.classification.value
+          : this.classification,
+      requiresInstitution: data.requiresInstitution.present
+          ? data.requiresInstitution.value
+          : this.requiresInstitution,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isSystem: data.isSystem.present ? data.isSystem.value : this.isSystem,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountType(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('classification: $classification, ')
+          ..write('requiresInstitution: $requiresInstitution, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isSystem: $isSystem, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    classification,
+    requiresInstitution,
+    sortOrder,
+    isSystem,
+    isDeleted,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AccountType &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.classification == this.classification &&
+          other.requiresInstitution == this.requiresInstitution &&
+          other.sortOrder == this.sortOrder &&
+          other.isSystem == this.isSystem &&
+          other.isDeleted == this.isDeleted &&
+          other.createdAt == this.createdAt);
+}
+
+class AccountTypesCompanion extends UpdateCompanion<AccountType> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> classification;
+  final Value<bool> requiresInstitution;
+  final Value<int> sortOrder;
+  final Value<bool> isSystem;
+  final Value<bool> isDeleted;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const AccountTypesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.classification = const Value.absent(),
+    this.requiresInstitution = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isSystem = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AccountTypesCompanion.insert({
+    required String id,
+    required String name,
+    required String classification,
+    this.requiresInstitution = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isSystem = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       classification = Value(classification);
+  static Insertable<AccountType> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? classification,
+    Expression<bool>? requiresInstitution,
+    Expression<int>? sortOrder,
+    Expression<bool>? isSystem,
+    Expression<bool>? isDeleted,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (classification != null) 'classification': classification,
+      if (requiresInstitution != null)
+        'requires_institution': requiresInstitution,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isSystem != null) 'is_system': isSystem,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AccountTypesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? classification,
+    Value<bool>? requiresInstitution,
+    Value<int>? sortOrder,
+    Value<bool>? isSystem,
+    Value<bool>? isDeleted,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return AccountTypesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      classification: classification ?? this.classification,
+      requiresInstitution: requiresInstitution ?? this.requiresInstitution,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isSystem: isSystem ?? this.isSystem,
+      isDeleted: isDeleted ?? this.isDeleted,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (classification.present) {
+      map['classification'] = Variable<String>(classification.value);
+    }
+    if (requiresInstitution.present) {
+      map['requires_institution'] = Variable<bool>(requiresInstitution.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isSystem.present) {
+      map['is_system'] = Variable<bool>(isSystem.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountTypesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('classification: $classification, ')
+          ..write('requiresInstitution: $requiresInstitution, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isSystem: $isSystem, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -398,6 +919,20 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _accountTypeIdMeta = const VerificationMeta(
+    'accountTypeId',
+  );
+  @override
+  late final GeneratedColumn<String> accountTypeId = GeneratedColumn<String>(
+    'account_type_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES account_types (id)',
+    ),
   );
   static const VerificationMeta _currencyMeta = const VerificationMeta(
     'currency',
@@ -518,6 +1053,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
     institutionName,
     name,
     type,
+    accountTypeId,
     currency,
     openingBalance,
     openingBalanceDate,
@@ -569,6 +1105,15 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
       );
     } else if (isInserting) {
       context.missing(_typeMeta);
+    }
+    if (data.containsKey('account_type_id')) {
+      context.handle(
+        _accountTypeIdMeta,
+        accountTypeId.isAcceptableOrUnknown(
+          data['account_type_id']!,
+          _accountTypeIdMeta,
+        ),
+      );
     }
     if (data.containsKey('currency')) {
       context.handle(
@@ -660,6 +1205,10 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
+      accountTypeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_type_id'],
+      ),
       currency: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}currency'],
@@ -710,6 +1259,7 @@ class Account extends DataClass implements Insertable<Account> {
   final String institutionName;
   final String name;
   final String type;
+  final String? accountTypeId;
   final String currency;
   final double openingBalance;
   final DateTime openingBalanceDate;
@@ -724,6 +1274,7 @@ class Account extends DataClass implements Insertable<Account> {
     required this.institutionName,
     required this.name,
     required this.type,
+    this.accountTypeId,
     required this.currency,
     required this.openingBalance,
     required this.openingBalanceDate,
@@ -741,6 +1292,9 @@ class Account extends DataClass implements Insertable<Account> {
     map['institution_name'] = Variable<String>(institutionName);
     map['name'] = Variable<String>(name);
     map['type'] = Variable<String>(type);
+    if (!nullToAbsent || accountTypeId != null) {
+      map['account_type_id'] = Variable<String>(accountTypeId);
+    }
     map['currency'] = Variable<String>(currency);
     map['opening_balance'] = Variable<double>(openingBalance);
     map['opening_balance_date'] = Variable<DateTime>(openingBalanceDate);
@@ -761,6 +1315,9 @@ class Account extends DataClass implements Insertable<Account> {
       institutionName: Value(institutionName),
       name: Value(name),
       type: Value(type),
+      accountTypeId: accountTypeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountTypeId),
       currency: Value(currency),
       openingBalance: Value(openingBalance),
       openingBalanceDate: Value(openingBalanceDate),
@@ -783,6 +1340,7 @@ class Account extends DataClass implements Insertable<Account> {
       institutionName: serializer.fromJson<String>(json['institutionName']),
       name: serializer.fromJson<String>(json['name']),
       type: serializer.fromJson<String>(json['type']),
+      accountTypeId: serializer.fromJson<String?>(json['accountTypeId']),
       currency: serializer.fromJson<String>(json['currency']),
       openingBalance: serializer.fromJson<double>(json['openingBalance']),
       openingBalanceDate: serializer.fromJson<DateTime>(
@@ -804,6 +1362,7 @@ class Account extends DataClass implements Insertable<Account> {
       'institutionName': serializer.toJson<String>(institutionName),
       'name': serializer.toJson<String>(name),
       'type': serializer.toJson<String>(type),
+      'accountTypeId': serializer.toJson<String?>(accountTypeId),
       'currency': serializer.toJson<String>(currency),
       'openingBalance': serializer.toJson<double>(openingBalance),
       'openingBalanceDate': serializer.toJson<DateTime>(openingBalanceDate),
@@ -821,6 +1380,7 @@ class Account extends DataClass implements Insertable<Account> {
     String? institutionName,
     String? name,
     String? type,
+    Value<String?> accountTypeId = const Value.absent(),
     String? currency,
     double? openingBalance,
     DateTime? openingBalanceDate,
@@ -835,6 +1395,9 @@ class Account extends DataClass implements Insertable<Account> {
     institutionName: institutionName ?? this.institutionName,
     name: name ?? this.name,
     type: type ?? this.type,
+    accountTypeId: accountTypeId.present
+        ? accountTypeId.value
+        : this.accountTypeId,
     currency: currency ?? this.currency,
     openingBalance: openingBalance ?? this.openingBalance,
     openingBalanceDate: openingBalanceDate ?? this.openingBalanceDate,
@@ -853,6 +1416,9 @@ class Account extends DataClass implements Insertable<Account> {
           : this.institutionName,
       name: data.name.present ? data.name.value : this.name,
       type: data.type.present ? data.type.value : this.type,
+      accountTypeId: data.accountTypeId.present
+          ? data.accountTypeId.value
+          : this.accountTypeId,
       currency: data.currency.present ? data.currency.value : this.currency,
       openingBalance: data.openingBalance.present
           ? data.openingBalance.value
@@ -880,6 +1446,7 @@ class Account extends DataClass implements Insertable<Account> {
           ..write('institutionName: $institutionName, ')
           ..write('name: $name, ')
           ..write('type: $type, ')
+          ..write('accountTypeId: $accountTypeId, ')
           ..write('currency: $currency, ')
           ..write('openingBalance: $openingBalance, ')
           ..write('openingBalanceDate: $openingBalanceDate, ')
@@ -899,6 +1466,7 @@ class Account extends DataClass implements Insertable<Account> {
     institutionName,
     name,
     type,
+    accountTypeId,
     currency,
     openingBalance,
     openingBalanceDate,
@@ -917,6 +1485,7 @@ class Account extends DataClass implements Insertable<Account> {
           other.institutionName == this.institutionName &&
           other.name == this.name &&
           other.type == this.type &&
+          other.accountTypeId == this.accountTypeId &&
           other.currency == this.currency &&
           other.openingBalance == this.openingBalance &&
           other.openingBalanceDate == this.openingBalanceDate &&
@@ -933,6 +1502,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
   final Value<String> institutionName;
   final Value<String> name;
   final Value<String> type;
+  final Value<String?> accountTypeId;
   final Value<String> currency;
   final Value<double> openingBalance;
   final Value<DateTime> openingBalanceDate;
@@ -948,6 +1518,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     this.institutionName = const Value.absent(),
     this.name = const Value.absent(),
     this.type = const Value.absent(),
+    this.accountTypeId = const Value.absent(),
     this.currency = const Value.absent(),
     this.openingBalance = const Value.absent(),
     this.openingBalanceDate = const Value.absent(),
@@ -964,6 +1535,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     this.institutionName = const Value.absent(),
     required String name,
     required String type,
+    this.accountTypeId = const Value.absent(),
     this.currency = const Value.absent(),
     this.openingBalance = const Value.absent(),
     required DateTime openingBalanceDate,
@@ -983,6 +1555,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     Expression<String>? institutionName,
     Expression<String>? name,
     Expression<String>? type,
+    Expression<String>? accountTypeId,
     Expression<String>? currency,
     Expression<double>? openingBalance,
     Expression<DateTime>? openingBalanceDate,
@@ -999,6 +1572,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       if (institutionName != null) 'institution_name': institutionName,
       if (name != null) 'name': name,
       if (type != null) 'type': type,
+      if (accountTypeId != null) 'account_type_id': accountTypeId,
       if (currency != null) 'currency': currency,
       if (openingBalance != null) 'opening_balance': openingBalance,
       if (openingBalanceDate != null)
@@ -1018,6 +1592,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     Value<String>? institutionName,
     Value<String>? name,
     Value<String>? type,
+    Value<String?>? accountTypeId,
     Value<String>? currency,
     Value<double>? openingBalance,
     Value<DateTime>? openingBalanceDate,
@@ -1034,6 +1609,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       institutionName: institutionName ?? this.institutionName,
       name: name ?? this.name,
       type: type ?? this.type,
+      accountTypeId: accountTypeId ?? this.accountTypeId,
       currency: currency ?? this.currency,
       openingBalance: openingBalance ?? this.openingBalance,
       openingBalanceDate: openingBalanceDate ?? this.openingBalanceDate,
@@ -1061,6 +1637,9 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
+    }
+    if (accountTypeId.present) {
+      map['account_type_id'] = Variable<String>(accountTypeId.value);
     }
     if (currency.present) {
       map['currency'] = Variable<String>(currency.value);
@@ -1104,6 +1683,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
           ..write('institutionName: $institutionName, ')
           ..write('name: $name, ')
           ..write('type: $type, ')
+          ..write('accountTypeId: $accountTypeId, ')
           ..write('currency: $currency, ')
           ..write('openingBalance: $openingBalance, ')
           ..write('openingBalanceDate: $openingBalanceDate, ')
@@ -6670,6 +7250,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ExpenseCategoriesTable expenseCategories =
       $ExpenseCategoriesTable(this);
+  late final $AccountTypesTable accountTypes = $AccountTypesTable(this);
   late final $AccountsTable accounts = $AccountsTable(this);
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $IncomesTable incomes = $IncomesTable(this);
@@ -6694,6 +7275,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     expenseCategories,
+    accountTypes,
     accounts,
     expenses,
     incomes,
@@ -7028,12 +7610,381 @@ typedef $$ExpenseCategoriesTableProcessedTableManager =
       ExpenseCategory,
       PrefetchHooks Function({bool expensesRefs})
     >;
+typedef $$AccountTypesTableCreateCompanionBuilder =
+    AccountTypesCompanion Function({
+      required String id,
+      required String name,
+      required String classification,
+      Value<bool> requiresInstitution,
+      Value<int> sortOrder,
+      Value<bool> isSystem,
+      Value<bool> isDeleted,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$AccountTypesTableUpdateCompanionBuilder =
+    AccountTypesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> classification,
+      Value<bool> requiresInstitution,
+      Value<int> sortOrder,
+      Value<bool> isSystem,
+      Value<bool> isDeleted,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$AccountTypesTableReferences
+    extends BaseReferences<_$AppDatabase, $AccountTypesTable, AccountType> {
+  $$AccountTypesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$AccountsTable, List<Account>> _accountsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.accounts,
+    aliasName: $_aliasNameGenerator(
+      db.accountTypes.id,
+      db.accounts.accountTypeId,
+    ),
+  );
+
+  $$AccountsTableProcessedTableManager get accountsRefs {
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.accountTypeId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_accountsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AccountTypesTableFilterComposer
+    extends Composer<_$AppDatabase, $AccountTypesTable> {
+  $$AccountTypesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get classification => $composableBuilder(
+    column: $table.classification,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get requiresInstitution => $composableBuilder(
+    column: $table.requiresInstitution,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSystem => $composableBuilder(
+    column: $table.isSystem,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> accountsRefs(
+    Expression<bool> Function($$AccountsTableFilterComposer f) f,
+  ) {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.accountTypeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AccountTypesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AccountTypesTable> {
+  $$AccountTypesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get classification => $composableBuilder(
+    column: $table.classification,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get requiresInstitution => $composableBuilder(
+    column: $table.requiresInstitution,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSystem => $composableBuilder(
+    column: $table.isSystem,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AccountTypesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AccountTypesTable> {
+  $$AccountTypesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get classification => $composableBuilder(
+    column: $table.classification,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get requiresInstitution => $composableBuilder(
+    column: $table.requiresInstitution,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSystem =>
+      $composableBuilder(column: $table.isSystem, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> accountsRefs<T extends Object>(
+    Expression<T> Function($$AccountsTableAnnotationComposer a) f,
+  ) {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.accountTypeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AccountTypesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AccountTypesTable,
+          AccountType,
+          $$AccountTypesTableFilterComposer,
+          $$AccountTypesTableOrderingComposer,
+          $$AccountTypesTableAnnotationComposer,
+          $$AccountTypesTableCreateCompanionBuilder,
+          $$AccountTypesTableUpdateCompanionBuilder,
+          (AccountType, $$AccountTypesTableReferences),
+          AccountType,
+          PrefetchHooks Function({bool accountsRefs})
+        > {
+  $$AccountTypesTableTableManager(_$AppDatabase db, $AccountTypesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountTypesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AccountTypesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AccountTypesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> classification = const Value.absent(),
+                Value<bool> requiresInstitution = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isSystem = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AccountTypesCompanion(
+                id: id,
+                name: name,
+                classification: classification,
+                requiresInstitution: requiresInstitution,
+                sortOrder: sortOrder,
+                isSystem: isSystem,
+                isDeleted: isDeleted,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required String classification,
+                Value<bool> requiresInstitution = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isSystem = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AccountTypesCompanion.insert(
+                id: id,
+                name: name,
+                classification: classification,
+                requiresInstitution: requiresInstitution,
+                sortOrder: sortOrder,
+                isSystem: isSystem,
+                isDeleted: isDeleted,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AccountTypesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({accountsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (accountsRefs) db.accounts],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (accountsRefs)
+                    await $_getPrefetchedData<
+                      AccountType,
+                      $AccountTypesTable,
+                      Account
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AccountTypesTableReferences
+                          ._accountsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$AccountTypesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).accountsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.accountTypeId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AccountTypesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AccountTypesTable,
+      AccountType,
+      $$AccountTypesTableFilterComposer,
+      $$AccountTypesTableOrderingComposer,
+      $$AccountTypesTableAnnotationComposer,
+      $$AccountTypesTableCreateCompanionBuilder,
+      $$AccountTypesTableUpdateCompanionBuilder,
+      (AccountType, $$AccountTypesTableReferences),
+      AccountType,
+      PrefetchHooks Function({bool accountsRefs})
+    >;
 typedef $$AccountsTableCreateCompanionBuilder =
     AccountsCompanion Function({
       required String id,
       Value<String> institutionName,
       required String name,
       required String type,
+      Value<String?> accountTypeId,
       Value<String> currency,
       Value<double> openingBalance,
       required DateTime openingBalanceDate,
@@ -7051,6 +8002,7 @@ typedef $$AccountsTableUpdateCompanionBuilder =
       Value<String> institutionName,
       Value<String> name,
       Value<String> type,
+      Value<String?> accountTypeId,
       Value<String> currency,
       Value<double> openingBalance,
       Value<DateTime> openingBalanceDate,
@@ -7066,6 +8018,25 @@ typedef $$AccountsTableUpdateCompanionBuilder =
 final class $$AccountsTableReferences
     extends BaseReferences<_$AppDatabase, $AccountsTable, Account> {
   $$AccountsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $AccountTypesTable _accountTypeIdTable(_$AppDatabase db) =>
+      db.accountTypes.createAlias(
+        $_aliasNameGenerator(db.accounts.accountTypeId, db.accountTypes.id),
+      );
+
+  $$AccountTypesTableProcessedTableManager? get accountTypeId {
+    final $_column = $_itemColumn<String>('account_type_id');
+    if ($_column == null) return null;
+    final manager = $$AccountTypesTableTableManager(
+      $_db,
+      $_db.accountTypes,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountTypeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
 
   static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
     _$AppDatabase db,
@@ -7355,6 +8326,29 @@ class $$AccountsTableFilterComposer
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$AccountTypesTableFilterComposer get accountTypeId {
+    final $$AccountTypesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountTypeId,
+      referencedTable: $db.accountTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTypesTableFilterComposer(
+            $db: $db,
+            $table: $db.accountTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   Expression<bool> expensesRefs(
     Expression<bool> Function($$ExpensesTableFilterComposer f) f,
@@ -7681,6 +8675,29 @@ class $$AccountsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$AccountTypesTableOrderingComposer get accountTypeId {
+    final $$AccountTypesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountTypeId,
+      referencedTable: $db.accountTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTypesTableOrderingComposer(
+            $db: $db,
+            $table: $db.accountTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$AccountsTableAnnotationComposer
@@ -7740,6 +8757,29 @@ class $$AccountsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$AccountTypesTableAnnotationComposer get accountTypeId {
+    final $$AccountTypesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountTypeId,
+      referencedTable: $db.accountTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTypesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accountTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   Expression<T> expensesRefs<T extends Object>(
     Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
@@ -8009,6 +9049,7 @@ class $$AccountsTableTableManager
           (Account, $$AccountsTableReferences),
           Account,
           PrefetchHooks Function({
+            bool accountTypeId,
             bool expensesRefs,
             bool incomesRefs,
             bool lendsRefs,
@@ -8038,6 +9079,7 @@ class $$AccountsTableTableManager
                 Value<String> institutionName = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> type = const Value.absent(),
+                Value<String?> accountTypeId = const Value.absent(),
                 Value<String> currency = const Value.absent(),
                 Value<double> openingBalance = const Value.absent(),
                 Value<DateTime> openingBalanceDate = const Value.absent(),
@@ -8053,6 +9095,7 @@ class $$AccountsTableTableManager
                 institutionName: institutionName,
                 name: name,
                 type: type,
+                accountTypeId: accountTypeId,
                 currency: currency,
                 openingBalance: openingBalance,
                 openingBalanceDate: openingBalanceDate,
@@ -8070,6 +9113,7 @@ class $$AccountsTableTableManager
                 Value<String> institutionName = const Value.absent(),
                 required String name,
                 required String type,
+                Value<String?> accountTypeId = const Value.absent(),
                 Value<String> currency = const Value.absent(),
                 Value<double> openingBalance = const Value.absent(),
                 required DateTime openingBalanceDate,
@@ -8085,6 +9129,7 @@ class $$AccountsTableTableManager
                 institutionName: institutionName,
                 name: name,
                 type: type,
+                accountTypeId: accountTypeId,
                 currency: currency,
                 openingBalance: openingBalance,
                 openingBalanceDate: openingBalanceDate,
@@ -8106,6 +9151,7 @@ class $$AccountsTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
+                accountTypeId = false,
                 expensesRefs = false,
                 incomesRefs = false,
                 lendsRefs = false,
@@ -8131,7 +9177,38 @@ class $$AccountsTableTableManager
                     if (lendRepaymentsRefs) db.lendRepayments,
                     if (borrowRepaymentsRefs) db.borrowRepayments,
                   ],
-                  addJoins: null,
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (accountTypeId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.accountTypeId,
+                                    referencedTable: $$AccountsTableReferences
+                                        ._accountTypeIdTable(db),
+                                    referencedColumn: $$AccountsTableReferences
+                                        ._accountTypeIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (expensesRefs)
@@ -8365,6 +9442,7 @@ typedef $$AccountsTableProcessedTableManager =
       (Account, $$AccountsTableReferences),
       Account,
       PrefetchHooks Function({
+        bool accountTypeId,
         bool expensesRefs,
         bool incomesRefs,
         bool lendsRefs,
@@ -12864,6 +13942,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$ExpenseCategoriesTableTableManager get expenseCategories =>
       $$ExpenseCategoriesTableTableManager(_db, _db.expenseCategories);
+  $$AccountTypesTableTableManager get accountTypes =>
+      $$AccountTypesTableTableManager(_db, _db.accountTypes);
   $$AccountsTableTableManager get accounts =>
       $$AccountsTableTableManager(_db, _db.accounts);
   $$ExpensesTableTableManager get expenses =>

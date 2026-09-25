@@ -16,6 +16,8 @@ import 'tables/balance_adjustment_table.dart';
 import 'tables/lend_repayment_table.dart';
 import 'tables/borrow_repayment_table.dart';
 import 'tables/bank_table.dart';
+import 'tables/account_type_table.dart';
+import '../../data/models/account_type_defaults.dart';
 
 part 'app_database.g.dart';
 
@@ -34,6 +36,7 @@ part 'app_database.g.dart';
     LendRepayments,
     BorrowRepayments,
     Banks,
+    AccountTypes,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -44,13 +47,17 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
+      await _seedAccountTypes();
       await _createIndexes();
+      await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_account_types_active_name ON account_types (lower(name)) WHERE is_deleted = 0',
+      );
     },
     onUpgrade: (m, from, to) async {
       if (from < 2) {
@@ -76,6 +83,33 @@ class AppDatabase extends _$AppDatabase {
           GROUP BY institution_name
         ''');
       }
+      if (from < 4) {
+        await m.createTable(accountTypes);
+        // Upgrades from v1 created the current accounts table above.
+        if (from >= 2) {
+          await m.addColumn(accounts, accounts.accountTypeId);
+        }
+        await _seedAccountTypes();
+        // Preserve every unknown legacy label as its own managed type.
+        await customStatement('''
+          INSERT INTO account_types (id, name, classification, requires_institution, sort_order, is_system, is_deleted, created_at)
+          SELECT 'legacy-type-' || MIN(rowid), trim(type), 'liquid', 0, 1000 + MIN(rowid), 0, 0, CAST(strftime('%s', 'now') AS INTEGER)
+          FROM accounts
+          WHERE trim(type) <> ''
+            AND NOT EXISTS (SELECT 1 FROM account_types WHERE lower(name) = lower(trim(accounts.type)))
+          GROUP BY lower(trim(type))
+        ''');
+        await customStatement('''
+          UPDATE accounts SET account_type_id =
+            (SELECT id FROM account_types WHERE lower(name) = lower(trim(accounts.type)) LIMIT 1)
+        ''');
+        await customStatement(
+          "UPDATE accounts SET account_type_id = 'system-other' WHERE account_type_id IS NULL",
+        );
+        await customStatement(
+          'CREATE UNIQUE INDEX IF NOT EXISTS idx_account_types_active_name ON account_types (lower(name)) WHERE is_deleted = 0',
+        );
+      }
     },
   );
 
@@ -95,6 +129,26 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_borrow_repayment_date ON borrow_repayments (borrow_id, account_id, repayment_date, is_deleted)',
     ]) {
       await customStatement(sql);
+    }
+  }
+
+  Future<void> _seedAccountTypes() async {
+    for (var i = 0; i < defaultAccountTypes.length; i++) {
+      final type = defaultAccountTypes[i];
+      await customStatement(
+        '''
+        INSERT OR IGNORE INTO account_types
+          (id, name, classification, requires_institution, sort_order, is_system, is_deleted, created_at)
+        VALUES (?, ?, ?, ?, ?, 1, 0, CAST(strftime('%s', 'now') AS INTEGER))
+      ''',
+        [
+          type.id,
+          type.name,
+          type.classification,
+          type.requiresInstitution ? 1 : 0,
+          i,
+        ],
+      );
     }
   }
 

@@ -3,11 +3,13 @@ import 'package:get/get.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../../data/services/financial_calculator.dart';
+import '../../data/models/account_type_defaults.dart';
 import 'account_controller.dart';
 import 'account_form_page.dart';
 import 'account_detail_page.dart';
 import 'comparison_page.dart';
 import 'transfer_page.dart';
+import '../../core/widgets/app_ui.dart';
 
 enum AccountTypeFilter { all, liquid, investment }
 
@@ -45,16 +47,12 @@ class AccountsPage extends StatelessWidget {
         final position = calculator.position();
         final groups = <String, List<Account>>{};
         for (final account in controller.activeAccounts.where((account) {
-          final isInvestment = const {
-            'FDR',
-            'DPS',
-            'Investment',
-          }.contains(account.type);
+          final classification = calculator.classificationOf(account);
           return accountFilter == AccountTypeFilter.all ||
               (account.includeInNetWorth &&
                   (accountFilter == AccountTypeFilter.investment
-                      ? isInvestment
-                      : !isInvestment));
+                      ? classification == AccountTypeClass.investment
+                      : classification == AccountTypeClass.liquid));
         })) {
           groups
               .putIfAbsent(
@@ -66,40 +64,77 @@ class AccountsPage extends StatelessWidget {
               .add(account);
         }
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
             if (accountFilter == AccountTypeFilter.all)
               Card(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                elevation: 0,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Financial Position',
-                        style: Theme.of(context).textTheme.titleLarge,
+                        'Total Assets',
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      const SizedBox(height: 12),
-                      _row('Net Worth', position.netWorth, bold: true),
-                      const Divider(),
-                      _row('Bank & Cash', position.bankAndCash),
+                      const SizedBox(height: 4),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          CurrencyHelper.formatAmount(
+                            Money.bdt(
+                              position.bankAndCash +
+                                  position.investments +
+                                  position.otherAssets +
+                                  position.receivables +
+                                  position.excludedAssets,
+                            ),
+                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      const Divider(height: 20),
+                      _row('Available', position.bankAndCash),
                       _row('Investments', position.investments),
+                      if (position.otherAssets != 0)
+                        _row('Other assets', position.otherAssets),
                       _row('Money to Receive', position.receivables),
                       _row('Money to Pay', -position.liabilities),
+                      _row('Net Worth', position.netWorth, bold: true),
                       if (position.excludedAssets != 0)
                         _row('Excluded accounts', position.excludedAssets),
                     ],
                   ),
                 ),
               ),
+            const SizedBox(height: 16),
+            AppActionRow(
+              firstLabel: 'Add Account',
+              firstIcon: Icons.add_rounded,
+              onFirst: () => Get.to(() => const AccountFormPage()),
+              secondLabel: 'Transfer',
+              secondIcon: Icons.swap_horiz_rounded,
+              onSecond: () => Get.to(() => const TransferPage()),
+            ),
+            const SizedBox(height: 20),
             if (groups.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  accountFilter == AccountTypeFilter.all
-                      ? 'Add your first account to start tracking balances. Old transactions remain unassigned.'
-                      : 'No accounts in this view yet.',
-                ),
+              AppEmptyState(
+                title: accountFilter == AccountTypeFilter.all
+                    ? 'No accounts yet'
+                    : 'No accounts in this view',
+                message: accountFilter == AccountTypeFilter.all
+                    ? 'Add a bank, cash, mobile wallet, FDR or DPS account to track where your money is.'
+                    : 'Try another account view.',
+                actionLabel: accountFilter == AccountTypeFilter.all
+                    ? 'Add Account'
+                    : null,
+                onAction: accountFilter == AccountTypeFilter.all
+                    ? () => Get.to(() => const AccountFormPage())
+                    : null,
               ),
             ...groups.entries.map(
               (group) => _group(
@@ -130,28 +165,9 @@ class AccountsPage extends StatelessWidget {
                     ),
                 ],
               ),
-            const SizedBox(height: 80),
           ],
         );
       }),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton.small(
-            heroTag: 'transfer',
-            tooltip: 'Transfer',
-            onPressed: () => Get.to(() => const TransferPage()),
-            child: const Icon(Icons.swap_horiz),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton(
-            heroTag: 'account',
-            tooltip: 'Add account',
-            onPressed: () => Get.to(() => const AccountFormPage()),
-            child: const Icon(Icons.add),
-          ),
-        ],
-      ),
     );
   }
 
@@ -162,57 +178,126 @@ class AccountsPage extends StatelessWidget {
     String name,
     List<Account> accounts,
   ) {
-    return Card(
+    final theme = Theme.of(context);
+    final total = accounts.fold<int>(
+      0,
+      (sum, a) => sum + calculator.balanceOf(a),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            title: Text(
-              name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          for (final a in accounts)
-            ListTile(
-              title: Text(a.name),
-              subtitle: Builder(
-                builder: (context) {
-                  final snapshot = controller.latestSnapshots[a.id];
-                  final unresolved =
-                      snapshot != null &&
-                      Money.cents(snapshot.difference) != 0 &&
-                      !calculator.adjustments.any(
-                        (x) => !x.isDeleted && x.snapshotId == snapshot.id,
-                      );
-                  final details = <String>[];
-                  if (snapshot != null) {
-                    details.add(
-                      'Last checked ${DateHelper.formatDate(snapshot.date)}',
-                    );
-                    if (unresolved) details.add('Difference to review');
-                  }
-                  return details.isEmpty
-                      ? const SizedBox.shrink()
-                      : Text(details.join(' • '));
-                },
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    CurrencyHelper.formatAmount(
-                      Money.bdt(calculator.balanceOf(a)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'Account options',
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () => _accountMenu(context, controller, a),
+                ),
+                Flexible(
+                  child: AppTrailingAmount(
+                    CurrencyHelper.formatAmount(Money.bdt(total)),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ],
-              ),
-              onTap: () => Get.to(() => AccountDetailPage(accountId: a.id)),
-              onLongPress: () => _accountMenu(context, controller, a),
+                ),
+              ],
             ),
+          ),
+          Card(
+            color: theme.colorScheme.surfaceContainerLow,
+            elevation: 0,
+            child: Column(
+              children: [
+                for (final a in accounts)
+                  InkWell(
+                    onTap: () =>
+                        Get.to(() => AccountDetailPage(accountId: a.id)),
+                    onLongPress: () => _accountMenu(context, controller, a),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  a.name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleSmall,
+                                ),
+                                Builder(
+                                  builder: (context) {
+                                    final snapshot =
+                                        controller.latestSnapshots[a.id];
+                                    final unresolved =
+                                        snapshot != null &&
+                                        Money.cents(snapshot.difference) != 0 &&
+                                        !calculator.adjustments.any(
+                                          (x) =>
+                                              !x.isDeleted &&
+                                              x.snapshotId == snapshot.id,
+                                        );
+                                    final details = <String>[];
+                                    details.add(calculator.typeNameOf(a));
+                                    if (snapshot != null) {
+                                      details.add(
+                                        'Last checked ${DateHelper.formatDate(snapshot.date)}',
+                                      );
+                                      if (unresolved) {
+                                        details.add('Difference to review');
+                                      }
+                                    }
+                                    return Text(
+                                      details.join(' • '),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: AppTrailingAmount(
+                              CurrencyHelper.formatAmount(
+                                Money.bdt(calculator.balanceOf(a)),
+                              ),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            tooltip: 'Account options',
+                            icon: const Icon(Icons.more_vert),
+                            onPressed: () =>
+                                _accountMenu(context, controller, a),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -293,9 +378,11 @@ class AccountsPage extends StatelessWidget {
           label,
           style: TextStyle(fontWeight: bold ? FontWeight.bold : null),
         ),
-        Text(
-          CurrencyHelper.formatAmount(Money.bdt(cents)),
-          style: TextStyle(fontWeight: bold ? FontWeight.bold : null),
+        Flexible(
+          child: AppTrailingAmount(
+            CurrencyHelper.formatAmount(Money.bdt(cents)),
+            style: TextStyle(fontWeight: bold ? FontWeight.bold : null),
+          ),
         ),
       ],
     ),

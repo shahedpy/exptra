@@ -3,7 +3,11 @@ import 'package:get/get.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import '../bank/bank_controller.dart';
+import '../../core/routes/app_routes.dart';
+import '../../core/widgets/app_ui.dart';
 import 'account_controller.dart';
+import '../account_type/account_type_controller.dart';
+import '../account_type/account_type_form_page.dart';
 
 class AccountFormPage extends StatefulWidget {
   final Account? account;
@@ -13,20 +17,11 @@ class AccountFormPage extends StatefulWidget {
 }
 
 class _AccountFormPageState extends State<AccountFormPage> {
-  static const types = [
-    'Savings',
-    'Current',
-    'Cash',
-    'Mobile Wallet',
-    'FDR',
-    'DPS',
-    'Investment',
-    'Other',
-  ];
   final key = GlobalKey<FormState>();
   final opening = TextEditingController(text: '0');
+  final name = TextEditingController();
   final note = TextEditingController();
-  String type = 'Savings';
+  String? selectedTypeId;
   String? selectedBank;
   DateTime date = DateTime.now();
   bool include = true, archived = false, saving = false;
@@ -37,9 +32,10 @@ class _AccountFormPageState extends State<AccountFormPage> {
     final a = widget.account;
     if (a != null) {
       selectedBank = a.institutionName.isEmpty ? null : a.institutionName;
+      name.text = a.name;
       opening.text = a.openingBalance.toStringAsFixed(2);
       note.text = a.note ?? '';
-      type = a.type;
+      selectedTypeId = a.accountTypeId;
       date = a.openingBalanceDate;
       include = a.includeInNetWorth;
       archived = a.isArchived;
@@ -49,20 +45,34 @@ class _AccountFormPageState extends State<AccountFormPage> {
   @override
   void dispose() {
     opening.dispose();
+    name.dispose();
     note.dispose();
     super.dispose();
   }
 
   Future<void> save() async {
     if (!key.currentState!.validate() || saving) return;
+    final typeController = Get.find<AccountTypeController>();
+    final effectiveTypeId =
+        selectedTypeId ?? typeController.types.firstOrNull?.id;
+    final selectedType = typeController.types
+        .where((t) => t.id == effectiveTypeId)
+        .firstOrNull;
+    if (selectedType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Add an account type first.')),
+      );
+      return;
+    }
     setState(() => saving = true);
     try {
       final controller = Get.find<AccountController>();
       await controller.repository.saveAccount(
         id: widget.account?.id,
         institutionName: selectedBank ?? '',
-        name: widget.account?.name ?? type,
-        type: type,
+        name: name.text.trim(),
+        type: selectedType.name,
+        accountTypeId: selectedType.id,
         currency: widget.account?.currency ?? 'BDT',
         openingBalance: CurrencyHelper.parseAmount(opening.text),
         openingBalanceDate: date,
@@ -94,8 +104,25 @@ class _AccountFormPageState extends State<AccountFormPage> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          TextFormField(
+            controller: name,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(
+              labelText: 'Account Name',
+              hintText: 'e.g., Savings Account',
+            ),
+            validator: (v) => v == null || v.trim().isEmpty
+                ? 'Account name is required'
+                : null,
+          ),
+          const SizedBox(height: 16),
           Obx(() {
             final bankController = Get.find<BankController>();
+            final types = Get.find<AccountTypeController>().types;
+            final effectiveTypeId = selectedTypeId ?? types.firstOrNull?.id;
+            final selectedType = types
+                .where((t) => t.id == effectiveTypeId)
+                .firstOrNull;
             final bankNames = bankController.banks
                 .map((bank) => bank.name)
                 .toList();
@@ -105,12 +132,14 @@ class _AccountFormPageState extends State<AccountFormPage> {
               bankNames.insert(0, selectedBank!);
             }
             return DropdownButtonFormField<String>(
+              key: ValueKey(selectedBank),
               initialValue: selectedBank,
               isExpanded: true,
               decoration: InputDecoration(
-                labelText: 'Bank',
-                helperText: bankNames.isEmpty ? 'Add banks from More' : null,
-                border: const OutlineInputBorder(),
+                labelText: 'Bank / Institution',
+                helperText: selectedType?.requiresInstitution == false
+                    ? 'Optional for this account type'
+                    : null,
               ),
               items: bankNames
                   .map(
@@ -123,43 +152,69 @@ class _AccountFormPageState extends State<AccountFormPage> {
               onChanged: bankNames.isEmpty
                   ? null
                   : (value) => setState(() => selectedBank = value),
-              validator: (value) => value == null
-                  ? bankNames.isEmpty
-                        ? 'Add a bank from More first'
-                        : 'Select a bank'
+              validator: (value) =>
+                  value == null && (selectedType?.requiresInstitution ?? true)
+                  ? 'Select a bank'
                   : null,
             );
           }),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            initialValue: type,
-            decoration: const InputDecoration(
-              labelText: 'Type',
-              border: OutlineInputBorder(),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => Get.toNamed(AppRoutes.banks),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Add bank'),
             ),
-            items: types
-                .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                .toList(),
-            onChanged: (v) => setState(() => type = v!),
+          ),
+          const SizedBox(height: 8),
+          Obx(() {
+            final types = Get.find<AccountTypeController>().types;
+            final effectiveTypeId = selectedTypeId ?? types.firstOrNull?.id;
+            return DropdownButtonFormField<String>(
+              key: ValueKey(effectiveTypeId),
+              initialValue: effectiveTypeId,
+              isExpanded: true,
+              decoration: const InputDecoration(labelText: 'Account Type'),
+              items: types
+                  .map(
+                    (t) => DropdownMenuItem(
+                      value: t.id,
+                      child: Text(t.name, overflow: TextOverflow.ellipsis),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (v) => setState(() => selectedTypeId = v),
+              validator: (v) => v == null ? 'Select an account type' : null,
+            );
+          }),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () async {
+                final createdId = await Get.to<String>(
+                  () => const AccountTypeFormPage(),
+                );
+                if (mounted && createdId != null) {
+                  setState(() => selectedTypeId = createdId);
+                }
+              },
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Add account type'),
+            ),
           ),
           const SizedBox(height: 16),
-          TextFormField(
+          AppAmountField(
             controller: opening,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Opening balance',
-              prefixText: '৳ ',
-              border: OutlineInputBorder(),
-            ),
+            label: 'Opening Balance',
             validator: (v) =>
                 double.tryParse((v ?? '').replaceAll(',', '')) == null
                 ? 'Enter an amount'
                 : null,
           ),
-          ListTile(
-            title: const Text('Opening balance date'),
-            subtitle: Text(DateHelper.formatDate(date)),
-            trailing: const Icon(Icons.calendar_today),
+          const SizedBox(height: 16),
+          AppDateField(
+            label: 'Balance As Of',
+            date: date,
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
@@ -170,13 +225,16 @@ class _AccountFormPageState extends State<AccountFormPage> {
               if (picked != null) setState(() => date = picked);
             },
           ),
+          const SizedBox(height: 16),
+          const InputDecorator(
+            decoration: InputDecoration(labelText: 'Currency'),
+            child: Text('BDT'),
+          ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: note,
             maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'Note (optional)',
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(labelText: 'Note (optional)'),
           ),
           SwitchListTile(
             title: const Text('Include in net worth'),
@@ -189,7 +247,7 @@ class _AccountFormPageState extends State<AccountFormPage> {
               value: archived,
               onChanged: (v) => setState(() => archived = v),
             ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
           FilledButton(
             onPressed: saving ? null : save,
             child: Text(saving ? 'Saving…' : 'Save Account'),

@@ -1,5 +1,6 @@
 import '../accounts/account_controller.dart';
 import '../bank/bank_controller.dart';
+import '../account_type/account_type_controller.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,75 +35,147 @@ class _MorePageState extends State<MorePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('More')),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          ListTile(
-            leading: const Icon(Icons.bar_chart_rounded),
-            title: const Text('Reports'),
-            subtitle: const Text('View income and expense reports'),
-            onTap: () => Get.to(() => const ReportPage()),
+          _section(context, 'Insights', [
+            _item(
+              context,
+              Icons.bar_chart_rounded,
+              'Reports',
+              'Financial insights and history',
+              () => Get.to(() => const ReportPage()),
+            ),
+          ]),
+          const SizedBox(height: 20),
+          _section(context, 'Management', [
+            _item(
+              context,
+              Icons.category_outlined,
+              'Expense Categories',
+              'Values used when adding expenses',
+              () => Get.toNamed(AppRoutes.expenseCategories),
+            ),
+            _item(
+              context,
+              Icons.payments_outlined,
+              'Income Sources',
+              'Values used when adding income',
+              () => Get.toNamed(AppRoutes.incomeSources),
+            ),
+            _item(
+              context,
+              Icons.account_balance_outlined,
+              'Banks',
+              'Institutions used by accounts',
+              () => Get.toNamed(AppRoutes.banks),
+            ),
+            _item(
+              context,
+              Icons.account_tree_outlined,
+              'Account Types',
+              'Types used when adding accounts',
+              () => Get.toNamed(AppRoutes.accountTypes),
+            ),
+          ]),
+          const SizedBox(height: 20),
+          _section(context, 'Data', [
+            _item(
+              context,
+              Icons.backup_outlined,
+              'Backup data',
+              'Export your EXPTRA data',
+              _backupData,
+            ),
+            _item(
+              context,
+              Icons.restore_outlined,
+              'Restore data',
+              'Import a saved backup',
+              _restoreData,
+            ),
+          ]),
+          const SizedBox(height: 20),
+          Text(
+            'About',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.category_outlined),
-            title: const Text('Expense Categories'),
-            subtitle: const Text('Manage expense category list'),
-            onTap: () => Get.toNamed(AppRoutes.expenseCategories),
-          ),
-          ListTile(
-            leading: const Icon(Icons.account_balance_wallet_outlined),
-            title: const Text('Income Sources'),
-            subtitle: const Text('Manage income source list'),
-            onTap: () => Get.toNamed(AppRoutes.incomeSources),
-          ),
-          ListTile(
-            leading: const Icon(Icons.account_balance_outlined),
-            title: const Text('Banks'),
-            subtitle: const Text('Manage banks used by accounts'),
-            onTap: () => Get.toNamed(AppRoutes.banks),
-          ),
-          ListTile(
-            leading: const Icon(Icons.backup_outlined),
-            title: const Text('Backup data'),
-            subtitle: const Text('Export your local data file'),
-            onTap: _backupData,
-          ),
-          ListTile(
-            leading: const Icon(Icons.restore_outlined),
-            title: const Text('Restore data'),
-            subtitle: const Text('Import data from a backup file'),
-            onTap: _restoreData,
-          ),
-          const Divider(height: 1),
-          const ListTile(
-            leading: Icon(Icons.person_outline),
-            title: Text('Concept • Code • Design'),
-            subtitle: Text('Shahed Mohammad Hridoy'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('App Version'),
-            subtitle: FutureBuilder<PackageInfo>(
-              future: _packageInfoFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Text('Loading...');
-                }
-
-                if (snapshot.hasError || !snapshot.hasData) {
-                  return const Text('Unavailable');
-                }
-
-                final packageInfo = snapshot.data!;
-                return Text(packageInfo.version);
-              },
+          const SizedBox(height: 8),
+          Card(
+            color: theme.colorScheme.surfaceContainerLow,
+            elevation: 0,
+            child: Column(
+              children: [
+                const ListTile(
+                  leading: Icon(Icons.person_outline),
+                  title: Text('Concept • Code • Design'),
+                  subtitle: Text('Shahed Mohammad Hridoy'),
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: const Text('App Version'),
+                  subtitle: FutureBuilder<PackageInfo>(
+                    future: _packageInfoFuture,
+                    builder: (_, snapshot) => Text(
+                      snapshot.hasData ? snapshot.data!.version : 'Unavailable',
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _section(BuildContext context, String title, List<Widget> items) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          color: theme.colorScheme.surfaceContainerLow,
+          elevation: 0,
+          child: Column(
+            children: [
+              for (var i = 0; i < items.length; i++) ...[
+                if (i > 0) const Divider(height: 1, indent: 56),
+                items[i],
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _item(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback action,
+  ) => ListTile(
+    leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+    title: Text(title),
+    subtitle: Text(subtitle),
+    trailing: const Icon(Icons.chevron_right_rounded),
+    onTap: action,
+  );
 
   Future<void> _backupData() async {
     try {
@@ -181,6 +254,9 @@ class _MorePageState extends State<MorePage> {
       }
       if (Get.isRegistered<BankController>()) {
         await Get.find<BankController>().loadBanks();
+      }
+      if (Get.isRegistered<AccountTypeController>()) {
+        await Get.find<AccountTypeController>().load();
       }
 
       Get.snackbar('Restore Complete', 'Data restored from backup file.');
