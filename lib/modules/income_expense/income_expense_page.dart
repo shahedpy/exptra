@@ -1,553 +1,368 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../core/constants/app_constants.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/helpers.dart';
-import 'expense_controller.dart';
-import 'income_controller.dart';
+import '../../core/widgets/app_ui.dart';
+import '../accounts/account_controller.dart';
 import '../expense_category/expense_category_controller.dart';
 import '../income_source/income_source_controller.dart';
+import 'expense_controller.dart';
+import 'income_controller.dart';
 
 class IncomeExpensePage extends StatefulWidget {
   const IncomeExpensePage({super.key});
-
   @override
   State<IncomeExpensePage> createState() => _IncomeExpensePageState();
 }
 
 class _IncomeExpensePageState extends State<IncomeExpensePage> {
-  int _selectedIndex = 0; // 0 = All, 1 = Income, 2 = Expense
+  int filter = 0;
 
   @override
   Widget build(BuildContext context) {
-    final incomeController = Get.find<IncomeController>();
-    final expenseController = Get.find<ExpenseController>();
-    final categoryController = Get.find<ExpenseCategoryController>();
-    final incomeSourceController = Get.find<IncomeSourceController>();
-
+    final income = Get.find<IncomeController>();
+    final expense = Get.find<ExpenseController>();
+    final sources = Get.find<IncomeSourceController>();
+    final categories = Get.find<ExpenseCategoryController>();
+    final accounts = Get.find<AccountController>();
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Income & Expense')),
-      body: Column(
-        children: [
-          // Button Segment
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.defaultPadding,
-              vertical: 12,
+      appBar: AppBar(title: const Text('Income / Expense')),
+      body: Obx(() {
+        final now = DateTime.now();
+        final monthIncome = income.incomes
+            .where(
+              (x) =>
+                  x.incomeDate.year == now.year &&
+                  x.incomeDate.month == now.month,
+            )
+            .fold<double>(0, (sum, x) => sum + x.amount);
+        final monthExpense = expense.expenses
+            .where(
+              (x) =>
+                  x.expenseDate.year == now.year &&
+                  x.expenseDate.month == now.month,
+            )
+            .fold<double>(0, (sum, x) => sum + x.amount);
+        final entries = <_Entry>[
+          for (final x in income.incomes)
+            _Entry(
+              id: x.id,
+              income: true,
+              amount: x.amount,
+              date: x.incomeDate,
+              title:
+                  sources.getIncomeSourceById(x.sourceId ?? '')?.name ??
+                  x.source ??
+                  'Income',
+              note: x.note,
+              accountId: x.accountId,
             ),
-            child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment<int>(
-                  value: 0,
-                  label: Text('All'),
-                  icon: Icon(Icons.list_rounded),
+          for (final x in expense.expenses)
+            _Entry(
+              id: x.id,
+              income: false,
+              amount: x.amount,
+              date: x.expenseDate,
+              title:
+                  categories.getCategoryById(x.categoryId)?.name ?? 'Expense',
+              note: x.note,
+              accountId: x.accountId,
+            ),
+        ]..sort((a, b) => b.date.compareTo(a.date));
+        final visible = entries
+            .where((e) => filter == 0 || e.income == (filter == 1))
+            .toList();
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            const AppSectionTitle('This Month'),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _Metric(
+                    label: 'Income',
+                    amount: monthIncome,
+                    icon: Icons.add_circle_outline_rounded,
+                  ),
                 ),
-                ButtonSegment<int>(
-                  value: 1,
-                  label: Text('Income'),
-                  icon: Icon(Icons.add_circle_outline_rounded),
-                ),
-                ButtonSegment<int>(
-                  value: 2,
-                  label: Text('Expense'),
-                  icon: Icon(Icons.remove_circle_outline_rounded),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _Metric(
+                    label: 'Expense',
+                    amount: monthExpense,
+                    icon: Icons.remove_circle_outline_rounded,
+                  ),
                 ),
               ],
-              selected: {_selectedIndex},
-              showSelectedIcon: false,
-              onSelectionChanged: (selected) {
-                setState(() {
-                  _selectedIndex = selected.first;
-                });
-              },
             ),
-          ),
-
-          // Content
-          Expanded(
-            child: _selectedIndex == 0
-                ? Obx(() {
-                    // Build a unified list: tag each item with its type and date
-                    final allItems = [
-                      ...incomeController.incomes.map(
-                        (e) => _TransactionItem(
-                          isIncome: true,
-                          date: e.incomeDate,
-                          title:
-                              incomeSourceController
-                                  .getIncomeSourceById(e.sourceId ?? '')
-                                  ?.name ??
-                              e.source ??
-                              'Income',
-                          note: e.note,
-                          amount: e.amount,
-                          id: e.id,
-                        ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Net Cash Flow',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
-                      ...expenseController.expenses.map((e) {
-                        final cat = categoryController.getCategoryById(
-                          e.categoryId,
-                        );
-                        return _TransactionItem(
-                          isIncome: false,
-                          date: e.expenseDate,
-                          title: cat?.name ?? 'Expense',
-                          note: e.note,
-                          amount: e.amount,
-                          id: e.id,
-                        );
-                      }),
-                    ]..sort((a, b) => b.date.compareTo(a.date));
-
-                    if (allItems.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No transactions yet',
-                          style: TextStyle(color: Colors.grey.shade600),
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(
-                        AppConstants.defaultPadding,
+                    ),
+                  ),
+                  Flexible(
+                    child: AppTrailingAmount(
+                      CurrencyHelper.formatSignedAmount(
+                        monthIncome - monthExpense,
                       ),
-                      itemCount: allItems.length,
-                      itemBuilder: (_, index) {
-                        final item = allItems[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: InkWell(
-                            onTap: () {
-                              final orig = item.isIncome
-                                  ? incomeController.incomes.firstWhere(
-                                      (e) => e.id == item.id,
-                                    )
-                                  : expenseController.expenses.firstWhere(
-                                      (e) => e.id == item.id,
-                                    );
-                              if (item.isIncome) {
-                                Get.toNamed(
-                                  AppRoutes.addIncome,
-                                  arguments: orig,
-                                );
-                              } else {
-                                Get.toNamed(
-                                  AppRoutes.addExpense,
-                                  arguments: orig,
-                                );
-                              }
-                            },
-                            onLongPress: () {
-                              Get.dialog(
-                                AlertDialog(
-                                  title: Text(
-                                    'Delete ${item.isIncome ? 'Income' : 'Expense'}',
-                                  ),
-                                  content: Text(
-                                    'Are you sure you want to delete this ${item.isIncome ? 'income' : 'expense'} entry?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        if (item.isIncome) {
-                                          incomeController.deleteIncome(
-                                            item.id,
-                                          );
-                                        } else {
-                                          expenseController.deleteExpense(
-                                            item.id,
-                                          );
-                                        }
-                                        Get.back();
-                                      },
-                                      child: const Text(
-                                        'Delete',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            AppActionRow(
+              firstLabel: 'Add Income',
+              firstIcon: Icons.add_rounded,
+              onFirst: () => Get.toNamed(AppRoutes.addIncome),
+              secondLabel: 'Add Expense',
+              secondIcon: Icons.remove_rounded,
+              onSecond: () => Get.toNamed(AppRoutes.addExpense),
+            ),
+            const SizedBox(height: 20),
+            const AppSectionTitle('Recent Transactions'),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              children: [
+                for (final (index, label) in [
+                  (0, 'All'),
+                  (1, 'Income'),
+                  (2, 'Expense'),
+                ])
+                  ChoiceChip(
+                    label: Text(label),
+                    selected: filter == index,
+                    visualDensity: VisualDensity.compact,
+                    onSelected: (_) => setState(() => filter = index),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (visible.isEmpty)
+              AppEmptyState(
+                title: 'No transactions in this view',
+                message: entries.isEmpty
+                    ? 'Add income or an expense to start tracking cash flow.'
+                    : 'Try another filter.',
+                actionLabel: entries.isEmpty ? 'Add Income' : null,
+                onAction: entries.isEmpty
+                    ? () => Get.toNamed(AppRoutes.addIncome)
+                    : null,
+              ),
+            for (final e in visible)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Card(
+                  color: theme.colorScheme.surfaceContainerLow,
+                  elevation: 0,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => _edit(e, income, expense),
+                    onLongPress: () => _delete(e, income, expense),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundColor:
+                                theme.colorScheme.secondaryContainer,
+                            child: Icon(
+                              e.income
+                                  ? Icons.add_rounded
+                                  : Icons.remove_rounded,
+                              size: 18,
+                              color: theme.colorScheme.onSecondaryContainer,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  e.note?.isNotEmpty == true
+                                      ? e.note!
+                                      : e.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleSmall,
                                 ),
-                              );
-                            },
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(
-                                AppConstants.defaultPadding,
-                              ),
-                              leading: CircleAvatar(
-                                backgroundColor: item.isIncome
-                                    ? Colors.green
-                                    : Colors.red,
-                                child: Icon(
-                                  item.isIncome
-                                      ? Icons.add_circle_rounded
-                                      : Icons.remove_circle_rounded,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              title: Text(item.title),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.isIncome ? 'Income' : 'Expense',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade700,
-                                    ),
+                                Text(
+                                  '${e.title} • ${_accountName(accounts, e.accountId)}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
                                   ),
-                                  if (item.note != null &&
-                                      item.note!.isNotEmpty)
-                                    Text(
-                                      item.note!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                  Text(
-                                    DateHelper.formatDate(item.date),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: Text(
-                                CurrencyHelper.formatAmount(item.amount),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: item.isIncome
-                                      ? Colors.green
-                                      : Colors.red,
                                 ),
+                                Text(
+                                  DateHelper.formatDate(e.date),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: AppTrailingAmount(
+                              '${e.income ? '+' : '−'}${CurrencyHelper.formatAmount(e.amount)}',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                        );
-                      },
-                    );
-                  })
-                : _selectedIndex == 1
-                // Income List
-                ? Obx(() {
-                    if (incomeController.incomes.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No income entries yet',
-                          style: TextStyle(color: Colors.grey.shade600),
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(
-                        AppConstants.defaultPadding,
+                        ],
                       ),
-                      itemCount: incomeController.incomes.length,
-                      itemBuilder: (_, index) {
-                        final entry = incomeController.incomes[index];
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: InkWell(
-                            onTap: () => Get.toNamed(
-                              AppRoutes.addIncome,
-                              arguments: entry,
-                            ),
-                            onLongPress: () {
-                              Get.dialog(
-                                AlertDialog(
-                                  title: const Text('Delete Income'),
-                                  content: const Text(
-                                    'Are you sure you want to delete this income entry?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        incomeController.deleteIncome(entry.id);
-                                        Get.back();
-                                      },
-                                      child: const Text(
-                                        'Delete',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(
-                                AppConstants.defaultPadding,
-                              ),
-                              leading: const CircleAvatar(
-                                backgroundColor: Colors.green,
-                                child: Icon(
-                                  Icons.add_circle_rounded,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              title: Text(
-                                incomeSourceController
-                                        .getIncomeSourceById(
-                                          entry.sourceId ?? '',
-                                        )
-                                        ?.name ??
-                                    entry.source ??
-                                    'Income',
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Income',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                  if (entry.note != null &&
-                                      entry.note!.isNotEmpty)
-                                    Text(
-                                      entry.note!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                  Text(
-                                    DateHelper.formatDate(entry.incomeDate),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: Text(
-                                CurrencyHelper.formatAmount(entry.amount),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  })
-                : Obx(() {
-                    if (expenseController.expenses.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No expense entries yet',
-                          style: TextStyle(color: Colors.grey.shade600),
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(
-                        AppConstants.defaultPadding,
-                      ),
-                      itemCount: expenseController.expenses.length,
-                      itemBuilder: (_, index) {
-                        final entry = expenseController.expenses[index];
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: InkWell(
-                            onTap: () => Get.toNamed(
-                              AppRoutes.addExpense,
-                              arguments: entry,
-                            ),
-                            onLongPress: () {
-                              Get.dialog(
-                                AlertDialog(
-                                  title: const Text('Delete Expense'),
-                                  content: const Text(
-                                    'Are you sure you want to delete this expense entry?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        expenseController.deleteExpense(
-                                          entry.id,
-                                        );
-                                        Get.back();
-                                      },
-                                      child: const Text(
-                                        'Delete',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(
-                                AppConstants.defaultPadding,
-                              ),
-                              leading: const CircleAvatar(
-                                backgroundColor: Colors.red,
-                                child: Icon(
-                                  Icons.remove_circle_rounded,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              title: Text(
-                                categoryController
-                                        .getCategoryById(entry.categoryId)
-                                        ?.name ??
-                                    'Expense',
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Expense',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                  if (entry.note != null &&
-                                      entry.note!.isNotEmpty)
-                                    Text(
-                                      entry.note!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                  Text(
-                                    DateHelper.formatDate(entry.expenseDate),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: Text(
-                                CurrencyHelper.formatAmount(entry.amount),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  }),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDialog(context),
-        child: const Icon(Icons.add),
-      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      }),
     );
   }
 
-  void _showAddDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Drag handle
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const Text(
-                  'Add Entry',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                ListTile(
-                  title: const Text('Add Income'),
-                  leading: const CircleAvatar(
-                    backgroundColor: Colors.green,
-                    child: Icon(
-                      Icons.add_circle_outline_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.addIncome);
-                  },
-                ),
-                ListTile(
-                  title: const Text('Add Expense'),
-                  leading: const CircleAvatar(
-                    backgroundColor: Colors.red,
-                    child: Icon(
-                      Icons.remove_circle_outline_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.addExpense);
-                  },
-                ),
-              ],
+  String _accountName(AccountController controller, String? id) {
+    if (id == null) return 'Unassigned account';
+    final a = controller.accounts.where((x) => x.id == id).firstOrNull;
+    return a == null
+        ? 'Unassigned account'
+        : '${a.institutionName.isEmpty ? '' : '${a.institutionName} '}${a.name}';
+  }
+
+  void _edit(_Entry e, IncomeController income, ExpenseController expense) {
+    if (e.income) {
+      Get.toNamed(
+        AppRoutes.addIncome,
+        arguments: income.incomes.firstWhere((x) => x.id == e.id),
+      );
+    } else {
+      Get.toNamed(
+        AppRoutes.addExpense,
+        arguments: expense.expenses.firstWhere((x) => x.id == e.id),
+      );
+    }
+  }
+
+  void _delete(_Entry e, IncomeController income, ExpenseController expense) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Delete ${e.income ? 'income' : 'expense'}?'),
+        content: Text(
+          'This ${e.income ? 'income' : 'expense'} entry will be removed.',
+        ),
+        actions: [
+          TextButton(onPressed: Get.back, child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              if (e.income) {
+                income.deleteIncome(e.id);
+              } else {
+                expense.deleteExpense(e.id);
+              }
+              Get.back();
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
 
-class _TransactionItem {
-  final bool isIncome;
+class _Metric extends StatelessWidget {
+  final String label;
+  final double amount;
+  final IconData icon;
+  const _Metric({
+    required this.label,
+    required this.amount,
+    required this.icon,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      color: theme.colorScheme.surfaceContainerLow,
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                CurrencyHelper.formatAmount(amount),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Entry {
+  final String id;
+  final bool income;
+  final double amount;
   final DateTime date;
   final String title;
   final String? note;
-  final double amount;
-  final String id;
-
-  _TransactionItem({
-    required this.isIncome,
+  final String? accountId;
+  const _Entry({
+    required this.id,
+    required this.income,
+    required this.amount,
     required this.date,
     required this.title,
     required this.note,
-    required this.amount,
-    required this.id,
+    required this.accountId,
   });
 }

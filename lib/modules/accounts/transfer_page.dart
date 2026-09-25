@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../../core/utils/helpers.dart';
 import 'account_controller.dart';
 import 'account_selector.dart';
+import '../../core/widgets/app_ui.dart';
+import '../../data/services/financial_calculator.dart';
 
 class TransferPage extends StatefulWidget {
   const TransferPage({super.key});
@@ -29,6 +31,12 @@ class _TransferPageState extends State<TransferPage> {
 
   Future<void> save() async {
     if (!key.currentState!.validate() || saving) return;
+    if (from == null || to == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Choose both accounts')));
+      return;
+    }
     if (from == to) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Choose different accounts')),
@@ -61,53 +69,66 @@ class _TransferPageState extends State<TransferPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Transfer')),
+    appBar: AppBar(title: const Text('Transfer Money')),
     body: Form(
       key: key,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          AccountSelector(
-            value: from,
-            label: 'From account',
-            onChanged: (v) => setState(() => from = v),
+          Text(
+            'Transfers move money between your own accounts and are not counted as income or expense.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 16),
           AccountSelector(
+            value: from,
+            label: 'From',
+            helperText: 'Source account',
+            onChanged: (v) => setState(() {
+              from = v;
+              if (to == v) to = null;
+            }),
+          ),
+          _balance(context, from),
+          Center(
+            child: IconButton(
+              tooltip: 'Swap accounts',
+              icon: const Icon(Icons.swap_vert_rounded),
+              onPressed: from == null || to == null
+                  ? null
+                  : () => setState(() {
+                      final old = from;
+                      from = to;
+                      to = old;
+                    }),
+            ),
+          ),
+          AccountSelector(
             value: to,
-            label: 'To account',
+            label: 'To',
+            helperText: 'Destination account',
             excludeId: from,
             onChanged: (v) => setState(() => to = v),
           ),
+          _balance(context, to),
           const SizedBox(height: 16),
-          TextFormField(
-            controller: amount,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Amount',
-              prefixText: '৳ ',
-              border: OutlineInputBorder(),
-            ),
-            validator: ValidationHelper.validateAmount,
-          ),
+          AppAmountField(controller: amount),
           const SizedBox(height: 16),
-          TextFormField(
+          AppAmountField(
             controller: fee,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Fee (expense)',
-              prefixText: '৳ ',
-              border: OutlineInputBorder(),
-            ),
+            label: 'Fee (optional expense)',
             validator: (v) =>
-                double.tryParse(v ?? '') == null || double.parse(v!) < 0
+                double.tryParse((v ?? '').replaceAll(',', '')) == null ||
+                    CurrencyHelper.parseAmount(v!) < 0
                 ? 'Enter a nonnegative fee'
                 : null,
           ),
-          ListTile(
-            title: const Text('Transfer date'),
-            subtitle: Text(DateHelper.formatDate(date)),
-            trailing: const Icon(Icons.calendar_today),
+          const SizedBox(height: 16),
+          AppDateField(
+            label: 'Transfer Date',
+            date: date,
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
@@ -118,20 +139,40 @@ class _TransferPageState extends State<TransferPage> {
               if (picked != null) setState(() => date = picked);
             },
           ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: note,
-            decoration: const InputDecoration(
-              labelText: 'Note (optional)',
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(labelText: 'Note (optional)'),
           ),
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: saving ? null : save,
-            child: const Text('Save Transfer'),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 48,
+            child: FilledButton(
+              onPressed: saving ? null : save,
+              child: const Text('Transfer Money'),
+            ),
           ),
         ],
       ),
     ),
   );
+
+  Widget _balance(BuildContext context, String? id) {
+    if (id == null) return const SizedBox.shrink();
+    final controller = Get.find<AccountController>();
+    final account = controller.activeAccounts
+        .where((a) => a.id == id)
+        .firstOrNull;
+    final calc = controller.calculator.value;
+    if (account == null || calc == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 4, left: 4),
+      child: Text(
+        'Current balance: ${CurrencyHelper.formatAmount(Money.bdt(calc.balanceOf(account)))}',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
 }

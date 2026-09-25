@@ -38,6 +38,11 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colorScheme.surfaceContainerLowest,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        constraints: const BoxConstraints(minHeight: 56),
         border: _inputBorder(colorScheme.outline),
         enabledBorder: _inputBorder(colorScheme.outline),
         focusedBorder: _inputBorder(colorScheme.primary, width: 2),

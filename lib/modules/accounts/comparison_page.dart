@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/widgets/app_ui.dart';
 import '../../data/services/financial_calculator.dart';
 import 'account_controller.dart';
 
@@ -75,15 +76,26 @@ class _ComparisonPageState extends State<ComparisonPage> {
     }),
   );
 
-  Widget _row(String label, int cents, {bool bold = false}) => ListTile(
-    dense: true,
-    title: Text(
-      label,
-      style: TextStyle(fontWeight: bold ? FontWeight.bold : null),
-    ),
-    trailing: Text(
-      CurrencyHelper.formatAmount(Money.bdt(cents)),
-      style: TextStyle(fontWeight: bold ? FontWeight.bold : null),
+  Widget _row(String label, int cents, {bool bold = false}) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: bold ? FontWeight.bold : null),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: AppTrailingAmount(
+            CurrencyHelper.formatAmount(Money.bdt(cents)),
+            style: TextStyle(fontWeight: bold ? FontWeight.bold : null),
+          ),
+        ),
+      ],
     ),
   );
 

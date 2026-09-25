@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/widgets/app_ui.dart';
 import '../../data/services/financial_calculator.dart';
 import 'account_controller.dart';
 import 'account_detail_page.dart';
@@ -206,14 +207,12 @@ class _FinancialHistoryPageState extends State<FinancialHistoryPage> {
             style: Theme.of(context).textTheme.labelLarge,
           ),
           for (final e in filtered)
-            ListTile(
-              title: Text(e.title),
-              subtitle: Text(
-                '${DateHelper.formatDate(e.date)} • ${accounts.firstWhere((a) => a.id == e.accountId).name} • ${e.type}',
-              ),
-              trailing: Text(
-                '${e.amount >= 0 ? '+' : ''}${CurrencyHelper.formatAmount(Money.bdt(e.amount))}',
-              ),
+            AppFinancialListRow(
+              title: e.title,
+              subtitle:
+                  '${DateHelper.formatDate(e.date)} • ${accounts.firstWhere((a) => a.id == e.accountId).name} • ${e.type}',
+              amount:
+                  '${e.amount >= 0 ? '+' : ''}${CurrencyHelper.formatAmount(Money.bdt(e.amount))}',
               onTap: () =>
                   Get.to(() => AccountDetailPage(accountId: e.accountId)),
             ),

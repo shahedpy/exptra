@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/app_ui.dart';
 import 'package:get/get.dart';
 import '../accounts/account_selector.dart';
 
-import '../../core/constants/app_constants.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/db/app_database.dart';
 import '../../core/routes/app_routes.dart';
@@ -56,150 +56,79 @@ class _AddIncomePageState extends State<AddIncomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Income' : 'Add Income'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Amount',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: '0.00',
-                  prefixText: AppConstants.currencySymbol,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
-                    ),
-                  ),
-                ),
-                validator: ValidationHelper.validateAmount,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Income Source',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Obx(() {
-                final sources = incomeSourceController.incomeSources;
-                if (sources.isEmpty) {
-                  return Center(
-                    child: Column(
-                      children: [
-                        const Text('No income sources found'),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () => Get.toNamed(AppRoutes.incomeSources),
-                          child: const Text('Add Income Source'),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(_isEdit ? 'Edit Income' : 'Add Income')),
+    body: Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          AppAmountField(controller: _amountController, prominent: true),
+          const SizedBox(height: 16),
+          Obx(() {
+            final items = incomeSourceController.incomeSources;
+            final selected = items.any((x) => x.id == _selectedSourceId)
+                ? _selectedSourceId
+                : null;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField<String>(
+                  key: ValueKey(selected),
+                  initialValue: selected,
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Income Source'),
+                  items: items
+                      .map(
+                        (x) => DropdownMenuItem(
+                          value: x.id,
+                          child: Text(x.name, overflow: TextOverflow.ellipsis),
                         ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (_selectedSourceId == null && sources.isNotEmpty) {
-                  _selectedSourceId = sources.first.id;
-                }
-
-                return DropdownButtonFormField<String>(
-                  initialValue: _selectedSourceId,
-                  items: sources.map((source) {
-                    return DropdownMenuItem(
-                      value: source.id,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: ColorHelper.getColorFromInt(
-                              source.color,
-                            ),
-                            radius: 16,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(source.name),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedSourceId = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.defaultBorderRadius,
-                      ),
-                    ),
-                  ),
-                );
-              }),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              AccountSelector(
-                value: _accountId,
-                label: 'To account',
-                onChanged: (value) => setState(() => _accountId = value),
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Date',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                trailing: const Icon(Icons.calendar_today),
-                title: Text(DateHelper.formatDate(_selectedDate)),
-                onTap: _pickDate,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Note (Optional)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _noteController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'Add notes...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
-                    ),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _selectedSourceId = v),
+                  validator: (v) =>
+                      v == null ? 'Select an income source' : null,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => Get.toNamed(AppRoutes.incomeSources),
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('Add income source'),
                   ),
                 ),
-                validator: ValidationHelper.validateNote,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 2),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  child: Text(_isEdit ? 'Update Income' : 'Add Income'),
-                ),
-              ),
-            ],
+              ],
+            );
+          }),
+          const SizedBox(height: 16),
+          AccountSelector(
+            value: _accountId,
+            label: 'Receive Into',
+            onChanged: (v) => setState(() => _accountId = v),
           ),
-        ),
+          const SizedBox(height: 16),
+          AppDateField(label: 'Date', date: _selectedDate, onTap: _pickDate),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _noteController,
+            maxLines: 2,
+            decoration: const InputDecoration(labelText: 'Note (optional)'),
+            validator: ValidationHelper.validateNote,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: _submitForm,
+              child: Text(_isEdit ? 'Update Income' : 'Save Income'),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(

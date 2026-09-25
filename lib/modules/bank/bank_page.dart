@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/master_data_list.dart';
 import 'package:get/get.dart';
 
-import '../../core/constants/app_constants.dart';
 import '../../core/db/app_database.dart';
 import 'bank_controller.dart';
 
@@ -23,46 +23,23 @@ class _BankPageState extends State<BankPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Banks')),
-      body: Obx(
-        () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : controller.banks.isEmpty
-            ? const Center(child: Text('Add a bank to use it in accounts.'))
-            : ReorderableListView.builder(
-                padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                buildDefaultDragHandles: false,
-                itemCount: controller.banks.length,
-                onReorderItem: controller.reorderBanks,
-                itemBuilder: (context, index) {
-                  final bank = controller.banks[index];
-                  return Card(
-                    key: ValueKey(bank.id),
-                    child: ListTile(
-                      leading: const Icon(Icons.account_balance_outlined),
-                      title: Text(bank.name),
-                      onTap: () => _editBank(bank),
-                      onLongPress: () => _confirmDelete(bank),
-                      trailing: ReorderableDragStartListener(
-                        index: index,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Icon(Icons.drag_handle),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addBank,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Obx(
+    () => MasterDataList<Bank>(
+      title: 'Banks',
+      singular: 'Bank',
+      emptyMessage: 'No banks added yet. Add one to use in accounts.',
+      icon: Icons.account_balance_outlined,
+      items: controller.banks.toList(),
+      loading: controller.isLoading.value,
+      idOf: (x) => x.id,
+      nameOf: (x) => x.name,
+
+      onAdd: _addBank,
+      onEdit: _editBank,
+      onDelete: _confirmDelete,
+      onReorder: controller.reorderBanks,
+    ),
+  );
 
   void _addBank() {
     nameController.clear();
@@ -86,7 +63,10 @@ class _BankPageState extends State<BankPage> {
               controller.deleteBank(bank);
               Get.back();
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),

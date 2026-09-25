@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/app_ui.dart';
 import 'package:get/get.dart';
 import '../accounts/account_selector.dart';
 import 'expense_controller.dart';
 import '../expense_category/expense_category_controller.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
-import '../../core/constants/app_constants.dart';
 import '../../core/routes/app_routes.dart';
 
 class AddExpensePage extends StatefulWidget {
@@ -55,147 +55,81 @@ class _AddExpensePageState extends State<AddExpensePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Expense' : 'Add Expense'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Amount',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: '0.00',
-                  prefixText: AppConstants.currencySymbol,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
-                    ),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(_isEdit ? 'Edit Expense' : 'Add Expense')),
+    body: Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          AppAmountField(controller: _amountController, prominent: true),
+          const SizedBox(height: 16),
+          Obx(() {
+            final items = categoryController.categories;
+            final selected = items.any((x) => x.id == _selectedCategoryId)
+                ? _selectedCategoryId
+                : null;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField<String>(
+                  key: ValueKey(selected),
+                  initialValue: selected,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Expense Category',
                   ),
-                ),
-                validator: ValidationHelper.validateAmount,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Expense Category',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Obx(() {
-                final categories = categoryController.categories;
-                if (categories.isEmpty) {
-                  return Center(
-                    child: Column(
-                      children: [
-                        const Text('No expense categories found'),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () =>
-                              Get.toNamed(AppRoutes.expenseCategories),
-                          child: const Text('Add Expense Category'),
+                  items: items
+                      .map(
+                        (x) => DropdownMenuItem(
+                          value: x.id,
+                          child: Text(x.name, overflow: TextOverflow.ellipsis),
                         ),
-                      ],
-                    ),
-                  );
-                }
-
-                return DropdownButtonFormField<String>(
-                  initialValue: _selectedCategoryId,
-                  items: categories.map((cat) {
-                    return DropdownMenuItem(
-                      value: cat.id,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: ColorHelper.getColorFromInt(
-                              cat.color,
-                            ),
-                            radius: 16,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(cat.name),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCategoryId = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.defaultBorderRadius,
-                      ),
-                    ),
-                  ),
-                );
-              }),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              AccountSelector(
-                value: _accountId,
-                label: 'From account',
-                onChanged: (value) => setState(() => _accountId = value),
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Date',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                trailing: const Icon(Icons.calendar_today),
-                title: Text(DateHelper.formatDate(_selectedDate)),
-                onTap: _pickDate,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Note (Optional)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _noteController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'Add notes...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
-                    ),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _selectedCategoryId = v),
+                  validator: (v) =>
+                      v == null ? 'Select an expense category' : null,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => Get.toNamed(AppRoutes.expenseCategories),
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('Add expense category'),
                   ),
                 ),
-                validator: ValidationHelper.validateNote,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 2),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  child: Text(_isEdit ? 'Update Expense' : 'Add Expense'),
-                ),
-              ),
-            ],
+              ],
+            );
+          }),
+          const SizedBox(height: 16),
+          AccountSelector(
+            value: _accountId,
+            label: 'Paid From',
+            onChanged: (v) => setState(() => _accountId = v),
           ),
-        ),
+          const SizedBox(height: 16),
+          AppDateField(label: 'Date', date: _selectedDate, onTap: _pickDate),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _noteController,
+            maxLines: 2,
+            decoration: const InputDecoration(labelText: 'Note (optional)'),
+            validator: ValidationHelper.validateNote,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: _submitForm,
+              child: Text(_isEdit ? 'Update Expense' : 'Save Expense'),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/widgets/app_ui.dart';
 import '../../data/services/financial_calculator.dart';
 import 'account_controller.dart';
 import 'account_form_page.dart';
@@ -104,7 +105,7 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
                     ),
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  Text('${account.type} • ${account.currency}'),
+                  Text('${calc.typeNameOf(account)} • ${account.currency}'),
                   if (latest != null)
                     Text(
                       'Last checked ${DateHelper.formatDate(latest.date)} • Difference ${CurrencyHelper.formatAmount(latest.difference)}',
@@ -178,16 +179,13 @@ class _AccountDetailPageState extends State<AccountDetailPage> {
           if (entries.isEmpty)
             const ListTile(title: Text('No matching transactions')),
           for (final entry in entries)
-            ListTile(
-              leading: Icon(_icon(entry.type)),
-              title: Text(entry.title),
-              subtitle: Text(
-                '${DateHelper.formatDate(entry.date)}${entry.note == null || entry.note!.isEmpty ? '' : ' • ${entry.note}'}\nRunning: ${CurrencyHelper.formatAmount(Money.bdt(running['${entry.type}:${entry.id}'] ?? 0))}',
-              ),
-              isThreeLine: true,
-              trailing: Text(
-                '${entry.amount >= 0 ? '+' : ''}${CurrencyHelper.formatAmount(Money.bdt(entry.amount))}',
-              ),
+            AppFinancialListRow(
+              icon: _icon(entry.type),
+              title: entry.title,
+              subtitle:
+                  '${DateHelper.formatDate(entry.date)}${entry.note == null || entry.note!.isEmpty ? '' : ' • ${entry.note}'}\nRunning: ${CurrencyHelper.formatAmount(Money.bdt(running['${entry.type}:${entry.id}'] ?? 0))}',
+              amount:
+                  '${entry.amount >= 0 ? '+' : ''}${CurrencyHelper.formatAmount(Money.bdt(entry.amount))}',
             ),
           const Divider(),
           Text(

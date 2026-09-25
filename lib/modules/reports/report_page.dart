@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/widgets/app_ui.dart';
 import 'report_controller.dart';
 import '../accounts/financial_reports_page.dart';
 
@@ -28,14 +29,22 @@ class ReportPage extends StatelessWidget {
       body: Obx(
         () => Column(
           children: [
-            ListTile(
-              dense: true,
-              leading: const Icon(Icons.account_balance_wallet_outlined),
-              title: const Text('Financial reports & account history'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Get.to(() => const FinancialReportsPage()),
-            ),
             _buildSummaryCard(theme, controller),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Card(
+                color: theme.colorScheme.surfaceContainerLow,
+                elevation: 0,
+                child: ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.account_balance_wallet_outlined),
+                  title: const Text('Accounts & Finance'),
+                  subtitle: const Text('Balances, statements and history'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Get.to(() => const FinancialReportsPage()),
+                ),
+              ),
+            ),
             _buildDataTypeSelector(controller),
             _buildTypeSelector(controller),
             if (controller.selectedType.value != ReportType.monthWise)
@@ -49,7 +58,9 @@ class ReportPage extends StatelessWidget {
 
   Widget _buildSummaryCard(ThemeData theme, ReportController controller) {
     return Card(
-      margin: const EdgeInsets.all(AppConstants.defaultPadding),
+      color: theme.colorScheme.primaryContainer,
+      elevation: 0,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Row(
@@ -90,6 +101,8 @@ class ReportPage extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
           textAlign: alignEnd ? TextAlign.right : TextAlign.left,
         ),
@@ -106,10 +119,11 @@ class ReportPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.defaultPadding,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: SegmentedButton<ReportType>(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            SegmentedButton<ReportType>(
               segments: [
                 ButtonSegment<ReportType>(
                   value: ReportType.dailyWise,
@@ -147,8 +161,8 @@ class ReportPage extends StatelessWidget {
               },
               showSelectedIcon: false,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -161,36 +175,39 @@ class ReportPage extends StatelessWidget {
         AppConstants.defaultPadding,
         8,
       ),
-      child: SegmentedButton<ReportDataType>(
-        segments: const [
-          ButtonSegment<ReportDataType>(
-            value: ReportDataType.income,
-            label: Text('Inc'),
-            icon: Icon(Icons.add_circle_outline_rounded),
-          ),
-          ButtonSegment<ReportDataType>(
-            value: ReportDataType.expense,
-            label: Text('Exp'),
-            icon: Icon(Icons.remove_circle_outline_rounded),
-          ),
-          ButtonSegment<ReportDataType>(
-            value: ReportDataType.lend,
-            label: Text('Len'),
-            icon: Icon(Icons.call_made_rounded),
-          ),
-          ButtonSegment<ReportDataType>(
-            value: ReportDataType.borrow,
-            label: Text('Bor'),
-            icon: Icon(Icons.call_received_rounded),
-          ),
-        ],
-        selected: {controller.selectedDataType.value},
-        onSelectionChanged: (types) {
-          if (types.isNotEmpty) {
-            controller.changeDataType(types.first);
-          }
-        },
-        showSelectedIcon: false,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SegmentedButton<ReportDataType>(
+          segments: const [
+            ButtonSegment<ReportDataType>(
+              value: ReportDataType.income,
+              label: Text('Inc'),
+              icon: Icon(Icons.add_circle_outline_rounded),
+            ),
+            ButtonSegment<ReportDataType>(
+              value: ReportDataType.expense,
+              label: Text('Exp'),
+              icon: Icon(Icons.remove_circle_outline_rounded),
+            ),
+            ButtonSegment<ReportDataType>(
+              value: ReportDataType.lend,
+              label: Text('Len'),
+              icon: Icon(Icons.call_made_rounded),
+            ),
+            ButtonSegment<ReportDataType>(
+              value: ReportDataType.borrow,
+              label: Text('Bor'),
+              icon: Icon(Icons.call_received_rounded),
+            ),
+          ],
+          selected: {controller.selectedDataType.value},
+          onSelectionChanged: (types) {
+            if (types.isNotEmpty) {
+              controller.changeDataType(types.first);
+            }
+          },
+          showSelectedIcon: false,
+        ),
       ),
     );
   }
@@ -252,6 +269,8 @@ class ReportPage extends StatelessWidget {
         final color = controller.colorForItem(item, theme);
 
         return Card(
+          color: theme.colorScheme.surfaceContainerLow,
+          elevation: 0,
           margin: const EdgeInsets.only(bottom: 10),
           child: Padding(
             padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -266,9 +285,11 @@ class ReportPage extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
-                    Text(
-                      CurrencyHelper.formatAmount(item.amount),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    Flexible(
+                      child: AppTrailingAmount(
+                        CurrencyHelper.formatAmount(item.amount),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ],
                 ),

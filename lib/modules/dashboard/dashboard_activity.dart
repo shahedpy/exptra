@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../core/db/app_database.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/widgets/app_ui.dart';
 import '../../data/services/financial_calculator.dart';
 import '../accounts/account_controller.dart';
 import '../expense_category/expense_category_controller.dart';
@@ -47,7 +48,7 @@ class RecentActivity extends StatelessWidget {
           ],
         ),
         SizedBox(
-        height: 48,
+          height: 48,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
@@ -300,19 +301,15 @@ class _ActivityTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 128),
+              Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
+                    AppTrailingAmount(
                       amountText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: theme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
-                      textAlign: TextAlign.end,
                     ),
                     if (status != null)
                       Padding(

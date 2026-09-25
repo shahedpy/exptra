@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/app_ui.dart';
 import 'package:get/get.dart';
 import '../accounts/account_selector.dart';
 
-import '../../core/constants/app_constants.dart';
 import '../../core/db/app_database.dart';
 import '../../core/utils/helpers.dart';
 import 'lend_borrow_controller.dart';
@@ -53,113 +53,66 @@ class _AddLendPageState extends State<AddLendPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Lend' : 'Add Lend'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Amount',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(_isEdit ? 'Edit Lend' : 'Add Lend')),
+    body: Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          Card(
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            elevation: 0,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Text(
+                'Lending moves money from your account into money to receive.',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: '0.00',
-                  prefixText: AppConstants.currencySymbol,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
-                    ),
-                  ),
-                ),
-                validator: ValidationHelper.validateAmount,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Person Name',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: 'Enter person name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
-                    ),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Person name is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              AccountSelector(
-                value: _accountId,
-                label: 'From account',
-                onChanged: (value) => setState(() => _accountId = value),
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Date',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                trailing: const Icon(Icons.calendar_today),
-                title: Text(DateHelper.formatDate(_selectedDate)),
-                onTap: _pickDate,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 1.5),
-              const Text(
-                'Note (Optional)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _noteController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'Add notes...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.defaultBorderRadius,
-                    ),
-                  ),
-                ),
-                validator: ValidationHelper.validateNote,
-              ),
-              const SizedBox(height: AppConstants.defaultPadding * 2),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  child: Text(_isEdit ? 'Update Lend' : 'Save Lend'),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _nameController,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(
+              labelText: 'Person',
+              hintText: 'Name',
+            ),
+            validator: (v) => v == null || v.trim().isEmpty
+                ? 'Person name is required'
+                : null,
+          ),
+          const SizedBox(height: 16),
+          AppAmountField(controller: _amountController, prominent: true),
+          const SizedBox(height: 16),
+          AccountSelector(
+            value: _accountId,
+            label: 'From Account',
+            onChanged: (v) => setState(() => _accountId = v),
+          ),
+          const SizedBox(height: 16),
+          AppDateField(label: 'Date', date: _selectedDate, onTap: _pickDate),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _noteController,
+            maxLines: 2,
+            decoration: const InputDecoration(labelText: 'Note (optional)'),
+            validator: ValidationHelper.validateNote,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: _submitForm,
+              child: Text(_isEdit ? 'Update Lend' : 'Save Lend'),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(

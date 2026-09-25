@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/master_data_list.dart';
 import 'package:get/get.dart';
 
 import '../../core/constants/app_constants.dart';
@@ -42,7 +43,10 @@ class _IncomeSourcePageState extends State<IncomeSourcePage> {
               controller.deleteIncomeSource(source.id);
               Get.back();
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -50,48 +54,23 @@ class _IncomeSourcePageState extends State<IncomeSourcePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Income Sources'), elevation: 0),
-      body: Obx(
-        () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : ReorderableListView.builder(
-                padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                buildDefaultDragHandles: false,
-                itemCount: controller.incomeSources.length,
-                onReorderItem: controller.reorderIncomeSources,
-                itemBuilder: (_, index) {
-                  final source = controller.incomeSources[index];
-                  return Card(
-                    key: ValueKey(source.id),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: ColorHelper.getColorFromInt(
-                          source.color,
-                        ),
-                      ),
-                      title: Text(source.name),
-                      onTap: () => _editSource(source),
-                      onLongPress: () => _confirmDeleteSource(source),
-                      trailing: ReorderableDragStartListener(
-                        index: index,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Icon(Icons.drag_handle),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addSource,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Obx(
+    () => MasterDataList<IncomeSource>(
+      title: 'Income Sources',
+      singular: 'Income Source',
+      emptyMessage: 'No income sources yet. Add one to use in income forms.',
+      icon: Icons.payments_outlined,
+      items: controller.incomeSources.toList(),
+      loading: controller.isLoading.value,
+      idOf: (x) => x.id,
+      nameOf: (x) => x.name,
+      colorOf: (x) => ColorHelper.getColorFromInt(x.color),
+      onAdd: _addSource,
+      onEdit: _editSource,
+      onDelete: _confirmDeleteSource,
+      onReorder: controller.reorderIncomeSources,
+    ),
+  );
 
   void _addSource() {
     _nameController.clear();
@@ -153,7 +132,9 @@ class _IncomeSourcePageState extends State<IncomeSourcePage> {
                           color: color,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isSelected ? Colors.black : Colors.grey,
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.onSurface
+                                : Theme.of(context).colorScheme.outline,
                             width: isSelected ? 3 : 1,
                           ),
                         ),

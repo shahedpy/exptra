@@ -8,6 +8,8 @@ import '../../core/db/app_database.dart';
 import 'lend_borrow_controller.dart';
 import '../accounts/account_selector.dart';
 import '../../data/services/financial_calculator.dart';
+import '../../core/widgets/app_ui.dart';
+import '../accounts/account_controller.dart';
 
 class LendBorrowPage extends StatefulWidget {
   final int initialIndex;
@@ -39,37 +41,80 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
       appBar: AppBar(title: const Text('Lend & Borrow')),
       body: Column(
         children: [
+          Obx(() {
+            final receive = controller.lends.fold<int>(
+              0,
+              (sum, e) =>
+                  sum +
+                  (controller.outstandingLends[e.id] ?? Money.cents(e.amount)),
+            );
+            final pay = controller.borrows.fold<int>(
+              0,
+              (sum, e) =>
+                  sum +
+                  (controller.outstandingBorrows[e.id] ??
+                      Money.cents(e.amount)),
+            );
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _BalanceCard(
+                          label: 'To Receive',
+                          amount: receive,
+                          icon: Icons.call_received_rounded,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _BalanceCard(
+                          label: 'To Pay',
+                          amount: pay,
+                          icon: Icons.call_made_rounded,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  AppActionRow(
+                    firstLabel: 'Add Lend',
+                    firstIcon: Icons.add_rounded,
+                    onFirst: () => Get.toNamed(AppRoutes.addLend),
+                    secondLabel: 'Add Borrow',
+                    secondIcon: Icons.add_rounded,
+                    onSecond: () => Get.toNamed(AppRoutes.addBorrow),
+                  ),
+                ],
+              ),
+            );
+          }),
           // Button Segment
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppConstants.defaultPadding,
               vertical: 12,
             ),
-            child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment<int>(
-                  value: 0,
-                  label: Text('All'),
-                  icon: Icon(Icons.list_rounded),
-                ),
-                ButtonSegment<int>(
-                  value: 1,
-                  label: Text('Lend'),
-                  icon: Icon(Icons.call_made_rounded),
-                ),
-                ButtonSegment<int>(
-                  value: 2,
-                  label: Text('Borrow'),
-                  icon: Icon(Icons.call_received_rounded),
-                ),
-              ],
-              selected: {_selectedIndex},
-              showSelectedIcon: false,
-              onSelectionChanged: (selected) {
-                setState(() {
-                  _selectedIndex = selected.first;
-                });
-              },
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: 6,
+                children: [
+                  for (final (index, label) in [
+                    (0, 'All'),
+                    (1, 'To Receive'),
+                    (2, 'To Pay'),
+                  ])
+                    ChoiceChip(
+                      label: Text(label),
+                      selected: _selectedIndex == index,
+                      visualDensity: VisualDensity.compact,
+                      onSelected: (_) => setState(() => _selectedIndex = index),
+                    ),
+                ],
+              ),
             ),
           ),
 
@@ -97,12 +142,15 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
               final allEmpty = lends.isEmpty && borrows.isEmpty;
 
               if (allEmpty) {
-                return Center(
-                  child: Text(
-                    widget.outstandingOnly
-                        ? 'No outstanding lends or borrows'
-                        : 'No lend/borrow entries yet',
-                    style: TextStyle(color: Colors.grey.shade600),
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: AppEmptyState(
+                    title: 'No lend or borrow records',
+                    message: widget.outstandingOnly
+                        ? 'No outstanding lend or borrow records.'
+                        : 'Add a lend or borrowing to track money to receive or pay.',
+                    actionLabel: 'Add Lend',
+                    onAction: () => Get.toNamed(AppRoutes.addLend),
                   ),
                 );
               }
@@ -170,253 +218,158 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDialog(context),
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  void _showAddDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const Text(
-                  'Add Entry',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                ListTile(
-                  title: const Text('Add Lend'),
-                  leading: const CircleAvatar(
-                    backgroundColor: Colors.orange,
-                    child: Icon(Icons.call_made_rounded, color: Colors.white),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.addLend);
-                  },
-                ),
-                ListTile(
-                  title: const Text('Add Borrow'),
-                  leading: const CircleAvatar(
-                    backgroundColor: Colors.blue,
-                    child: Icon(
-                      Icons.call_received_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.addBorrow);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
   Widget _buildEntryTile(LendBorrowController controller, dynamic entry) {
-    final bool isLend;
-    final String id;
-    final String personName;
-    final double amount;
-    final String? note;
-    final DateTime date;
-
-    if (entry is Lend) {
-      isLend = true;
-      id = entry.id;
-      personName = entry.personName;
-      amount = entry.amount;
-      note = entry.note;
-      date = entry.lendDate;
-    } else {
-      isLend = false;
-      final borrowEntry = entry as Borrow;
-      id = borrowEntry.id;
-      personName = borrowEntry.personName;
-      amount = borrowEntry.amount;
-      note = borrowEntry.note;
-      date = borrowEntry.borrowDate;
-    }
-
+    final isLend = entry is Lend;
+    final String id = entry.id;
+    final String personName = entry.personName;
+    final double amount = entry.amount;
+    final String? note = entry.note;
+    final String? accountId = entry.accountId;
+    final DateTime date = isLend ? entry.lendDate : entry.borrowDate;
     final outstanding = isLend
         ? controller.outstandingLends[id] ?? Money.cents(amount)
         : controller.outstandingBorrows[id] ?? Money.cents(amount);
-    final settledLabel = outstanding == 0
-        ? (isLend ? 'Paid' : 'Returned')
-        : 'Repay';
-    final isPaid = outstanding == 0;
-    final avatarColor = isPaid
-        ? Colors.grey.shade400
-        : (isLend ? Colors.orange : Colors.blue);
     final type = isLend
         ? LendBorrowController.typeLend
         : LendBorrowController.typeBorrow;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () => Get.toNamed(
-          isLend ? AppRoutes.addLend : AppRoutes.addBorrow,
-          arguments: entry,
-        ),
-        onLongPress: () {
-          Get.dialog(
+    final status = outstanding == 0
+        ? 'Paid'
+        : outstanding < Money.cents(amount)
+        ? 'Partial'
+        : 'Outstanding';
+    final theme = Theme.of(context);
+    final account = accountId == null
+        ? null
+        : Get.find<AccountController>().accounts
+              .where((a) => a.id == accountId)
+              .firstOrNull;
+    final accountName = account == null
+        ? 'Unassigned account'
+        : '${account.institutionName.isEmpty ? '' : '${account.institutionName} '}${account.name}';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Card(
+        color: theme.colorScheme.surfaceContainerLow,
+        elevation: 0,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => Get.toNamed(
+            isLend ? AppRoutes.addLend : AppRoutes.addBorrow,
+            arguments: entry,
+          ),
+          onLongPress: () => Get.dialog(
             AlertDialog(
-              title: const Text('Delete Entry'),
-              content: const Text(
-                'Are you sure you want to delete this entry?',
-              ),
+              title: const Text('Delete entry?'),
+              content: Text('The record for $personName will be removed.'),
               actions: [
-                TextButton(
-                  onPressed: () => Get.back(),
-                  child: const Text('Cancel'),
-                ),
+                TextButton(onPressed: Get.back, child: const Text('Cancel')),
                 TextButton(
                   onPressed: () {
                     controller.deleteEntry(id, type);
                     Get.back();
                   },
-                  child: const Text(
+                  child: Text(
                     'Delete',
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(color: theme.colorScheme.error),
                   ),
                 ),
               ],
             ),
-          );
-        },
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
-          leading: CircleAvatar(
-            backgroundColor: avatarColor,
-            child: Icon(
-              isLend ? Icons.call_made_rounded : Icons.call_received_rounded,
-              color: Colors.white,
-            ),
           ),
-          title: Text(
-            personName,
-            style: TextStyle(
-              decoration: isPaid
-                  ? TextDecoration.lineThrough
-                  : TextDecoration.none,
-              color: isPaid ? Colors.grey : null,
-            ),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                isLend ? 'Lend' : 'Borrow',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-              ),
-              if (note != null && note.isNotEmpty)
-                Text(
-                  note,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              Text(
-                DateHelper.formatDate(date),
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-              ),
-            ],
-          ),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                CurrencyHelper.formatAmount(Money.bdt(outstanding)),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: isPaid ? Colors.grey : null,
-                  decoration: isPaid
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
-                ),
-              ),
-              const SizedBox(height: 4),
-              GestureDetector(
-                onTap: outstanding > 0
-                    ? () => _showRepayment(
-                        controller,
-                        id: id,
-                        type: type,
-                        outstanding: outstanding,
-                        originalDate: date,
-                      )
-                    : null,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: theme.colorScheme.secondaryContainer,
+                  child: Icon(
+                    isLend
+                        ? Icons.call_made_rounded
+                        : Icons.call_received_rounded,
+                    size: 18,
+                    color: theme.colorScheme.onSecondaryContainer,
                   ),
-                  decoration: BoxDecoration(
-                    color: isPaid
-                        ? Colors.green.shade100
-                        : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isPaid
-                          ? Colors.green.shade400
-                          : Colors.grey.shade400,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        isPaid
-                            ? Icons.check_circle_rounded
-                            : Icons.radio_button_unchecked_rounded,
-                        size: 12,
-                        color: isPaid
-                            ? Colors.green.shade700
-                            : Colors.grey.shade600,
-                      ),
-                      const SizedBox(width: 4),
                       Text(
-                        settledLabel,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isPaid
-                              ? Colors.green.shade700
-                              : Colors.grey.shade600,
-                          fontWeight: FontWeight.w600,
+                        personName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      Text(
+                        '${isLend ? 'Lend' : 'Borrow'} • $status',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        '${isLend ? 'From' : 'Into'} $accountName',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (outstanding < Money.cents(amount) && outstanding > 0)
+                        Text(
+                          'Original ${CurrencyHelper.formatAmount(amount)}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      if (note?.isNotEmpty == true)
+                        Text(
+                          note!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      Text(
+                        DateHelper.formatDate(date),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      AppTrailingAmount(
+                        CurrencyHelper.formatAmount(Money.bdt(outstanding)),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (outstanding > 0)
+                        TextButton(
+                          onPressed: () => _showRepayment(
+                            controller,
+                            id: id,
+                            type: type,
+                            outstanding: outstanding,
+                            originalDate: date,
+                          ),
+                          child: Text(isLend ? 'Receive' : 'Repay'),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -430,9 +383,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
     required int outstanding,
     required DateTime originalDate,
   }) async {
-    final amount = TextEditingController(
-      text: Money.bdt(outstanding).toStringAsFixed(2),
-    );
+    String amountText = Money.bdt(outstanding).toStringAsFixed(2);
     String? accountId;
     DateTime date = DateTime.now();
     final formKey = GlobalKey<FormState>();
@@ -440,6 +391,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
+          scrollable: true,
           title: Text(
             type == LendBorrowController.typeLend
                 ? 'Receive repayment'
@@ -463,7 +415,8 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  controller: amount,
+                  initialValue: amountText,
+                  onChanged: (value) => amountText = value,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -520,7 +473,7 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
           id: id,
           type: type,
           accountId: accountId!,
-          amount: double.parse(amount.text),
+          amount: double.parse(amountText),
           date: date,
         );
         if (mounted) {
@@ -536,6 +489,59 @@ class _LendBorrowPageState extends State<LendBorrowPage> {
         }
       }
     }
-    amount.dispose();
+  }
+}
+
+class _BalanceCard extends StatelessWidget {
+  final String label;
+  final int amount;
+  final IconData icon;
+  const _BalanceCard({
+    required this.label,
+    required this.amount,
+    required this.icon,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      color: theme.colorScheme.surfaceContainerLow,
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(width: 5),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                CurrencyHelper.formatAmount(Money.bdt(amount)),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
